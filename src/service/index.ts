@@ -3,9 +3,6 @@ import { AxiosRequestHeaders, AxiosError } from 'axios'
 import { BASE_URL, TIME_OUT } from './config'
 import ZZRequest from './request'
 
-// 移除未使用的导入
-// import { AtMessage } from 'taro-ui'
-
 // 封装消息提示函数，只使用Taro原生API
 const showMessage = (message: string, type: 'success' | 'error' | 'loading' | 'none' = 'none') => {
   // 使用Taro原生API显示提示

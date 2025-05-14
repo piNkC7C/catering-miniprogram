@@ -1,0 +1,32 @@
+.order-page {
+  width: 100vw;
+
+  .order-cart {
+    .order-cart-left {
+      // width: 80px;
+      // height: 80px;
+      /* 宽高 */
+      // background-color: brown;
+      /* 颜色 */
+      // border-radius: 8px;
+      /* 设置圆角 */
+      /*perspective:视角距离元素高度（仅3d变幻有效）*/
+      /*scale:放大缩小，（x，y）*/
+      /*rotateX:3d绕x旋转*/
+      /*transform-origin:旋转中心点（默认元素中心，这里我选择左下角）*/
+      // transform: perspective(18px) rotateX(-1deg);
+      /* 镜头距离元素表面的位置为8px，x轴为1.1倍y轴为1.3倍，绕x轴旋转5度 */
+      // transform-origin: bottom left;
+      /* bottom left = left bottom = 0 100% 中心点偏移量*/
+      // border: 1px solid #ff9900;
+      /* 边框 */
+      // background: url('../../assets/order/order-left.png');
+      // background-size: 100% 115%;
+    }
+
+    .order-cart-right {
+      // background: url('../../assets/order/order-right.png');
+      // background-size: 100% 115%;
+    }
+  }
+}

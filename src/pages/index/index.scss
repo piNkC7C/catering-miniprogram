@@ -1,0 +1,97 @@
+.index {
+  padding: 1vh 2vw;
+  width: calc(100vw - 4vw);
+  height: calc(100vh - 2vh);
+  background-image: url('../../assets/index/bg-index.png');
+  background-size: 100% 65%;
+  background-repeat: no-repeat;
+  background-color: #F82629;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  .index-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 65%;
+    background-color: transparent;
+
+    .user-info-cell {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 1vh 5vw;
+
+      .user-info-cell-avatar {
+        margin-right: 2vw;
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+
+      .user-info {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        height: 100%;
+
+        .user-title {
+          display: flex;
+          align-items: flex-end;
+          height: 55%;
+          font-weight: bold;
+          font-family: 'PingFang SC', 'PingFang SC-Medium';
+        }
+
+        .user-description {
+          color: #999;
+          font-family: 'PingFang SC', 'PingFang SC-Regular';
+        }
+      }
+
+      .user-info-cell-button {
+        display: flex;
+        align-items: center;
+        justify-items: flex-end;
+        height: 100%;
+      }
+
+    }
+
+    .action-card {
+      background: linear-gradient( 180deg, #FDF7E7 0%, #FFFFFF 100%);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+
+      .action-card-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 80%;
+        width: 50%;
+
+        .action-card-item-icon {
+          margin-bottom: 2vh;
+        }
+
+        .action-card-item-title {
+          font-weight: bold;
+          font-family: 'PingFang SC', 'PingFang SC-Medium';
+        }
+
+        .action-card-item-description {
+          color: #999;
+          font-family: 'PingFang SC', 'PingFang SC-Regular';
+        }
+      }
+    }
+
+    .index-zixun {
+      background-color: #FFFFFF;
+    }
+  }
+}

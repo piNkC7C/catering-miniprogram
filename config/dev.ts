@@ -5,5 +5,7 @@ export default {
     stats: true
   },
   mini: {},
-  h5: {}
+  h5: {
+    esnextModules: []
+  }
 } satisfies UserConfigExport
