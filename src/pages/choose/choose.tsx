@@ -345,6 +345,7 @@ export default function Choose() {
               width: pxTransform(windowWidth * 0.256),
               height: pxTransform(viewHeight * 0.036),
               borderRadius: pxTransform(viewHeight * 0.018),
+              fontSize: pxTransform(viewHeight * 0.03),
             }}
           >
             <View
@@ -352,7 +353,6 @@ export default function Choose() {
               style={{
                 width: pxTransform(windowWidth * 0.0848),
                 height: pxTransform(viewHeight * 0.036),
-                fontSize: pxTransform(viewHeight * 0.024),
               }}
               onClick={() => setGoodCount(goodCount > 1 ? goodCount - 1 : 1)}
             >-</View>
@@ -368,7 +368,6 @@ export default function Choose() {
               style={{
                 width: pxTransform(windowWidth * 0.0848),
                 height: pxTransform(viewHeight * 0.036),
-                fontSize: pxTransform(viewHeight * 0.024),
               }}
               onClick={() => setGoodCount(goodCount + 1)}
             >+</View>
