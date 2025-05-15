@@ -1,18 +1,102 @@
-.orderlist-page {
-  font-size: 16px;
-  padding: 1.2rem;
-  width: calc(100vw - 2.4rem);
-  height: calc(100vh - 2.4rem);
-  
-  .page-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 20px;
+.choose-detail-page {
+  position: relative;
+  background-color: pink;
+
+  .header {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
   }
 
-  .page-content {
-    background-color: #f5f5f5;
-    padding: 15px;
-    border-radius: 8px;
+  .body {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    overflow: scroll;
+    background-color: transparent;
+
+    .body-header {
+      display: flex;
+      flex-direction: column;
+      background-color: #fff;
+
+      .body-header-title {
+        font-weight: bold;
+        color: #333;
+      }
+    }
+
+    .body-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      background-color: #fff;
+
+      .body-content-item {
+        display: flex;
+        flex-direction: column;
+
+        .body-content-item-count {
+          text-align: left;
+        }
+      }
+    }
   }
-} 
+
+  .body-footer {
+    position: absolute;
+    bottom: 0;
+    z-index: 2000;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+
+    .body-footer-top {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+}
+
+.custom-input-number {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 24px;
+  overflow: hidden;
+  width: 120px;
+  height: 40px;
+  background: #fff;
+
+  .custom-btn {
+    width: 40px;
+    height: 40px;
+    color: #d61518;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 400;
+    cursor: pointer;
+    user-select: none;
+
+    &.minus {
+      border-right: 1px solid #e5e5e5;
+    }
+    &.plus {
+      border-left: 1px solid #e5e5e5;
+    }
+  }
+
+  .custom-value {
+    width: 40px;
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+    font-weight: 500;
+  }
+}

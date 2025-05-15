@@ -52,19 +52,16 @@ export default function Order() {
     { wait: 100 }
   );
 
-  // 获取系统信息
-  const systemInfo = getSystemInfoSync()
+  const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
+  const finalStatusBarHeight = statusBarHeight || 0
   // 获取胶囊按钮信息
-  const menuButtonInfo = getMenuButtonBoundingClientRect()
-  // console.log('menuButtonInfo',menuButtonInfo);
-  // 状态栏高度
-  const statusBarHeight = systemInfo.statusBarHeight || 0
+  const { top: topMenuButton, height: heightMenuButton } = getMenuButtonBoundingClientRect()
   // 导航栏高度 = 胶囊按钮顶部位置 + (胶囊按钮高度 + 两边距离和)/2
-  const navBarHeight = (menuButtonInfo.top - statusBarHeight) * 2 + menuButtonInfo.height
+  const navBarHeight = (topMenuButton - finalStatusBarHeight) * 2 + heightMenuButton
   // 总高度
-  const navHeight = statusBarHeight + navBarHeight + 5
+  const navHeight = finalStatusBarHeight + navBarHeight + 5
   // 获取可视区域高度
-  const viewHeight = systemInfo.windowHeight - navHeight
+  const viewHeight = windowHeight - navHeight
 
   // 已添加购物车数量
   const [cartNum, setCartNum] = useState<number>(1)
@@ -140,9 +137,9 @@ export default function Order() {
           className='search-bar-container'
           style={{
             position: 'absolute',
-            top: `${menuButtonInfo.top}px`,
+            top: `${topMenuButton}px`,
             left: pxTransform(8),
-            height: `${menuButtonInfo.height}px`,
+            height: `${heightMenuButton}px`,
             display: 'flex',
             alignItems: 'center',
           }}
@@ -153,7 +150,7 @@ export default function Order() {
               nutuiSearchbarContentBackground: '#f5f5f5',
               nutuiSearchbarInputTextAlign: 'left',
               nutuiSearchbarWidth: '100%',
-              nutuiSearchbarHeight: `${menuButtonInfo.height - 6}px`,
+              nutuiSearchbarHeight: `${heightMenuButton - 6}px`,
               nutuiSearchbarPadding: '6px 0',
             }}
           >
@@ -176,7 +173,7 @@ export default function Order() {
           style={{
             padding: `0 ${pxTransform(8)}`,
             width: `calc(100% - ${pxTransform(16)})`,
-            height: pxTransform(systemInfo.windowWidth * 0.15),
+            height: pxTransform(windowWidth * 0.15),
             display: 'flex',
             flexDirection: 'column',
           }}
@@ -230,7 +227,7 @@ export default function Order() {
           </View>
           <View
             style={{
-              padding: `0 ${pxTransform(systemInfo.windowWidth * 0.02)}`,
+              padding: `0 ${pxTransform(windowWidth * 0.02)}`,
               height: '40%',
               display: 'flex',
               flexDirection: 'row',
@@ -258,7 +255,7 @@ export default function Order() {
           style={{
             marginBottom: pxTransform(viewHeight * 0.02),
             width: '100%',
-            height: pxTransform(systemInfo.windowWidth * 0.1),
+            height: pxTransform(windowWidth * 0.1),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -267,7 +264,7 @@ export default function Order() {
           <Image
             mode='widthFix'
             src={orderJoinVip}
-            width={systemInfo.windowWidth * 0.93}
+            width={windowWidth * 0.93}
           />
         </View>
         <View
@@ -303,7 +300,7 @@ export default function Order() {
             onScroll={handleScroll}
             style={{
               flex: 1,
-              padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(systemInfo.windowWidth * 0.05)}`,
+              padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(windowWidth * 0.05)}`,
               height: `calc(100% - ${pxTransform(viewHeight * 0.04)})`,
               backgroundColor: '#fff',
               overflow: 'scroll',
@@ -341,7 +338,7 @@ export default function Order() {
                         <View
                           style={{
                             width: '100%',
-                            height: pxTransform(systemInfo.windowWidth * 0.2),
+                            height: pxTransform(windowWidth * 0.2),
                             display: 'flex',
                             flexDirection: 'row',
                             alignItems: 'center',
@@ -350,14 +347,14 @@ export default function Order() {
                         >
                           <Image
                             src={listItem.src}
-                            width={pxTransform(systemInfo.windowWidth * 0.2)}
-                            height={pxTransform(systemInfo.windowWidth * 0.2)}
+                            width={pxTransform(windowWidth * 0.2)}
+                            height={pxTransform(windowWidth * 0.2)}
                           />
                           <View
                             style={{
                               height: '100%',
                               flex: 1,
-                              marginLeft: pxTransform(systemInfo.windowWidth * 0.02),
+                              marginLeft: pxTransform(windowWidth * 0.02),
                               display: 'flex',
                               flexDirection: 'column',
                               justifyContent: 'space-between',
@@ -393,7 +390,7 @@ export default function Order() {
                                 </ConfigProvider>
                                 <Text
                                   style={{
-                                    marginLeft: pxTransform(systemInfo.windowWidth * 0.01),
+                                    marginLeft: pxTransform(windowWidth * 0.01),
                                     fontSize: pxTransform(viewHeight * 0.012),
                                     color: '#999',
                                   }}
@@ -434,7 +431,7 @@ export default function Order() {
         <View
           style={{
             width: '100%',
-            height: pxTransform(systemInfo.windowWidth * 0.1),
+            height: pxTransform(windowWidth * 0.1),
             background: '#fff',
           }}
         ></View>
@@ -443,9 +440,9 @@ export default function Order() {
           style={{
             position: 'fixed',
             bottom: 0,
-            margin: pxTransform(systemInfo.windowWidth * 0.05) + ' ' + pxTransform(systemInfo.windowWidth * 0.05),
-            width: `calc(${systemInfo.windowWidth}px - ${systemInfo.windowWidth * 0.1}px)`,
-            height: pxTransform(systemInfo.windowWidth * 0.15),
+            margin: pxTransform(windowWidth * 0.05) + ' ' + pxTransform(windowWidth * 0.05),
+            width: `calc(${windowWidth}px - ${windowWidth * 0.1}px)`,
+            height: pxTransform(windowWidth * 0.15),
             background: '#323232',
             zIndex: 100,
             borderRadius: pxTransform(30),
@@ -480,7 +477,7 @@ export default function Order() {
               width: '70%',
               height: '100%',
               color: '#fff',
-              paddingLeft: pxTransform(systemInfo.windowWidth * 0.05),
+              paddingLeft: pxTransform(windowWidth * 0.05),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -497,7 +494,7 @@ export default function Order() {
               <View
                 className='order-cart-right-icon'
                 style={{
-                  marginRight: pxTransform(systemInfo.windowWidth * 0.02),
+                  marginRight: pxTransform(windowWidth * 0.02),
                   height: '100%',
                   display: 'flex',
                   alignItems: 'center',
@@ -506,7 +503,7 @@ export default function Order() {
               >
                 <Badge value={cartNum}>
                   <Cart
-                    size={pxTransform(systemInfo.windowWidth * 0.1)}
+                    size={pxTransform(windowWidth * 0.1)}
                   />
                 </Badge>
               </View>
