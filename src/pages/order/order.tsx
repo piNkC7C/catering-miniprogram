@@ -1,13 +1,13 @@
 import { useRef, useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
-import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery } from '@tarojs/taro'
+import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector } from '@/hooks/useAppStore'
 import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag } from '@nutui/nutui-react-taro'
-import { Cart, Star, StarFill, ArrowDown } from '@nutui/icons-react-taro'
+import { Cart, Star, StarFill, ArrowDown, Add, Minus } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
-import orderJoinVip from '@/assets/order/order-joinvip.png'
+import orderJoinVip from '@/assets/order/order-joinvip@2x.png'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -70,6 +70,12 @@ export default function Order() {
   // 侧边栏选中值
   const [sideBarValue, setSideBarValue] = useState<number | string>('anchor-1')
 
+  // 购物车左侧显示
+  const [cartLeftWidth, setCartLeftWidth] = useState<string>('30%')
+  const [cartLeftBackground, setCartLeftBackground] = useState<string>('#D61518')
+  // 购物车右侧宽度
+  // const [cartRightWidth, setCartRightWidth] = useState<string>(`calc(70% - ${pxTransform(windowWidth * 0.18)})`)
+
   const dataList = Array.from({ length: 15 }).map((_, index) => (
     {
       id: `anchor-${index + 1}`,
@@ -86,6 +92,7 @@ export default function Order() {
           shopDescription: '自营',
           delivery: '厂商配送',
           shopName: '阳澄湖大闸蟹自营店>',
+          detail: 1,
         },
         {
           name: '安徽',
@@ -98,6 +105,7 @@ export default function Order() {
           shopDescription: '自营',
           delivery: '厂商配送',
           shopName: '阳澄湖大闸蟹自营店>',
+          detail: 0,
         },
         {
           name: '安徽',
@@ -110,6 +118,7 @@ export default function Order() {
           shopDescription: '自营',
           delivery: '厂商配送',
           shopName: '阳澄湖大闸蟹自营店>',
+          detail: 0,
         },
       ],
     }
@@ -121,8 +130,6 @@ export default function Order() {
       ],
     },
   ])
-
-  // 滚动触发导航栏激活
 
   return (
     <>
@@ -206,7 +213,7 @@ export default function Order() {
             </View>
             <Button
               type="default"
-              size="normal"
+              size="mini"
               color='#F2F2F2'
               style={{
                 fontSize: pxTransform(viewHeight * 0.02),
@@ -278,21 +285,21 @@ export default function Order() {
           }}
         >
           <SideBar
-              style={{
-                height: '100%',
-              }}
-              value={sideBarValue}
-              onChange={(key) => {
-                setSideBarValue(key)
-              }}
-            >
-              {
-                dataList.map((item) => (
-                  <SideBar.Item title={item.title} value={item.id}>
-                  </SideBar.Item>
-                ))
-              }
-            </SideBar>
+            style={{
+              height: '100%',
+            }}
+            value={sideBarValue}
+            onChange={(key) => {
+              setSideBarValue(key)
+            }}
+          >
+            {
+              dataList.map((item) => (
+                <SideBar.Item title={item.title} value={item.id}>
+                </SideBar.Item>
+              ))
+            }
+          </SideBar>
           <ScrollView
             id='parentScroll'
             scrollY
@@ -319,7 +326,7 @@ export default function Order() {
                       width: '100%',
                       marginBottom: pxTransform(viewHeight * 0.02),
                       backgroundColor: '#fff',
-                      color:'#6A6A6A',
+                      color: '#6A6A6A',
                       fontSize: pxTransform(viewHeight * 0.018),
                       // 高亮显示可见元素
                       // backgroundColor: visibleItems.includes(item.id) ? 'rgba(255,215,0,0.2)' : 'transparent',
@@ -358,6 +365,8 @@ export default function Order() {
                               display: 'flex',
                               flexDirection: 'column',
                               justifyContent: 'space-between',
+                              fontSize: pxTransform(viewHeight * 0.018),
+                              fontWeight: 'bold',
                             }}
                           >
                             <Text>{listItem.title}</Text>
@@ -379,13 +388,17 @@ export default function Order() {
                                 <ConfigProvider
                                   theme={{
                                     nutuiPricePrimaryColor: '#333',
+                                    nutuiPriceSymbolLargeSize: pxTransform(viewHeight * 0.02),
                                   }}
                                 >
                                   <Price
                                     color='gray'
                                     price={listItem.price}
-                                    size="large"
+                                    size="small"
                                     thousands
+                                    style={{
+                                      fontWeight: 'bold',
+                                    }}
                                   />
                                 </ConfigProvider>
                                 <Text
@@ -398,15 +411,37 @@ export default function Order() {
                                   起
                                 </Text>
                               </View>
-                              <Button
-                                type="primary"
-                                size="small"
-                                style={{
-                                  borderRadius: pxTransform(20),
-                                }}
-                              >
-                                选规格
-                              </Button>
+                              {
+                                listItem.detail ? (
+                                  <Button
+                                    type="primary"
+                                    size="mini"
+                                    style={{
+                                      // width: pxTransform(windowWidth * 0.13),
+                                      // height: pxTransform(viewHeight * 0.035),
+                                      borderRadius: pxTransform(viewHeight * 0.05),
+                                      // fontSize: pxTransform(viewHeight * 0.03),
+                                    }}
+                                    onClick={() => {
+                                      navigateTo({
+                                        url: '/pages/choose/choose',
+                                      })
+                                    }}
+                                  >选规格</Button>
+                                ) : (
+                                  <Button
+                                    type="primary"
+                                    size="small"
+                                    style={{
+                                      width: pxTransform(windowWidth * 0.05),
+                                      height: pxTransform(windowWidth * 0.05),
+                                      borderRadius: pxTransform(windowWidth * 0.05),
+                                    }}
+                                    icon={<Add color='#fff' size={windowWidth * 0.036} />}
+                                  >
+                                  </Button>
+                                )
+                              }
                             </View>
                           </View>
                         </View>
@@ -453,11 +488,11 @@ export default function Order() {
         >
           <View className='order-cart-left'
             style={{
-              width: '30%',
+              width: cartLeftWidth,
               height: '100%',
               color: '#fff',
-              background: '#D61518',
-              fontSize: pxTransform(viewHeight * 0.018),
+              background: cartLeftBackground,
+              fontSize: pxTransform(viewHeight * 0.02),
               borderRadius: `${pxTransform(30)} ${pxTransform(0)} ${pxTransform(0)} ${pxTransform(30)}`,
               display: 'flex',
               alignItems: 'center',
@@ -465,87 +500,109 @@ export default function Order() {
             }}
           >
             {
-              loginStatus === 0 ? (
+              cartLeftWidth === '30%' ? loginStatus === 0 ? (
                 '登录后查询'
               ) : (
                 '查询订单'
+              ) : (
+                ''
               )
             }
           </View>
-          <View className='order-cart-right'
+          <View className='order-cart-middle'
             style={{
-              width: '70%',
+              flex: 1,
               height: '100%',
               color: '#fff',
               paddingLeft: pxTransform(windowWidth * 0.05),
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
             }}
           >
             <View
+              className='order-cart-middle-icon'
               style={{
-                width: '70%',
+                marginRight: pxTransform(windowWidth * 0.02),
                 height: '100%',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'flex-start',
+              }}
+              onClick={() => {
+                if (cartLeftWidth === '30%') {
+                  setCartLeftWidth('0')
+                  setCartLeftBackground('')
+                } else {
+                  setCartLeftWidth('30%')
+                  setCartLeftBackground('#D61518')
+                }
               }}
             >
-              <View
-                className='order-cart-right-icon'
-                style={{
-                  marginRight: pxTransform(windowWidth * 0.02),
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <Badge value={cartNum}>
-                  <Cart
-                    size={pxTransform(windowWidth * 0.1)}
-                  />
-                </Badge>
-              </View>
-              <View
-                className='order-cart-right-price'
-                style={{
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  fontWeight: 'bold',
-                }}
-              >
-                <ConfigProvider
-                  theme={{
-                    nutuiPriceColor: '#fff',
-                  }}
-                >
-                  <Price
-                    color='gray'
-                    price={cartPrice}
-                    size="xlarge"
-                    thousands
-                  />
-                </ConfigProvider>
-              </View>
+              <Badge value={cartNum}>
+                <Cart
+                  size={pxTransform(windowWidth * 0.1)}
+                />
+              </Badge>
             </View>
             <View
-              className='order-cart-right-price'
+              className='order-cart-middle-price'
               style={{
                 height: '100%',
-                width: '30%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: `${pxTransform(0)} ${pxTransform(30)} ${pxTransform(30)} ${pxTransform(0)}`,
-                background: cartNum > 0 ? '#D61518' : '',
-                color: cartNum > 0 ? '#fff' : '#999',
+                justifyContent: 'flex-start',
+                fontWeight: 'bold',
+              }}
+              onClick={() => {
+                if (cartLeftWidth === '30%') {
+                  setCartLeftWidth('0')
+                  setCartLeftBackground('')
+                } else {
+                  setCartLeftWidth('30%')
+                  setCartLeftBackground('#D61518')
+                }
               }}
             >
-              <Text>去下单</Text>
+              {
+                cartNum === 0 ? (
+                  <Text
+                    style={{
+                      fontSize: pxTransform(viewHeight * 0.015),
+                      color: '#fff',
+                    }}
+                  >未选购商品</Text>
+                ) : (
+                  <ConfigProvider
+                    theme={{
+                      nutuiPriceColor: '#fff',
+                    }}
+                  >
+                    <Price
+                      color='gray'
+                      price={cartPrice}
+                      size="xlarge"
+                      thousands
+                    />
+                  </ConfigProvider>
+                )
+              }
             </View>
+          </View>
+          <View
+            className='order-cart-right'
+            style={{
+              height: '100%',
+              width: pxTransform(windowWidth * 0.18),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: `${pxTransform(0)} ${pxTransform(30)} ${pxTransform(30)} ${pxTransform(0)}`,
+              background: cartNum > 0 ? '#D61518' : '',
+              color: cartNum > 0 ? '#fff' : '#999',
+              fontSize: pxTransform(viewHeight * 0.02),
+            }}
+          >
+            <Text>去下单</Text>
           </View>
         </View>
       </View >

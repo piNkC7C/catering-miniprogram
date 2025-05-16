@@ -1,11 +1,12 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getCurrentPages } from '@tarojs/taro'
 import './choose.scss'
 import { useAppSelector } from '@/hooks/useAppStore'
-import { pxTransform, Divider, Grid, Image, Badge, ConfigProvider, Price, InputNumber } from '@nutui/nutui-react-taro'
+import { pxTransform, Divider, Grid, Image, Badge, ConfigProvider, Price, InputNumber, Button } from '@nutui/nutui-react-taro'
 import { Check } from '@nutui/icons-react-taro'
 import { useState } from 'react'
 import { IGoodItem } from './type'
+import chooseBack from '@/assets/choose/choose-back.png'
 
 export default function Choose() {
   // 获取登录状态和用户信息
@@ -19,17 +20,8 @@ export default function Choose() {
   //   console.log('OrderList page loaded.')
   // })
 
-  // 是否进行了滑动
-  const [isScroll, setIsScroll] = useState<boolean>(false)
-
   // 选择的加一商品
-  const [selectedAddOneGood, setSelectedAddOneGood] = useState<IGoodItem>({
-    id: 1,
-    title: '原切前胸牛肉',
-    count: 1,
-    image: 'https://img.yzcdn.cn/vant/ipad.png',
-    price: 39
-  })
+  const [selectedAddOneGood, setSelectedAddOneGood] = useState<IGoodItem | null>(null)
 
   // 商品价格
   const [goodPrice, setGoodPrice] = useState<number>(39)
@@ -61,17 +53,19 @@ export default function Choose() {
           position: 'relative',
           boxShadow: '0px 0px 7px 0px rgba(0,0,0,0.15)',
           borderRadius: pxTransform(viewHeight * 0.01),
-          border: selectedAddOneGood.id === listItem.id ? '1px solid #D61518' : 'none',
+          border: item.title !== '已包含' && selectedAddOneGood?.id === listItem.id ? '1px solid #D61518' : 'none',
         }}
         onClick={() => {
-          setSelectedAddOneGood(listItem)
+          if (item.title !== '已包含') {
+            setSelectedAddOneGood(listItem)
+          }
         }}
       >
         <Badge
           value={<Check color="#fff" />}
           size="large"
           style={{
-            display: selectedAddOneGood.id === listItem.id ? 'block' : 'none',
+            display: item.title !== '已包含' && selectedAddOneGood?.id === listItem.id ? 'block' : 'none',
             position: 'absolute',
             top: 8,
             right: 8,
@@ -87,13 +81,45 @@ export default function Choose() {
   const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
   const finalStatusBarHeight = statusBarHeight || 0
   // 获取胶囊按钮信息
-  const { top: topMenuButton, height: heightMenuButton } = getMenuButtonBoundingClientRect()
+  const { top: topMenuButton, height: heightMenuButton, left: leftMenuButton, width: widthMenuButton } = getMenuButtonBoundingClientRect()
   // 导航栏高度 = 胶囊按钮顶部位置 + (胶囊按钮高度 + 两边距离和)/2
   const navBarHeight = (topMenuButton - finalStatusBarHeight) * 2 + heightMenuButton
   // 总高度
   const navHeight = finalStatusBarHeight + navBarHeight + 5
   // 获取可视区域高度
   const viewHeight = windowHeight - navHeight
+
+  // 滑动高度
+  const [scrollYTop, setScrollYTop] = useState<number>(windowHeight * 0.5 - navHeight)
+
+  // 定义一个平滑滚动函数
+  function smoothScrollTo(target: number, duration = 300) {
+    const start = scrollYTop;
+    const change = target - start;
+    const startTime = Date.now();
+
+    // 缓动函数
+    function easeInOutQuad(t: number) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function animate() {
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeInOutQuad(progress);
+      const next = start + change * eased;
+
+      setScrollYTop(next);
+
+      if (progress < 1) {
+        setTimeout(animate, 16); // 16ms 一帧
+      } else {
+        setScrollYTop(target); // 最终确保到位
+      }
+    }
+    animate();
+  }
 
   return (
     <View
@@ -103,6 +129,29 @@ export default function Choose() {
         width: `${windowWidth}px`,
       }}
     >
+    <View
+      className='header-back'
+      style={{
+        top: topMenuButton,
+        left: windowWidth - leftMenuButton - widthMenuButton,
+        width: heightMenuButton,
+        height: heightMenuButton,
+      }}
+      onClick={() => {
+        // const pages = getCurrentPages()
+        // console.log(pages)
+        navigateBack()
+      }}
+    >
+      <Image
+        src={chooseBack}
+        mode='scaleToFill'
+        style={{
+          width: heightMenuButton,
+          height: heightMenuButton,
+        }}
+      />
+    </View>
       <View
         className='header'
         style={{
@@ -111,14 +160,10 @@ export default function Choose() {
       >
       </View>
       <ScrollView
-        scrollTop={(windowHeight * 0.5 - navHeight)}
+        scrollTop={scrollYTop}
         className='body'
         style={{
-          top: 0,
           height: `${windowHeight}px`,
-        }}
-        onScroll={() => {
-          setIsScroll(true)
         }}
         scrollY
       >
@@ -158,6 +203,7 @@ export default function Choose() {
               title: '已包含',
               list: [
                 {
+                  id: 10,
                   title: '原切前胸牛肉',
                   count: '1',
                   image: 'https://img.yzcdn.cn/vant/ipad.png'
@@ -318,7 +364,7 @@ export default function Choose() {
       <View
         className='body-footer'
         style={{
-          padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(windowWidth * 0.05)}`,
+          padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(windowWidth * 0.05)} ${pxTransform(viewHeight * 0.035)}`,
           width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
           height: pxTransform(viewHeight * 0.1),
         }}
@@ -375,7 +421,35 @@ export default function Choose() {
         </View>
         <View
           className='body-footer-bottom'
-        ></View>
+        >
+          <Button
+            className='body-footer-bottom-button'
+            style={{
+              width: pxTransform(windowWidth * 0.25),
+              borderRadius: pxTransform(20),
+              '--nutui-button-default-height': pxTransform(viewHeight * 0.05),
+            } as any}
+            onClick={() => {
+              if (scrollYTop === 0) {
+                smoothScrollTo(windowHeight * 0.5 - navHeight, 200)
+              } else {
+                smoothScrollTo(0, 200)
+              }
+              setSelectedAddOneGood(null)
+            }}
+          >恢复默认</Button>
+          <Button
+            className='body-footer-bottom-button'
+            style={{
+              width: pxTransform(windowWidth * 0.6),
+              borderRadius: pxTransform(20),
+              fontSize: pxTransform(viewHeight * 0.02),
+              '--nutui-button-default-background-color': '#D61518',
+              '--nutui-button-default-color': '#fff',
+              '--nutui-button-default-height': pxTransform(viewHeight * 0.05),
+            } as any}
+          >加入购物袋</Button>
+        </View>
       </View>
     </View>
   )

@@ -26,9 +26,12 @@
       /* 边框 */
       // background: url('../../assets/order/order-left.png');
       // background-size: 100% 115%;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .order-cart-right {
+    .order-cart-middle {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      // width: 100%;
       // background: url('../../assets/order/order-right.png');
       // background-size: 100% 115%;
     }

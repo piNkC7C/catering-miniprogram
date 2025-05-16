@@ -1,12 +1,14 @@
 import { configureStore, Action } from '@reduxjs/toolkit'
 import exampleReducer from './modules/example'
 import loginReducer from './modules/login'
+import orderListReducer from './modules/orderList'
 import { ThunkDispatch } from 'redux-thunk'
 
 const store = configureStore({
   reducer: {
     example: exampleReducer,
-    login: loginReducer
+    login: loginReducer,
+    orderList: orderListReducer
   }
 })
 

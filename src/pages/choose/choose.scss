@@ -9,12 +9,19 @@
     flex-direction: column;
   }
 
+  .header-back {
+    z-index: 2000;
+    position: absolute;
+  }
+
   .body {
     position: absolute;
+    top: 0;
     z-index: 1000;
     width: 100%;
     overflow: scroll;
     background-color: transparent;
+    scroll-behavior: smooth;
 
     .body-header {
       display: flex;
@@ -52,6 +59,7 @@
     background-color: #fff;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
 
     .body-footer-top {
       display: flex;
@@ -90,6 +98,14 @@
           font-weight: 500;
         }
       }
+    }
+
+    .body-footer-bottom {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      
     }
   }
 }
