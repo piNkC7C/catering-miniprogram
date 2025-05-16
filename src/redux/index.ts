@@ -13,7 +13,7 @@ const store = configureStore({
 })
 
 export type IRootState = ReturnType<typeof store.getState>
-// export type DispatchType = typeof store.dispatch
-export type DispatchType = ThunkDispatch<IRootState, unknown, Action>;
+export type DispatchType = typeof store.dispatch
+// export type DispatchType = ThunkDispatch<unknown, unknown, Action>;
 
 export default store
