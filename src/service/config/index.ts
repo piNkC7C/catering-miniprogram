@@ -19,4 +19,4 @@
 // console.log(import.meta.env.VITE_BASE_URL)
 
 export const TIME_OUT = 999999999999999
-export const BASE_URL = '/api'
+export const BASE_URL = 'https://qyapi.weixin.qq.com'

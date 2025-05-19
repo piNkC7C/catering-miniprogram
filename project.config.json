@@ -1,6 +1,6 @@
 {
   "miniprogramRoot": "dist/",
-  "projectname": "tao-miniprogram",
+  "projectname": "catering-miniprogram",
   "description": "基于taro框架使用react开发的微信小程序",
   "appid": "wxd3a5530a4763cc45",
   "setting": {

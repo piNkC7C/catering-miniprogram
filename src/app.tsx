@@ -36,16 +36,16 @@ function App({ children }: PropsWithChildren<any>) {
         //     }
         // })
         // 小程序登录
-        login({
-            success: (res) => {
-                console.log('login success', res)
-            },
-            fail: (err) => {
-                console.log('login fail', err)
-            },
-            timeout: 10000,
-            force: true
-        })
+        // login({
+        //     success: (res) => {
+        //         console.log('login success', res)
+        //     },
+        //     fail: (err) => {
+        //         console.log('login fail', err)
+        //     },
+        //     timeout: 10000,
+        //     force: true
+        // })
     }, [])
 
     // children 是将要会渲染的页面

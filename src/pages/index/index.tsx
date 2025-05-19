@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Span } from '@tarojs/components'
-import { useLoad, getSystemInfoSync } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, switchTab } from '@tarojs/taro'
 import './index.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
@@ -72,16 +72,16 @@ export default function Index() {
             <Image
               src={userInfo?.avatar || userNologin}
               mode="scaleToFill"
-              width={pxTransform(viewHeight * 0.1)}
-              height={pxTransform(viewHeight * 0.1)}
-              radius={pxTransform(viewHeight * 0.05)}
+              width={pxTransform(viewHeight * 0.06)}
+              height={pxTransform(viewHeight * 0.06)}
+              radius={pxTransform(viewHeight * 0.03)}
             />
           </View>
           <View className='user-info'>
             <View
               className='user-title'
               style={{
-                fontSize: pxTransform(viewHeight * 0.03),
+                fontSize: pxTransform(viewHeight * 0.023),
               }}
             >
               {loginStatus === 0 ? 'HI,xxx火锅用户' : `HI,${userInfo?.nickname}`}
@@ -89,7 +89,7 @@ export default function Index() {
             <View
               className='user-description'
               style={{
-                fontSize: pxTransform(viewHeight * 0.015),
+                fontSize: pxTransform(viewHeight * 0.013),
               }}
             >
               {loginStatus === 0 ? '为给您提供更好的服务请先授权登录' : '欢迎使用'}
@@ -152,7 +152,14 @@ export default function Index() {
             borderRadius: pxTransform(10),
           }}
         >
-          <View className='action-card-item'>
+          <View
+            className='action-card-item'
+            onClick={() => {
+              switchTab({
+                url: '/pages/order/order',
+              })
+            }}
+          >
             <View className='action-card-item-icon'>
               <Image
                 src={iconOrder}
@@ -164,7 +171,7 @@ export default function Index() {
             <View
               className='action-card-item-title'
               style={{
-                fontSize: pxTransform(viewHeight * 0.03),
+                fontSize: pxTransform(viewHeight * 0.025),
               }}
             >
               扫码点餐
@@ -185,7 +192,14 @@ export default function Index() {
               borderColor: '#BDBCBB',
             }}
           />
-          <View className='action-card-item'>
+          <View
+            className='action-card-item'
+            onClick={() => {
+              navigateTo({
+                url: '/pages/points/points',
+              })
+            }}
+          >
             <View className='action-card-item-icon'>
               <Image
                 src={iconJifen}
@@ -197,7 +211,7 @@ export default function Index() {
             <View
               className='action-card-item-title'
               style={{
-                fontSize: pxTransform(viewHeight * 0.03),
+                fontSize: pxTransform(viewHeight * 0.025),
               }}
             >
               积分兑换

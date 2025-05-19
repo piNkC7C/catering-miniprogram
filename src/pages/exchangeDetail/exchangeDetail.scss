@@ -1,0 +1,86 @@
+.exchange-detail-page {
+    background-color: #f5f5f5;
+    overflow: hidden;
+
+    .exchange-detail-nav {
+        position: relative;
+        background-color: #fff;
+
+        .nav-content {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .nav-left {
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+    .exchange-detail-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+
+        .content-swiper {
+            width: 100%;
+            height: 40%;
+        }
+
+        .content-title {
+            margin-bottom: 25rpx;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            .top {
+                width: 100%;
+                height: 50%;
+            }
+
+            .bottom {
+                width: 100%;
+                height: 50%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .content-detail {
+            background-color: #fff;
+
+            .top {
+                width: 100%;
+                height: 10%;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .bottom {
+                width: 100%;
+                height: 90%;
+                overflow: auto;
+                color: #A2A6A9;
+            }
+        }
+
+        .content-button {
+            width: 100%;
+            height: calc(12% - 25rpx);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
