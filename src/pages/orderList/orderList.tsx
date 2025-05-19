@@ -38,11 +38,11 @@ export default function OrderList() {
   const [checkAgree, setCheckAgree] = useState<boolean>(false)
 
   // 登录状态为0时，初始化显示底部弹层
-  useEffect(() => {
-    if (loginStatus === 0) {
-      setShowBottomPopup(true)
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (loginStatus === 0) {
+  //     setShowBottomPopup(true)
+  //   }
+  // }, [])
 
   // 提示框
   const [toastState, setToastState] = useState<{
@@ -70,32 +70,12 @@ export default function OrderList() {
       value: 'shop'
     },
     {
-      title: '买单订单',
-      value: 'buy'
-    },
-    {
-      title: '储值订单',
-      value: 'value'
-    },
-    {
-      title: '拼券订单',
-      value: 'pintuan'
-    },
-    {
-      title: '券包订单',
-      value: 'quanbao'
-    },
-    {
-      title: '礼品卡',
-      value: 'gift'
-    },
-    {
-      title: '权益卡订单',
-      value: 'right'
+      title: '外卖订单',
+      value: 'takeout'
     },
     {
       title: '商城订单',
-      value: 'mall'
+      value: 'mail'
     }
   ]
 
@@ -200,6 +180,7 @@ export default function OrderList() {
                                 className='orderlist-item-top-right'
                                 style={{
                                   fontSize: pxTransform(windowHeight * 0.02),
+                                  color:item.orderStatus === 0 ? '#D7181A' : '#676767'
                                 }}
                               >
                                 {item.orderStatus === 0 && '待支付'}
@@ -241,7 +222,7 @@ export default function OrderList() {
                                         className='orderlist-item-middle-left-goods-name'
                                         style={{
                                           // width: pxTransform(windowHeight * 0.12),
-                                          width: '6rem',
+                                          width: '4rem',
                                           height: pxTransform(windowHeight * 0.02),
                                           fontSize: pxTransform(windowHeight * 0.015),
                                           marginTop: pxTransform(windowHeight * 0.005),

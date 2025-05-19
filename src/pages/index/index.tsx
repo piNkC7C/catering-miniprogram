@@ -25,11 +25,11 @@ export default function Index() {
   const [checkAgree, setCheckAgree] = useState<boolean>(false)
 
   // 登录状态为0时，初始化显示底部弹层
-  useEffect(() => {
-    if (loginStatus === 0) {
-      setShowBottomPopup(true)
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (loginStatus === 0) {
+  //     setShowBottomPopup(true)
+  //   }
+  // }, [])
 
   // 提示框
   const [toastState, setToastState] = useState<{

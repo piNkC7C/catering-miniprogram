@@ -14,28 +14,39 @@ function App({ children }: PropsWithChildren<any>) {
     //     console.log('App launched.')
     // })
 
-    // useEffect(() => {
-    //     // 检查用户登录状态
-    //     checkSession({
-    //         success: (res) => {
-    //             console.log('checkSession success', res)
-    //         },
-    //         fail: (err) => {
-    //             console.log('checkSession fail', err)
-    //             // 如果用户未登录，则跳转到登录页面
-    //             login({
-    //                 success: (res) => {
-    //                     console.log('login success', res)
-    //                 },
-    //                 fail: (err) => {
-    //                     console.log('login fail', err)
-    //                 },
-    //                 timeout: 10000,
-    //                 force: true
-    //             })
-    //         }
-    //     })
-    // }, [])
+    useEffect(() => {
+        // 检查用户登录状态
+        // checkSession({
+        //     success: (res) => {
+        //         console.log('checkSession success', res)
+        //     },
+        //     fail: (err) => {
+        //         console.log('checkSession fail', err)
+        //         // 如果用户未登录，则跳转到登录页面
+        //         login({
+        //             success: (res) => {
+        //                 console.log('login success', res)
+        //             },
+        //             fail: (err) => {
+        //                 console.log('login fail', err)
+        //             },
+        //             timeout: 10000,
+        //             force: true
+        //         })
+        //     }
+        // })
+        // 小程序登录
+        login({
+            success: (res) => {
+                console.log('login success', res)
+            },
+            fail: (err) => {
+                console.log('login fail', err)
+            },
+            timeout: 10000,
+            force: true
+        })
+    }, [])
 
     // children 是将要会渲染的页面
     return (
