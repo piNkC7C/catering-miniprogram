@@ -1,7 +1,8 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getCurrentPages } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getCurrentPages, showToast } from '@tarojs/taro'
 import './choose.scss'
-import { useAppSelector } from '@/hooks/useAppStore'
+import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
+import { setCartListAction } from '@/redux/modules/order'
 import { pxTransform, Divider, Grid, Image, Badge, ConfigProvider, Price, InputNumber, Button } from '@nutui/nutui-react-taro'
 import { Check } from '@nutui/icons-react-taro'
 import { useState } from 'react'
@@ -14,8 +15,12 @@ export default function Choose() {
     login: {
       loginStatus,
       userInfo
+    },
+    order: {
+      cartList
     }
   } = useAppSelector((state) => state)
+  const dispatch = useAppDispatch()
   // useLoad(() => {
   //   console.log('OrderList page loaded.')
   // })
@@ -129,29 +134,29 @@ export default function Choose() {
         width: `${windowWidth}px`,
       }}
     >
-    <View
-      className='header-back'
-      style={{
-        top: topMenuButton,
-        left: windowWidth - leftMenuButton - widthMenuButton,
-        width: heightMenuButton,
-        height: heightMenuButton,
-      }}
-      onClick={() => {
-        // const pages = getCurrentPages()
-        // console.log(pages)
-        navigateBack()
-      }}
-    >
-      <Image
-        src={chooseBack}
-        mode='scaleToFill'
+      <View
+        className='header-back'
         style={{
+          top: topMenuButton,
+          left: windowWidth - leftMenuButton - widthMenuButton,
           width: heightMenuButton,
           height: heightMenuButton,
         }}
-      />
-    </View>
+        onClick={() => {
+          // const pages = getCurrentPages()
+          // console.log(pages)
+          navigateBack()
+        }}
+      >
+        <Image
+          src={chooseBack}
+          mode='scaleToFill'
+          style={{
+            width: heightMenuButton,
+            height: heightMenuButton,
+          }}
+        />
+      </View>
       <View
         className='header'
         style={{
@@ -205,8 +210,9 @@ export default function Choose() {
                 {
                   id: 10,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png'
+                  count: 1,
+                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  price: 39
                 }
               ]
             }, {
@@ -448,6 +454,42 @@ export default function Choose() {
               '--nutui-button-default-color': '#fff',
               '--nutui-button-default-height': pxTransform(viewHeight * 0.05),
             } as any}
+            onClick={() => {
+              if (selectedAddOneGood) {
+                dispatch(setCartListAction({
+                  type: 'add', data: {
+                    id: 1,
+                    title: '原切前胸牛肉',
+                    count: 1,
+                    image: 'https://img.yzcdn.cn/vant/ipad.png',
+                    price: 39,
+                    detail: true,
+                    detailList: [
+                      {
+                        id: 1,
+                        title: '原切前胸牛肉',
+                        count: 1,
+                        image: 'https://img.yzcdn.cn/vant/ipad.png',
+                        price: 39,
+                      },
+                      {
+                        id: 1,
+                        title: '原切前胸牛肉',
+                        count: 1,
+                        image: 'https://img.yzcdn.cn/vant/ipad.png',
+                        price: 39,
+                      },
+                    ],
+                  }
+                }))
+                navigateBack()
+              } else {
+                showToast({
+                  title: '请选择一款你加一我送一的商品',
+                  icon: 'none',
+                })
+              }
+            }}
           >加入购物袋</Button>
         </View>
       </View>

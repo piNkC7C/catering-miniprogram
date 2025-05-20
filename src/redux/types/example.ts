@@ -1,5 +1,5 @@
 export interface IExampleState {
-    data: any
+    number: number
   }
   
   export interface IThunkExampleState {

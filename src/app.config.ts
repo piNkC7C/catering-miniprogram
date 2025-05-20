@@ -2,7 +2,7 @@ export default defineAppConfig({
   pages: [
     // tabbar页面
     // 首页
-    'pages/index/index',
+    // 'pages/index/index',
     // 点单
     'pages/order/order',
     // 订单列表
@@ -28,12 +28,12 @@ export default defineAppConfig({
   },
   tabBar: {
     list: [
-      {
-        pagePath: 'pages/index/index',
-        text: '',
-        iconPath: 'assets/tabbar/tab-index.png',
-        selectedIconPath: 'assets/tabbar/tab-index.png'
-      },
+      // {
+      //   pagePath: 'pages/index/index',
+      //   text: '',
+      //   iconPath: 'assets/tabbar/tab-index.png',
+      //   selectedIconPath: 'assets/tabbar/tab-index.png'
+      // },
       {
         pagePath: 'pages/order/order',
         text: '',

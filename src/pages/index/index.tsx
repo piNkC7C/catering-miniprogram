@@ -10,6 +10,8 @@ import userNologin from '@/assets/index/user-nologin.png'
 import iconOrder from '@/assets/index/icon-order.png'
 import iconJifen from '@/assets/index/icon-jifen.png'
 import vipFrame from '@/assets/index/Frame.png'
+import LoginPopup from '@/components/LoginPopup'
+
 export default function Index() {
   // 获取登录状态和用户信息
   const {
@@ -22,7 +24,6 @@ export default function Index() {
 
   // 底部弹层
   const [showBottomPopup, setShowBottomPopup] = useState<boolean>(false)
-  const [checkAgree, setCheckAgree] = useState<boolean>(false)
 
   // 登录状态为0时，初始化显示底部弹层
   // useEffect(() => {
@@ -31,27 +32,9 @@ export default function Index() {
   //   }
   // }, [])
 
-  // 提示框
-  const [toastState, setToastState] = useState<{
-    icon: string | React.ReactNode
-    content?: string
-    duration?: number
-    title?: string
-  }>({
-    icon: null,
-    content: 'toast',
-    duration: 2,
-    title: '',
-  })
-  const [showToast, setShowToast] = useState<boolean>(false)
-
   // 视图高度
-  const [viewHeight, setViewHeight] = useState<number>(0)
 
-  useEffect(() => {
-    const systemInfo = getSystemInfoSync()
-    setViewHeight(systemInfo.windowHeight)
-  }, [])
+  const {windowHeight:viewHeight} = getSystemInfoSync()
 
   // useLoad(() => {
   //   console.log('Page loaded.')
@@ -284,170 +267,10 @@ export default function Index() {
           </View>
         </View>
       </View>
-      <Popup
-        closeable
-        left={
-          <View>
-            <Image
-              src={userNologin}
-              mode="scaleToFill"
-              width={pxTransform(viewHeight * 0.05)}
-              height={pxTransform(viewHeight * 0.05)}
-              radius={pxTransform(viewHeight * 0.025)}
-            />
-          </View>
-        }
-        title={
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <View
-              style={{
-                color: '#333333',
-                fontSize: pxTransform(viewHeight * 0.03),
-              }}
-            >
-              欢迎加入xxxx火锅
-            </View>
-            <View
-              style={{
-                marginTop: pxTransform(viewHeight * 0.01),
-                color: '#676767',
-                fontSize: pxTransform(viewHeight * 0.015),
-              }}
-            >
-              加入后享专属活动&会员好礼
-            </View>
-          </View>
-        }
+      <LoginPopup
         visible={showBottomPopup}
-        position="bottom"
-        onClose={() => {
-          setShowBottomPopup(false)
-        }}
-        lockScroll
-      >
-        <View
-          style={{
-            padding: `0 ${pxTransform(viewHeight * 0.02)}`,
-            marginBottom: pxTransform(viewHeight * 0.025),
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: 'calc(100% - ${pxTransform(viewHeight * 0.04)})',
-          }}
-        >
-          <Space
-            direction='vertical'
-            align='center'
-            style={{
-              width: '100%'
-            }}
-          >
-            <Button
-              size='large'
-              type="primary"
-              style={{
-                width: pxTransform(viewHeight * 0.4),
-                borderRadius: pxTransform(viewHeight * 0.05),
-              }}
-              {...(checkAgree ? {
-                openType: 'getRealtimePhoneNumber|agreePrivacyAuthorization',
-                onGetRealTimePhoneNumber: (realTimePhoneNumber) => {
-                  console.log(realTimePhoneNumber.detail);
-                  // 获取到手机号后处理登录逻辑
-                  // dispatch(setLoginStatus(1))
-                  // dispatch(userInfoAction({
-                  //   type: 'set',
-                  //   data: {
-                  //     nickname: '杨柳依依',
-                  //     avatar: "https://img12.360buyimg.com/imagetools/jfs/t1/143702/31/16654/116794/5fc6f541Edebf8a57/4138097748889987.png",
-                  //   }
-                  // }))
-                }
-              } : {})}
-              onClick={() => {
-                if (!checkAgree) {
-                  setShowToast(true)
-                  setToastState({
-                    icon: 'error',
-                    content: '请先同意用户协议',
-                  })
-                  return
-                }
-                // 用户已同意协议，但还需要点击获取手机号的微信弹窗
-                // 当用户同意授权后会触发onGetRealTimePhoneNumber回调
-              }}
-            >
-              手机号快捷登录
-            </Button>
-            <Button
-              size='large'
-              type="primary"
-              fill='outline'
-              style={{
-                width: pxTransform(viewHeight * 0.4),
-                borderRadius: pxTransform(viewHeight * 0.05),
-              }}
-              onClick={() => {
-                setShowBottomPopup(false)
-              }}
-            >
-              暂时跳过
-            </Button>
-          </Space>
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: '100%',
-            }}
-          >
-            <Checkbox
-              checked={checkAgree}
-              onChange={(val) => {
-                setCheckAgree(val)
-                // 如果用户取消勾选，则关闭Toast提示
-                if (!val && showToast) {
-                  setShowToast(false)
-                }
-              }}
-              style={{
-                marginRight: pxTransform(viewHeight * 0.01),
-              }}
-            />
-            <View
-              style={{
-                fontSize: pxTransform(viewHeight * 0.02),
-              }}
-            >
-              <Text>允许我们在必要场景下，合理使用您的个人信息，且阅读并同意</Text>
-              <Text
-                style={{
-                  color: '#1890ff',
-                }}
-              >
-                《xxxx火锅用户协议》
-              </Text>
-            </View>
-          </View>
-        </View>
-      </Popup>
-      <Toast
-        content={toastState.content}
-        duration={toastState.duration}
-        icon={toastState.icon}
-        title={toastState.title}
-        visible={showToast}
-        onClose={() => {
-          setShowToast(false)
-        }}
+        onClose={() => setShowBottomPopup(false)}
+        viewHeight={viewHeight}
       />
     </View>
   )

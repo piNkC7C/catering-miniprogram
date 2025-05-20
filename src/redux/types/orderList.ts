@@ -18,11 +18,3 @@ export interface IOrderListState {
     }[]
   }[]
 }
-
-export interface IThunkOrderListState {
-  state: IOrderListState
-}
-
-export interface IGetOrderListDataRequest {
-  type: string | number
-}

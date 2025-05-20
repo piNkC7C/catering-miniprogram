@@ -3,6 +3,7 @@ import exampleReducer from './modules/example'
 import loginReducer from './modules/login'
 import orderListReducer from './modules/orderList'
 import pointsReducer from './modules/points'
+import orderReducer from './modules/order'
 import { ThunkDispatch } from 'redux-thunk'
 
 const store = configureStore({
@@ -10,7 +11,8 @@ const store = configureStore({
     example: exampleReducer,
     login: loginReducer,
     orderList: orderListReducer,
-    points: pointsReducer
+    points: pointsReducer,
+    order: orderReducer
   }
 })
 

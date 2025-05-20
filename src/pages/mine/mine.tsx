@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo } from '@tarojs/taro'
 import './mine.scss'
@@ -13,6 +14,7 @@ import mineKeFu1 from '@/assets/mine/mine-kf1@2x.png'
 import mineKeFu2 from '@/assets/mine/mine-kf2@2x.png'
 import mineDizhi from '@/assets/mine/mine-address@2x.png'
 import mineHuiyuan from '@/assets/mine/mine-vip@2x.png'
+import LoginPopup from '@/components/LoginPopup'
 
 export default function Mine() {
   // 获取登录状态和用户信息
@@ -84,6 +86,9 @@ export default function Mine() {
     },
   ]
 
+  // 登录组件
+  const [loginPopupVisible, setLoginPopupVisible] = useState<boolean>(false)
+
   return (
     <View
       className='mine-page'
@@ -143,6 +148,11 @@ export default function Mine() {
               style={{
                 fontSize: `${pxTransform(windowWidth * 0.03)}`,
                 borderRadius: `${pxTransform(windowWidth * 0.05)}`,
+              }}
+              onClick={() => {
+                if (loginStatus === 0) {
+                  setLoginPopupVisible(true)
+                }
               }}
             >登录/注册</Button>
           </View>
@@ -250,6 +260,11 @@ export default function Mine() {
           </View>
         </View>
       </View>
+      <LoginPopup
+        visible={loginPopupVisible}
+        onClose={() => setLoginPopupVisible(false)}
+        viewHeight={windowHeight}
+      />
     </View>
   )
 } 

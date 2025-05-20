@@ -3,11 +3,13 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
 import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo } from '@tarojs/taro'
 import './order.scss'
-import { useAppSelector } from '@/hooks/useAppStore'
-import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag } from '@nutui/nutui-react-taro'
-import { Cart, Star, StarFill, ArrowDown, Add, Minus } from '@nutui/icons-react-taro'
+import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
+import { setCartListAction } from '@/redux/modules/order'
+import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse } from '@nutui/nutui-react-taro'
+import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
 import orderJoinVip from '@/assets/order/order-joinvip@2x.png'
+import LoginPopup from '@/components/LoginPopup'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -15,14 +17,26 @@ export default function Order() {
     login: {
       loginStatus,
       userInfo
+    },
+    order: {
+      cartList
     }
   } = useAppSelector((state) => state)
+  const dispatch = useAppDispatch()
   // useLoad(() => {
   //   console.log('Order page loaded.')
   // })
 
   // 门店信息
   const [shopIsFavor, setShopIsFavor] = useState<boolean>(false)
+
+  // 登录组件
+  const [loginPopupVisible, setLoginPopupVisible] = useState<boolean>(false)
+
+  // 购物车弹窗
+  const [showCartPopup, setShowCartPopup] = useState<boolean>(false)
+  // 购物车全选
+  const [cartCheckboxGroupValue, setCartCheckboxGroupValue] = useState<any[]>([])
 
   // 创建一个手动滚动事件来检测元素可见性
   // const [visibleItems, setVisibleItems] = useState<string[]>([]);
@@ -63,10 +77,6 @@ export default function Order() {
   // 获取可视区域高度
   const viewHeight = windowHeight - navHeight
 
-  // 已添加购物车数量
-  const [cartNum, setCartNum] = useState<number>(1)
-  // 购物车总价
-  const [cartPrice, setCartPrice] = useState<number>(618.68)
   // 侧边栏选中值
   const [sideBarValue, setSideBarValue] = useState<number | string>('anchor-1')
 
@@ -413,33 +423,134 @@ export default function Order() {
                               </View>
                               {
                                 listItem.detail ? (
-                                  <Button
-                                    type="primary"
-                                    size="mini"
+                                  <Badge 
                                     style={{
-                                      // width: pxTransform(windowWidth * 0.13),
-                                      // height: pxTransform(viewHeight * 0.035),
-                                      borderRadius: pxTransform(viewHeight * 0.05),
-                                      // fontSize: pxTransform(viewHeight * 0.03),
+                                      marginRight: pxTransform(windowWidth * 0.02),
                                     }}
-                                    onClick={() => {
-                                      navigateTo({
-                                        url: '/pages/choose/choose',
-                                      })
-                                    }}
-                                  >选规格</Button>
+                                    value={cartList.find((findItem) => {
+                                      return findItem.id === listItem.id
+                                    })?.count}>
+                                    <Button
+                                      type="primary"
+                                      size="mini"
+                                      style={{
+                                        // width: pxTransform(windowWidth * 0.13),
+                                        // height: pxTransform(viewHeight * 0.035),
+                                        borderRadius: pxTransform(viewHeight * 0.05),
+                                        // fontSize: pxTransform(viewHeight * 0.03),
+                                      }}
+                                      onClick={() => {
+                                        navigateTo({
+                                          url: '/pages/choose/choose',
+                                        })
+                                      }}
+                                    >选规格</Button>
+                                  </Badge>
                                 ) : (
-                                  <Button
-                                    type="primary"
-                                    size="small"
+                                  <View
                                     style={{
-                                      width: pxTransform(windowWidth * 0.05),
-                                      height: pxTransform(windowWidth * 0.05),
-                                      borderRadius: pxTransform(windowWidth * 0.05),
+                                      marginRight: pxTransform(windowWidth * 0.02),
+                                      display: 'flex',
+                                      flexDirection: 'row',
+                                      alignItems: 'flex-end',
+                                      justifyContent: 'space-between',
                                     }}
-                                    icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                   >
-                                  </Button>
+                                    {
+                                      cartList.find((findItem) => {
+                                        return findItem.id === listItem.id
+                                      }) && (
+                                        <View
+                                          style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                          }}
+                                        >
+                                          <Button
+                                            type="primary"
+                                            size="small"
+                                            fill='outline'
+                                            style={{
+                                              width: pxTransform(windowWidth * 0.05),
+                                              height: pxTransform(windowWidth * 0.05),
+                                              borderRadius: pxTransform(windowWidth * 0.05),
+                                            }}
+                                            icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
+                                            onClick={() => {
+                                              if (cartList.find((findItem) => {
+                                                return findItem.id === listItem.id
+                                              })?.count === 1) {
+                                                dispatch(setCartListAction({
+                                                  type: 'remove', data: {
+                                                    id: listItem.id,
+                                                  }
+                                                }))
+                                              } else {
+                                                dispatch(setCartListAction({
+                                                  type: 'set', data: [
+                                                    ...cartList.map((mapItem) => {
+                                                      if (mapItem.id === listItem.id) {
+                                                        return { ...mapItem, count: mapItem.count - 1 }
+                                                      }
+                                                      return mapItem
+                                                    })
+                                                  ]
+                                                }))
+                                              }
+                                            }}
+                                          >
+                                          </Button>
+                                          <Text
+                                            style={{
+                                              margin: `0 ${pxTransform(windowWidth * 0.02)}`,
+                                            }}
+                                          >{cartList.find((findItem) => {
+                                            return findItem.id === listItem.id
+                                          })?.count}</Text>
+                                        </View>
+                                      )
+                                    }
+                                    <Button
+                                      type="primary"
+                                      size="small"
+                                      style={{
+                                        width: pxTransform(windowWidth * 0.05),
+                                        height: pxTransform(windowWidth * 0.05),
+                                        borderRadius: pxTransform(windowWidth * 0.05),
+                                      }}
+                                      icon={<Add color='#fff' size={windowWidth * 0.036} />}
+                                      onClick={() => {
+                                        if (cartList.find((findItem) => {
+                                          return findItem.id === listItem.id
+                                        })) {
+                                          dispatch(setCartListAction({
+                                            type: 'set', data: [
+                                              ...cartList.map((mapItem) => {
+                                                if (mapItem.id === listItem.id) {
+                                                  return { ...mapItem, count: mapItem.count + 1 }
+                                                }
+                                                return mapItem
+                                              })
+                                            ]
+                                          }))
+                                        } else {
+                                          dispatch(setCartListAction({
+                                            type: 'add', data: {
+                                              id: listItem.id,
+                                              title: listItem.title,
+                                              price: listItem.price,
+                                              image: listItem.src,
+                                              count: 1,
+                                              detail: false,
+                                              detailList: [],
+                                            }
+                                          }))
+                                        }
+                                      }}
+                                    >
+                                    </Button>
+                                  </View>
                                 )
                               }
                             </View>
@@ -498,12 +609,17 @@ export default function Order() {
               alignItems: 'center',
               justifyContent: 'center',
             }}
+            onClick={() => {
+              if (loginStatus === 0) {
+                setLoginPopupVisible(true)
+              }
+            }}
           >
             {
               cartLeftWidth === '30%' ? loginStatus === 0 ? (
                 '登录后查询'
               ) : (
-                '查询订单'
+                '套餐券'
               ) : (
                 ''
               )
@@ -532,13 +648,15 @@ export default function Order() {
                 if (cartLeftWidth === '30%') {
                   setCartLeftWidth('0')
                   setCartLeftBackground('')
+                  setShowCartPopup(true)
                 } else {
                   setCartLeftWidth('30%')
                   setCartLeftBackground('#D61518')
+                  setShowCartPopup(false)
                 }
               }}
             >
-              <Badge value={cartNum}>
+              <Badge value={cartList.length}>
                 <Cart
                   size={pxTransform(windowWidth * 0.1)}
                 />
@@ -557,14 +675,16 @@ export default function Order() {
                 if (cartLeftWidth === '30%') {
                   setCartLeftWidth('0')
                   setCartLeftBackground('')
+                  setShowCartPopup(true)
                 } else {
                   setCartLeftWidth('30%')
                   setCartLeftBackground('#D61518')
+                  setShowCartPopup(false)
                 }
               }}
             >
               {
-                cartNum === 0 ? (
+                cartList.length === 0 ? (
                   <Text
                     style={{
                       fontSize: pxTransform(viewHeight * 0.015),
@@ -579,7 +699,7 @@ export default function Order() {
                   >
                     <Price
                       color='gray'
-                      price={cartPrice}
+                      price={cartList.reduce((acc, item) => acc + item.price * item.count, 0)}
                       size="xlarge"
                       thousands
                     />
@@ -597,14 +717,295 @@ export default function Order() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: `${pxTransform(0)} ${pxTransform(30)} ${pxTransform(30)} ${pxTransform(0)}`,
-              background: cartNum > 0 ? '#D61518' : '',
-              color: cartNum > 0 ? '#fff' : '#999',
+              background: cartList.length > 0 ? '#D61518' : '',
+              color: cartList.length > 0 ? '#fff' : '#999',
               fontSize: pxTransform(viewHeight * 0.02),
             }}
           >
             <Text>去下单</Text>
           </View>
         </View>
+        <LoginPopup
+          visible={loginPopupVisible}
+          onClose={() => setLoginPopupVisible(false)}
+          viewHeight={windowHeight}
+        />
+        <Popup
+          visible={showCartPopup}
+          position='bottom'
+          onClose={() => {
+            setShowCartPopup(false)
+            setCartLeftWidth('30%')
+            setCartLeftBackground('#D61518')
+          }}
+          zIndex={50}
+          round={true}
+        >
+          <View
+            className='order-cart-popup'
+            style={{
+              borderRadius: `${pxTransform(20)} ${pxTransform(20)} 0 0`,
+            }}
+          >
+            <View
+              className='title'
+              style={{
+                padding: `0 ${pxTransform(windowWidth * 0.05)}`,
+                width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
+                height: pxTransform(windowHeight * 0.05),
+              }}
+            >
+              <View
+                className='title-left title-item'
+              >
+                <Checkbox
+                  style={{
+                    '--nut-icon-width': pxTransform(windowWidth * 0.035),
+                    '--nut-icon-height': pxTransform(windowWidth * 0.035),
+                  } as any}
+                  className="test"
+                  label="全选"
+                  checked={cartCheckboxGroupValue.length > 0}
+                  indeterminate={cartCheckboxGroupValue.length > 0 && cartCheckboxGroupValue.length < cartList.length}
+                  onChange={(state) => {
+                    if (state) {
+                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.id))
+                    } else {
+                      setCartCheckboxGroupValue([])
+                    }
+                  }}
+                />
+              </View>
+              <View
+                className='title-right title-item'
+                onClick={() => {
+                  dispatch(setCartListAction({ type: 'clear' }))
+                }}
+              >
+                <Del
+                  size={pxTransform(windowWidth * 0.03)}
+                />
+                <Text
+                  style={{
+                    marginLeft: pxTransform(windowWidth * 0.01),
+                    fontSize: pxTransform(windowWidth * 0.03),
+                  }}
+                >清空</Text>
+              </View>
+            </View>
+            <View
+              className='content'
+              style={{
+                padding: pxTransform(windowWidth * 0.03),
+                width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
+              }}
+            >
+              {
+                cartList.map((item) => (
+                  <>
+                    <View
+                      className='content-item'
+                    >
+                      <View
+                        className='item-left'
+                      >
+                        <View
+                          className='item-left-checkbox'
+                          style={{
+                            width: pxTransform(windowWidth * 0.1),
+                            height: pxTransform(windowWidth * 0.1),
+                          }}
+                        >
+                          <Checkbox
+                            value={item.id}
+                            checked={cartCheckboxGroupValue.includes(item.id)}
+                            onChange={(state) => {
+                              if (state) {
+                                setCartCheckboxGroupValue((prev) => {
+                                  if (prev.length < cartList.length - 1) {
+
+                                  }
+                                  return [...prev, item.id]
+                                })
+                              } else {
+                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== item.id))
+                              }
+                            }}
+                            style={{
+                              '--nut-icon-width': pxTransform(windowWidth * 0.04),
+                              '--nut-icon-height': pxTransform(windowWidth * 0.04),
+                            } as any}
+                          />
+                        </View>
+                        <Image
+                          src={item.image}
+                          width={pxTransform(windowWidth * 0.1)}
+                          height={pxTransform(windowWidth * 0.1)}
+                        />
+                      </View>
+                      <View
+                        className='item-right'
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {
+                          item.detail ? (
+                            <Collapse
+                              defaultActiveName={['1', '2']} expandIcon={<ArrowDown />}
+                              style={{
+                                width: '100%',
+                                '--nutui-collapse-item-padding': 0,
+                                '--nutui-collapse-item-header-border-bottom': 'none'
+                              } as any}
+                            >
+                              <Collapse.Item title={item.title} name="1">
+                                {
+                                  item.detailList.map((item) => (
+                                    <View
+                                      className='item-detail'
+                                    >
+                                      <View
+                                        style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                        }}
+                                      >
+                                        <Image
+                                          src={item.image}
+                                          width={pxTransform(windowWidth * 0.1)}
+                                          height={pxTransform(windowWidth * 0.1)}
+                                        />
+                                        <Text
+                                          style={{
+                                            marginLeft: pxTransform(windowWidth * 0.02),
+                                          }}
+                                        >{item.title}</Text>
+                                      </View>
+                                      <Text
+                                        style={{
+                                          color: '#939393',
+                                        }}
+                                      >x{item.count}</Text>
+                                    </View>
+                                  ))
+                                }
+                              </Collapse.Item>
+                            </Collapse>
+                          ) : (
+                            <View
+                              style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <Text>{item.title}</Text>
+                            </View>
+                          )
+                        }
+                        <View
+                          className='right-bottom'
+                        >
+                          <ConfigProvider
+                            theme={{
+                              nutuiPricePrimaryColor: '#333',
+                              nutuiPriceSymbolLargeSize: pxTransform(viewHeight * 0.02),
+                            }}
+                          >
+                            <Price
+                              color='gray'
+                              price={item.price}
+                              size="small"
+                              thousands
+                            />
+                          </ConfigProvider>
+                          <View
+                            className="custom-input-number"
+                            style={{
+                              width: pxTransform(windowWidth * 0.2),
+                              height: pxTransform(viewHeight * 0.03),
+                              borderRadius: pxTransform(viewHeight * 0.018),
+                              fontSize: pxTransform(viewHeight * 0.03),
+                            }}
+                          >
+                            <View
+                              className="custom-btn minus"
+                              style={{
+                                width: pxTransform(windowWidth * 0.0848),
+                                height: pxTransform(viewHeight * 0.036),
+                              }}
+                              onClick={() => {
+                                if (item.count === 1) {
+                                  const newCartList = cartList.filter((mapItem) => mapItem.id !== item.id)
+                                  dispatch(setCartListAction({ type: 'set', data: newCartList }))
+                                } else {
+                                  dispatch(setCartListAction({
+                                    type: 'set', data: [
+                                      ...cartList.map((mapItem) => {
+                                        if (mapItem.id === item.id) {
+                                          return {
+                                            ...mapItem,
+                                            count: mapItem.count - 1,
+                                          }
+                                        }
+                                        return mapItem
+                                      })
+                                    ]
+                                  }))
+                                }
+                              }}
+                            >-</View>
+                            <View
+                              className="custom-value"
+                              style={{
+                                width: pxTransform(windowWidth * 0.0848),
+                                fontSize: pxTransform(viewHeight * 0.02),
+                              }}
+                            >{item.count}</View>
+                            <View
+                              className="custom-btn plus"
+                              style={{
+                                width: pxTransform(windowWidth * 0.0848),
+                                height: pxTransform(viewHeight * 0.036),
+                              }}
+                              onClick={() => dispatch(setCartListAction({
+                                type: 'set', data: [
+                                  ...cartList.map((mapItem) => {
+                                    if (mapItem.id === item.id) {
+                                      return {
+                                        ...mapItem,
+                                        count: mapItem.count + 1,
+                                      }
+                                    }
+                                    return mapItem
+                                  })
+                                ]
+                              }))
+                              }
+                            >+</View>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </>
+                ))
+              }
+              <View
+                className='cart-bottom'
+                style={{
+                  width: '100%',
+                  height: pxTransform(windowWidth * 0.23),
+                  background: '#fff',
+                }}
+              >
+              </View>
+            </View>
+          </View>
+        </Popup>
       </View >
     </>
   )

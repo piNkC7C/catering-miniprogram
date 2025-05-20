@@ -8,7 +8,9 @@ export const initDataAsync = createAsyncThunk<
   IThunkExampleState
 >('example/initDataAsync', async (payload, { dispatch }) => {
   // 在此请求接口获取数据
+  console.log('payload', payload);
+  
 
   // 分派进redux
-  dispatch(initDataAction(payload))
+  // dispatch(initDataAction(payload))
 })
