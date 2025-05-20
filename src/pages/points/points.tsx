@@ -141,6 +141,11 @@ export default function Points() {
                             />
                             <Text
                                 className='points-list-item'
+                                onClick={() => {
+                                    navigateTo({
+                                        url: '/pages/pointsRules/pointsRules',
+                                    })
+                                }}
                             >积分规则</Text>
                             <Divider
                                 direction="vertical"

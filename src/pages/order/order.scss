@@ -107,14 +107,14 @@
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            
+
             .custom-input-number {
               display: flex;
               align-items: center;
               justify-content: center;
               border: 1px solid #e5e5e5;
               background: #fff;
-      
+
               .custom-btn {
                 color: #d61518;
                 display: flex;
@@ -122,16 +122,16 @@
                 justify-content: center;
                 font-weight: 400;
                 user-select: none;
-      
+
                 &.minus {
                   border-right: 1px solid #e5e5e5;
                 }
-      
+
                 &.plus {
                   border-left: 1px solid #e5e5e5;
                 }
               }
-      
+
               .custom-value {
                 text-align: center;
                 color: #333;
@@ -141,6 +141,44 @@
           }
         }
       }
+    }
+  }
+}
+
+.goods-coupon-popup {
+  .use-coupon {
+    width: 100%;
+  }
+
+  .goods-coupon-item {
+    margin-bottom: 15rpx;
+    background: #fff;
+    border-radius: 15rpx;
+
+    .item-top {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      .item-top-right {
+        height: 100%;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-around;
+        color: #999;
+      }
+    }
+
+    .item-bottom {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
     }
   }
 }

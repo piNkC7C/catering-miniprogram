@@ -5,7 +5,7 @@ import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingC
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction } from '@/redux/modules/order'
-import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse } from '@nutui/nutui-react-taro'
+import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse, Divider, Dialog } from '@nutui/nutui-react-taro'
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
 import orderJoinVip from '@/assets/order/order-joinvip@2x.png'
@@ -37,6 +37,12 @@ export default function Order() {
   const [showCartPopup, setShowCartPopup] = useState<boolean>(false)
   // 购物车全选
   const [cartCheckboxGroupValue, setCartCheckboxGroupValue] = useState<any[]>([])
+
+  // 商品券弹窗
+  const [showGoodsCouponPopup, setShowGoodsCouponPopup] = useState<boolean>(false)
+  // 使用说明弹窗
+  const [showGoodsCouponDescriptionDialog, setShowGoodsCouponDescriptionDialog] = useState<boolean>(false)
+  const [goodsCouponDescriptionDialogItem, setGoodsCouponDescriptionDialogItem] = useState<string>('')
 
   // 创建一个手动滚动事件来检测元素可见性
   // const [visibleItems, setVisibleItems] = useState<string[]>([]);
@@ -78,7 +84,7 @@ export default function Order() {
   const viewHeight = windowHeight - navHeight
 
   // 侧边栏选中值
-  const [sideBarValue, setSideBarValue] = useState<number | string>('anchor-1')
+  const [sideBarValue, setSideBarValue] = useState<number | string>('good-coupon')
 
   // 购物车左侧显示
   const [cartLeftWidth, setCartLeftWidth] = useState<string>('30%')
@@ -86,60 +92,56 @@ export default function Order() {
   // 购物车右侧宽度
   // const [cartRightWidth, setCartRightWidth] = useState<string>(`calc(70% - ${pxTransform(windowWidth * 0.18)})`)
 
-  const dataList = Array.from({ length: 15 }).map((_, index) => (
+  const dataList = [
     {
-      id: `anchor-${index + 1}`,
-      title: `Opt ${index + 1}`,
+      id: 'zhuanqu',
+      title: '专区',
       list: [
         {
-          name: '安徽',
           id: 1,
-          src: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-          title:
-            '现货水产礼盒海鲜水',
-          price: '388',
-          vipPrice: '378',
-          shopDescription: '自营',
-          delivery: '厂商配送',
-          shopName: '阳澄湖大闸蟹自营店>',
-          detail: 1,
+          title: '肥牛',
+          price: 29,
+          image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          detail: true,
         },
         {
-          name: '安徽',
           id: 2,
-          src: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-          title:
-            '现货水产礼盒海鲜水',
-          price: '388',
-          vipPrice: '378',
-          shopDescription: '自营',
-          delivery: '厂商配送',
-          shopName: '阳澄湖大闸蟹自营店>',
-          detail: 0,
+          title: '肥牛',
+          price: 29,
+          image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          detail: false,
         },
         {
-          name: '安徽',
           id: 3,
-          src: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-          title:
-            '现货水产礼盒海鲜水',
-          price: '388',
-          vipPrice: '378',
-          shopDescription: '自营',
-          delivery: '厂商配送',
-          shopName: '阳澄湖大闸蟹自营店>',
-          detail: 0,
+          title: '肥牛',
+          price: 29,
+          image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          detail: false,
         },
       ],
     }
-  )).concat([
+  ]
+
+  const goodsCouponList = [
     {
-      id: 'anchor-11',
-      title: '',
-      list: [
-      ],
+      id: 1,
+      title: '当家肥牛卷一份',
+      image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+      startTime: '2025-05-20',
+      endTime: '2025-05-21',
+      type: 0,
+      description: '每件商品限用一张',
     },
-  ])
+    {
+      id: 1,
+      title: '当家肥牛卷一份',
+      image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+      startTime: '2025-05-20',
+      endTime: '2025-05-21',
+      type: 1,
+      description: '每件商品限用一张',
+    }
+  ]
 
   return (
     <>
@@ -303,6 +305,8 @@ export default function Order() {
               setSideBarValue(key)
             }}
           >
+            <SideBar.Item title='尊享商品券' value='good-coupon'>
+            </SideBar.Item>
             {
               dataList.map((item) => (
                 <SideBar.Item title={item.title} value={item.id}>
@@ -323,6 +327,24 @@ export default function Order() {
               overflow: 'scroll',
             }}
           >
+            <View
+              id='good-coupon'
+              className='scrollTarget'
+              style={{
+                // position: sideBarValue === item.id ? 'sticky' : 'relative',
+                // top: sideBarValue === item.id ? 0 : 'auto',
+                zIndex: 10,
+                width: '100%',
+                marginBottom: pxTransform(viewHeight * 0.02),
+                backgroundColor: '#fff',
+                color: '#6A6A6A',
+                fontSize: pxTransform(viewHeight * 0.018),
+                // 高亮显示可见元素
+                // backgroundColor: visibleItems.includes(item.id) ? 'rgba(255,215,0,0.2)' : 'transparent',
+              }}
+            >
+              <Text>尊享商品券(每件商品限用一张)</Text>
+            </View>
             {
               dataList.map((item, index) => (
                 <>
@@ -363,7 +385,7 @@ export default function Order() {
                           }}
                         >
                           <Image
-                            src={listItem.src}
+                            src={listItem.image}
                             width={pxTransform(windowWidth * 0.2)}
                             height={pxTransform(windowWidth * 0.2)}
                           />
@@ -423,7 +445,7 @@ export default function Order() {
                               </View>
                               {
                                 listItem.detail ? (
-                                  <Badge 
+                                  <Badge
                                     style={{
                                       marginRight: pxTransform(windowWidth * 0.02),
                                     }}
@@ -540,7 +562,7 @@ export default function Order() {
                                               id: listItem.id,
                                               title: listItem.title,
                                               price: listItem.price,
-                                              image: listItem.src,
+                                              image: listItem.image,
                                               count: 1,
                                               detail: false,
                                               detailList: [],
@@ -612,6 +634,8 @@ export default function Order() {
             onClick={() => {
               if (loginStatus === 0) {
                 setLoginPopupVisible(true)
+              } else {
+                setShowGoodsCouponPopup(true)
               }
             }}
           >
@@ -1007,6 +1031,142 @@ export default function Order() {
           </View>
         </Popup>
       </View >
+      <Popup
+        closeable
+        round={true}
+        visible={showGoodsCouponPopup}
+        position='bottom'
+        onClose={() => {
+          setShowGoodsCouponPopup(false)
+        }}
+        title='尊享商品券'
+        style={{
+          background: '#f5f5f5',
+        }}
+      >
+        <View
+          className='goods-coupon-popup'
+          style={{
+            padding: pxTransform(windowWidth * 0.03),
+            width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
+            height: pxTransform(windowHeight * 0.7),
+          }}
+        >
+          <View
+            className='use-coupon'
+            style={{
+              // marginLeft: pxTransform(windowWidth * 0.03),
+              paddingBottom: pxTransform(windowWidth * 0.03),
+              height: pxTransform(windowHeight * 0.03),
+              fontSize: pxTransform(windowWidth * 0.04),
+            }}
+          >
+            可用券（{goodsCouponList.length}）
+          </View>
+          {
+            goodsCouponList.map((item) => (
+              <View
+                className='goods-coupon-item'
+                style={{
+                  padding: pxTransform(windowWidth * 0.03),
+                  height: pxTransform(windowHeight * 0.15),
+                  width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
+                }}
+              >
+                <View
+                  className='item-top'
+                  style={{
+                    height: `calc(65% - ${pxTransform(windowWidth * 0.03)})`,
+                  }}
+                >
+                  <Image
+                    src={item.image}
+                    width={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
+                    height={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
+                  />
+                  <View
+                    className='item-top-right'
+                    style={{
+                      marginLeft: pxTransform(windowWidth * 0.05),
+                      fontSize: pxTransform(windowWidth * 0.025),
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: pxTransform(windowWidth * 0.04),
+                        fontWeight: 'bold',
+                        color: '#333',
+                      }}
+                    >{item.title}</Text>
+                    <Text>
+                      <Text
+                        style={{
+                          fontSize: pxTransform(windowWidth * 0.04),
+                          fontWeight: 'bold',
+                          color: '#D61518',
+                          marginRight: pxTransform(windowWidth * 0.01),
+                        }}
+                      >免费兑换</Text>
+                      无门槛</Text>
+                    <Text>有效期：{item.startTime}&nbsp;-&nbsp;{item.endTime}</Text>
+                  </View>
+                </View>
+                <Divider
+                  style={{
+                    borderStyle: 'dashed',
+                    '--nutui-divider-margin': `${pxTransform(windowWidth * 0.03)} 0`,
+                  } as any}
+                />
+                <View
+                  className='item-bottom'
+                  style={{
+                    height: `calc(35% - ${pxTransform(windowWidth * 0.03)})`,
+                  }}
+                >
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      fontSize: pxTransform(windowWidth * 0.03),
+                      color: '#999',
+                    }}
+                    onClick={() => {
+                      setGoodsCouponDescriptionDialogItem(item.description)
+                      setShowGoodsCouponDescriptionDialog(true)
+                    }}
+                  >
+                    使用说明<ArrowDown
+                      size={windowWidth * 0.03}
+                      style={{
+                        marginLeft: pxTransform(windowWidth * 0.01),
+                      }}
+                    />
+                  </View>
+                  <Button
+                    type='primary'
+                    disabled={item.type === 1}
+                    style={{
+                      borderRadius: pxTransform(windowWidth * 0.05),
+                    }}
+                  >{
+                      item.type === 0 ? '立即使用' : '已使用'
+                    }</Button>
+                </View>
+              </View>
+            ))
+          }
+        </View>
+      </Popup>
+      <Dialog
+        title="使用说明"
+        visible={showGoodsCouponDescriptionDialog}
+        confirmText="我知道了"
+        hideCancelButton
+        onConfirm={() => setShowGoodsCouponDescriptionDialog(false)}
+      >
+        <Text>{goodsCouponDescriptionDialogItem}</Text>
+      </Dialog>
     </>
   )
 } 

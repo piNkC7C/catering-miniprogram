@@ -81,7 +81,7 @@ export default function Mine() {
       icon: mineKeFu1,
     },
     {
-      title: '联系客服',
+      title: '反馈建议',
       icon: mineKeFu2,
     },
   ]

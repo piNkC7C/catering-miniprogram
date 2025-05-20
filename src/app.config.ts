@@ -2,7 +2,7 @@ export default defineAppConfig({
   pages: [
     // tabbar页面
     // 首页
-    // 'pages/index/index',
+    'pages/index/index',
     // 点单
     'pages/order/order',
     // 订单列表
@@ -17,8 +17,12 @@ export default defineAppConfig({
     'pages/points/points',
     // 积分明细
     'pages/pointsDetail/pointsDetail',
+    // 积分规则
+    'pages/pointsRules/pointsRules',
     // 兑换详情
     'pages/exchangeDetail/exchangeDetail',
+    // 选桌
+    'pages/selectTable/selectTable',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -28,12 +32,12 @@ export default defineAppConfig({
   },
   tabBar: {
     list: [
-      // {
-      //   pagePath: 'pages/index/index',
-      //   text: '',
-      //   iconPath: 'assets/tabbar/tab-index.png',
-      //   selectedIconPath: 'assets/tabbar/tab-index.png'
-      // },
+      {
+        pagePath: 'pages/index/index',
+        text: '',
+        iconPath: 'assets/tabbar/tab-index.png',
+        selectedIconPath: 'assets/tabbar/tab-index.png'
+      },
       {
         pagePath: 'pages/order/order',
         text: '',

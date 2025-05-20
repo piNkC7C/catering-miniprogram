@@ -25,6 +25,15 @@ export default function Choose() {
   //   console.log('OrderList page loaded.')
   // })
 
+  // 已包含商品
+  const [selectedIncludeGood, setSelectedIncludeGood] = useState<IGoodItem | null>({
+    id: 1,
+    title: '原切前胸牛肉',
+    image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+    price: 39,
+    count: 1,
+  })
+
   // 选择的加一商品
   const [selectedAddOneGood, setSelectedAddOneGood] = useState<IGoodItem | null>(null)
 
@@ -34,43 +43,27 @@ export default function Choose() {
   const [goodCount, setGoodCount] = useState<number>(1)
 
   // 商品列表
-  const gridItem = (item: any, listItem: any, index: number) => {
+  const gridItem = (listItem: any, index: number) => {
     return (
       <Grid.Item
         key={index}
-        text={item.title !== '已包含' ? listItem.title :
-          (
-            // <View
-            //   style={{
-            //     display: 'flex',
-            //     flexDirection: 'column',
-            //   }}
-            // >
-            //   <View>{listItem.title}</View>
-            //   <View
-            //     className='body-content-item-count'
-            //   >x{listItem.count}</View>
-            // </View>
-            <Text>{listItem.title}&nbsp;&nbsp;x{listItem.count}</Text>
-          )
+        text={<Text>{listItem.title}&nbsp;&nbsp;x1</Text>
         }
         style={{
           position: 'relative',
           boxShadow: '0px 0px 7px 0px rgba(0,0,0,0.15)',
           borderRadius: pxTransform(viewHeight * 0.01),
-          border: item.title !== '已包含' && selectedAddOneGood?.id === listItem.id ? '1px solid #D61518' : 'none',
+          border: selectedAddOneGood?.id === listItem.id ? '1px solid #D61518' : 'none',
         }}
         onClick={() => {
-          if (item.title !== '已包含') {
-            setSelectedAddOneGood(listItem)
-          }
+          setSelectedAddOneGood(listItem)
         }}
       >
         <Badge
           value={<Check color="#fff" />}
           size="large"
           style={{
-            display: item.title !== '已包含' && selectedAddOneGood?.id === listItem.id ? 'block' : 'none',
+            display: selectedAddOneGood?.id === listItem.id ? 'block' : 'none',
             position: 'absolute',
             top: 8,
             right: 8,
@@ -160,9 +153,16 @@ export default function Choose() {
       <View
         className='header'
         style={{
-          height: `${navHeight + 20}px`,
+          height: `${windowHeight}px`,
         }}
       >
+        <Image
+          src={selectedIncludeGood?.image}
+          mode='widthFix'
+          style={{
+            width: windowWidth,
+          }}
+        />
       </View>
       <ScrollView
         scrollTop={scrollYTop}
@@ -203,162 +203,102 @@ export default function Choose() {
             padding: `0 ${pxTransform(windowWidth * 0.05)} ${pxTransform(viewHeight * 0.02)}`,
           }}
         >
-          {
-            [{
-              title: '已包含',
-              list: [
-                {
-                  id: 10,
-                  title: '原切前胸牛肉',
-                  count: 1,
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                }
-              ]
-            }, {
-              title: '选择你加1，我送1商品',
-              list: [
+          <View className='body-content-item'>
+            <View
+              className='body-content-item-title'
+              style={{
+                marginBottom: pxTransform(viewHeight * 0.02),
+              }}
+            >
+              <Text>已包含</Text>
+            </View>
+            <Grid columns={3} gap={7}>
+              <Grid.Item
+                text={selectedIncludeGood?.title}
+                style={{
+                  position: 'relative',
+                  boxShadow: '0px 0px 7px 0px rgba(0,0,0,0.15)',
+                  borderRadius: pxTransform(viewHeight * 0.01),
+                  border: 'none',
+                }}
+              >
+                <Image
+                  src={selectedIncludeGood?.image}
+                />
+              </Grid.Item>
+            </Grid>
+            <Divider />
+          </View>
+          <View className='body-content-item'>
+            <View
+              className='body-content-item-title'
+              style={{
+                marginBottom: pxTransform(viewHeight * 0.02),
+              }}
+            >
+              <Text>选择你加1，我送1商品</Text>
+            </View>
+            <Grid columns={3} gap={7}>
+              {[
                 {
                   id: 1,
                   title: '原切前胸牛肉',
-                  count: 1,
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 2,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 3,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 4,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 5,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 6,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 7,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 8,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
                 {
                   id: 9,
                   title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
+                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
                   price: 39
                 },
-                {
-                  id: 10,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 11,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 12,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 13,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 14,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 15,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 16,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-                {
-                  id: 17,
-                  title: '原切前胸牛肉',
-                  count: '1',
-                  image: 'https://img.yzcdn.cn/vant/ipad.png',
-                  price: 39
-                },
-              ]
-            }].map((item, index) => (
-              <View className='body-content-item' key={index}>
-                <View
-                  className='body-content-item-title'
-                  style={{
-                    marginBottom: pxTransform(viewHeight * 0.02),
-                  }}
-                >
-                  <Text>{item.title}</Text>
-                </View>
-                <Grid columns={3} gap={7}>
-                  {item.list.map((listItem, index) => (
-                    gridItem(item, listItem, index)
-                  ))}
-                </Grid>
-                {
-                  index === 0 ? <Divider /> : null
-                }
-              </View>
-            ))
-          }
+              ].map((listItem, index) => (
+                gridItem(listItem, index)
+              ))}
+            </Grid>
+          </View>
         </View>
         <View
           style={{
@@ -458,26 +398,26 @@ export default function Choose() {
               if (selectedAddOneGood) {
                 dispatch(setCartListAction({
                   type: 'add', data: {
-                    id: 1,
-                    title: '原切前胸牛肉',
+                    id: selectedIncludeGood?.id,
+                    title: selectedIncludeGood?.title,
                     count: 1,
-                    image: 'https://img.yzcdn.cn/vant/ipad.png',
-                    price: 39,
+                    image: selectedIncludeGood?.image,
+                    price: selectedIncludeGood?.price,
                     detail: true,
                     detailList: [
                       {
-                        id: 1,
-                        title: '原切前胸牛肉',
+                        id: selectedIncludeGood?.id,
+                        title: selectedIncludeGood?.title,
                         count: 1,
-                        image: 'https://img.yzcdn.cn/vant/ipad.png',
-                        price: 39,
+                        image: selectedIncludeGood?.image,
+                        price: selectedIncludeGood?.price,
                       },
                       {
-                        id: 1,
-                        title: '原切前胸牛肉',
+                        id: selectedAddOneGood.id,
+                        title: selectedAddOneGood.title,
                         count: 1,
-                        image: 'https://img.yzcdn.cn/vant/ipad.png',
-                        price: 39,
+                        image: selectedAddOneGood.image,
+                        price: selectedAddOneGood.price,
                       },
                     ],
                   }
