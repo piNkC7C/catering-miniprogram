@@ -4,4 +4,5 @@ export interface IPointsState {
     pointsNumber: number
     couponList: any[]
     exchangeList: any[]
+    vipLevel: any
 }

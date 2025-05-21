@@ -4,6 +4,7 @@ import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo
 import './mine.scss'
 import { useAppSelector } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button } from '@nutui/nutui-react-taro'
+import { ArrowRight } from '@nutui/icons-react-taro'
 import mineNavBgi from '@/assets/mine/mine-bgi@2x.png'
 import userNoLogin from '@/assets/index/user-nologin@2x.png'
 import mineJifen from '@/assets/mine/mine-jifen@2x.png'
@@ -134,28 +135,54 @@ export default function Mine() {
                   fontWeight: 'bold',
                 }}
               >{loginStatus === 0 ? 'HI,xxx火锅用户' : `HI,${userInfo?.nickname}`}</Text>
-              <Text
-                style={{
-                  fontSize: `${pxTransform(windowWidth * 0.025)}`,
-                  color: '#605F5E',
-                }}
-              >{loginStatus === 0 ? '为给您提供更好的服务请授权登录' : ''}</Text>
+
+              {loginStatus === 0 ? (
+                <Text
+                  style={{
+                    fontSize: `${pxTransform(windowWidth * 0.025)}`,
+                    color: '#605F5E',
+                  }}
+                >为给您提供更好的服务请授权登录</Text>
+              ) : (
+                <Button
+                  type="primary"
+                  size="small"
+                  style={{
+                    marginTop: pxTransform(windowHeight * 0.005),
+                    height: pxTransform(windowHeight * 0.02),
+                    fontSize: pxTransform(windowHeight * 0.015),
+                    borderRadius: pxTransform(windowHeight * 0.05),
+                  }}
+                  rightIcon={<ArrowRight />}
+                  onClick={() => {
+                    navigateTo({
+                      url: '/subPackages/vip/vip',
+                    })
+                  }}
+                >
+                  查看我的会员权益
+                </Button>
+              )}
             </View>
           </View>
           <View className='mine-content-top-right'>
-            <Button
-              type='primary'
-              size='normal'
-              style={{
-                fontSize: `${pxTransform(windowWidth * 0.03)}`,
-                borderRadius: `${pxTransform(windowWidth * 0.05)}`,
-              }}
-              onClick={() => {
-                if (loginStatus === 0) {
-                  setLoginPopupVisible(true)
-                }
-              }}
-            >登录/注册</Button>
+            {
+              loginStatus === 0 && (
+                <Button
+                  type='primary'
+                  size='normal'
+                  style={{
+                    fontSize: `${pxTransform(windowWidth * 0.03)}`,
+                    borderRadius: `${pxTransform(windowWidth * 0.05)}`,
+                  }}
+                  onClick={() => {
+                    if (loginStatus === 0) {
+                      setLoginPopupVisible(true)
+                    }
+                  }}
+                >登录/注册</Button>
+              )
+            }
           </View>
         </View>
         <View

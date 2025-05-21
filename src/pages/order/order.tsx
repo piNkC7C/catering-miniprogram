@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
-import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter } from '@tarojs/taro'
+import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction } from '@/redux/modules/order'
@@ -19,13 +19,44 @@ export default function Order() {
       userInfo
     },
     order: {
-      cartList
+      cartList,
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
+  const [tableInfo, setTableInfo] = useState<any>({
+    tableId: null,
+    peopleNum: null,
+  })
+
   const router = useRouter()
   const { tableId, peopleNum } = router.params
+  useEffect(() => {
+    if (tableId && peopleNum) {
+      setTableInfo({ tableId, peopleNum })
+      setStorage(
+        {
+          key: 'tableInfo',
+          data: { tableId, peopleNum },
+          fail: (err) => {
+            console.log('点单页设置桌号失败', err)
+          }
+        },
+      )
+    } else {
+      getStorage(
+        {
+          key: 'tableInfo',
+          fail: (err) => {
+            console.log('点单页获取桌号失败', err)
+          },
+          success: (res) => {
+            setTableInfo(res.data)
+          },
+        },
+      )
+    }
+  }, [tableId, peopleNum])
   // useLoad(() => {
   //   console.log('Order page loaded.')
   // })
@@ -237,17 +268,17 @@ export default function Order() {
               }}
             >
               {
-                tableId && peopleNum ? (
+                tableInfo.tableId && tableInfo.peopleNum ? (
                   <>
                     <Text
                       style={{
                         fontWeight: 'bold',
                       }}
-                    >{tableId}</Text>号桌&nbsp;&nbsp;<Text
+                    >{tableInfo.tableId}</Text>号桌&nbsp;&nbsp;<Text
                       style={{
                         fontWeight: 'bold',
                       }}
-                    >{peopleNum}</Text>人就餐
+                    >{tableInfo.peopleNum}</Text>人就餐
                   </>
                 ) : '未选桌号'
               }
@@ -750,12 +781,27 @@ export default function Order() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: `${pxTransform(0)} ${pxTransform(30)} ${pxTransform(30)} ${pxTransform(0)}`,
-              background: cartList.length > 0 ? '#D61518' : '',
-              color: cartList.length > 0 ? '#fff' : '#999',
+              background: cartList.length > 0 || !(tableInfo.tableId && tableInfo.peopleNum) ? '#D61518' : '',
+              color: cartList.length > 0 || !(tableInfo.tableId && tableInfo.peopleNum) ? '#fff' : '#999',
               fontSize: pxTransform(viewHeight * 0.02),
             }}
+            onClick={() => {
+              if (!(tableInfo.tableId && tableInfo.peopleNum)) {
+                scanCode(
+                  {
+                    scanType: ['qrCode'],
+                    success: (res) => {
+                      console.log('扫桌码成功', res)
+                    },
+                    fail: (err) => {
+                      console.log('扫桌码失败', err)
+                    }
+                  }
+                )
+              }
+            }}
           >
-            <Text>去下单</Text>
+            <Text>{tableInfo.tableId && tableInfo.peopleNum ? '去下单' : '扫桌码'}</Text>
           </View>
         </View>
         <LoginPopup

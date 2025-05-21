@@ -27,7 +27,7 @@ const initialState: IOrderState = {
     //     },
     //   ],
     // }
-  ]
+  ],
 }
 
 const orderSlice = createSlice({

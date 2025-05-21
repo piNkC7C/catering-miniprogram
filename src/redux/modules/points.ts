@@ -57,7 +57,7 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 1
         },
         {
@@ -68,7 +68,7 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 2
         },
         {
@@ -79,7 +79,7 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 3
         },
     ],
@@ -92,7 +92,7 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 1
         },
         {
@@ -103,7 +103,7 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 2
         },
         {
@@ -114,7 +114,7 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 3
         },
         {
@@ -125,10 +125,15 @@ const initialState: IPointsState = {
             start: '2025-01-01',
             end: '2025-01-31',
             tag: '仅线下门店可用',
-            desc:'限于100家门店使用；',
+            desc: '限于100家门店使用；',
             status: 4
         }
-    ]
+    ],
+    vipLevel: {
+        exp: 2200,
+        level: 1,
+        name: '小小牛马',
+    }
 }
 
 const pointsSlice = createSlice({

@@ -4,7 +4,7 @@ import { useLoad, getSystemInfoSync, navigateTo, switchTab } from '@tarojs/taro'
 import './index.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
-import { Cell, Avatar, pxTransform, Button, Divider, Image, Grid, Popup, Checkbox, Space, Toast } from '@nutui/nutui-react-taro'
+import { Cell, Avatar, pxTransform, Button, Divider, Image, Grid, Popup, Checkbox, Space, Toast, Tag } from '@nutui/nutui-react-taro'
 import { ArrowRight, Close } from '@nutui/icons-react-taro'
 import userNologin from '@/assets/index/user-nologin.png'
 import iconOrder from '@/assets/index/icon-order.png'
@@ -18,6 +18,9 @@ export default function Index() {
     login: {
       loginStatus,
       userInfo
+    },
+    points: {
+      vipLevel
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
@@ -34,7 +37,7 @@ export default function Index() {
 
   // 视图高度
 
-  const {windowHeight:viewHeight} = getSystemInfoSync()
+  const { windowHeight: viewHeight, windowWidth } = getSystemInfoSync()
 
   // useLoad(() => {
   //   console.log('Page loaded.')
@@ -75,7 +78,26 @@ export default function Index() {
                 fontSize: pxTransform(viewHeight * 0.013),
               }}
             >
-              {loginStatus === 0 ? '为给您提供更好的服务请先授权登录' : '欢迎使用'}
+              {loginStatus === 0 ? '为给您提供更好的服务请先授权登录' : (
+                <Button
+                  type="primary"
+                  size="small"
+                  style={{
+                    marginTop: pxTransform(viewHeight * 0.005),
+                    height: pxTransform(viewHeight * 0.02),
+                    fontSize: pxTransform(viewHeight * 0.015),
+                    borderRadius: pxTransform(viewHeight * 0.05),
+                  }}
+                  rightIcon={<ArrowRight />}
+                  onClick={() => {
+                    navigateTo({
+                      url: '/subPackages/vip/vip',
+                    })
+                  }}
+                >
+                  查看我的会员权益
+                </Button>
+              )}
             </View>
           </View>
           <View className='user-info-cell-button'>
