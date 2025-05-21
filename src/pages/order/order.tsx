@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
-import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo } from '@tarojs/taro'
+import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction } from '@/redux/modules/order'
@@ -23,6 +23,9 @@ export default function Order() {
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
+
+  const router = useRouter()
+  const { tableId, peopleNum } = router.params
   // useLoad(() => {
   //   console.log('Order page loaded.')
   // })
@@ -233,15 +236,21 @@ export default function Order() {
                 color: '#333',
               }}
             >
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                }}
-              >1</Text>桌&nbsp;&nbsp;<Text
-                style={{
-                  fontWeight: 'bold',
-                }}
-              >4</Text>人就餐
+              {
+                tableId && peopleNum ? (
+                  <>
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                      }}
+                    >{tableId}</Text>号桌&nbsp;&nbsp;<Text
+                      style={{
+                        fontWeight: 'bold',
+                      }}
+                    >{peopleNum}</Text>人就餐
+                  </>
+                ) : '未选桌号'
+              }
             </Button>
           </View>
           <View

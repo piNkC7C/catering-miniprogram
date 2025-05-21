@@ -51,20 +51,20 @@ export default function Mine() {
       title: '优惠券',
       icon: mineYouhui,
       desc: '查看优惠券',
-      path: '/pages/coupon/coupon'
+      path: '/pages/couponList/couponList?type=all'
     },
-    {
-      title: '余额',
-      icon: mineYuE,
-      desc: '查看余额',
-      path: '/pages/balance/balance'
-    },
-    {
-      title: '礼品卡',
-      icon: mineLiPai,
-      desc: '查看礼品卡',
-      path: '/pages/giftCard/giftCard'
-    }
+    // {
+    //   title: '余额',
+    //   icon: mineYuE,
+    //   desc: '查看余额',
+    //   path: '/pages/balance/balance'
+    // },
+    // {
+    //   title: '礼品卡',
+    //   icon: mineLiPai,
+    //   desc: '查看礼品卡',
+    //   path: '/pages/giftCard/giftCard'
+    // }
   ]
 
   const mineContentBottomBottomItemList = [
@@ -79,6 +79,7 @@ export default function Mine() {
     {
       title: '联系客服',
       icon: mineKeFu1,
+      path: '/subPackages/selectTable/selectTable'
     },
     {
       title: '反馈建议',
@@ -115,7 +116,7 @@ export default function Mine() {
           style={{
             padding: `${pxTransform(windowWidth * 0.03)} ${pxTransform(windowWidth * 0.03)}`,
             width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
-            height: `calc(15% - ${pxTransform(windowWidth * 0.06)})`,
+            height: `calc(10% - ${pxTransform(windowWidth * 0.06)})`,
           }}
         >
           <View className='mine-content-top-left'>
@@ -161,12 +162,16 @@ export default function Mine() {
           className='mine-content-middle mine-content-item'
           style={{
             padding: `${pxTransform(windowWidth * 0.03)} ${pxTransform(windowWidth * 0.03)}`,
+            paddingBottom: `${pxTransform(windowWidth * 0.05)}`,
             width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
-            height: `calc(40% - ${pxTransform(windowWidth * 0.06)})`,
+            // height: `calc(40% - ${pxTransform(windowWidth * 0.06)})`,
           }}
         >
           <View
             className='mine-content-middle-top'
+            style={{
+              marginBottom: `${pxTransform(windowWidth * 0.03)}`,
+            }}
           >
             我的资产
           </View>
@@ -195,7 +200,7 @@ export default function Mine() {
                     <Text
                       style={{
                         marginLeft: `${pxTransform(windowWidth * 0.02)}`,
-                        fontSize: `${pxTransform(windowWidth * 0.05)}`,
+                        fontSize: `${pxTransform(windowWidth * 0.04)}`,
                         color: '#333',
                         fontWeight: 'bold',
                       }}
@@ -219,12 +224,16 @@ export default function Mine() {
           className='mine-content-bottom mine-content-item'
           style={{
             padding: `${pxTransform(windowWidth * 0.03)} ${pxTransform(windowWidth * 0.03)}`,
+            paddingBottom: `${pxTransform(windowWidth * 0.05)}`,
             width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
-            height: `calc(25% - ${pxTransform(windowWidth * 0.06)})`,
+            // height: `calc(25% - ${pxTransform(windowWidth * 0.06)})`,
           }}
         >
           <View
             className='mine-content-bottom-top'
+            style={{
+              marginBottom: `${pxTransform(windowWidth * 0.03)}`,
+            }}
           >
             我的功能
           </View>
@@ -233,7 +242,16 @@ export default function Mine() {
           >
             {
               mineContentBottomBottomItemList.map((item, index) => (
-                <View className='mine-content-bottom-bottom-item'>
+                <View
+                  className='mine-content-bottom-bottom-item'
+                  onClick={() => {
+                    if (item.path) {
+                      navigateTo({
+                        url: item.path
+                      })
+                    }
+                  }}
+                >
                   <View
                     className='item-top'
                   >

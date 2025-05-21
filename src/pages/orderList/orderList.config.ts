@@ -1,3 +1,3 @@
 export default {
-  navigationBarTitleText: '订单列表'
+  navigationBarTitleText: '订单列表',
 } 

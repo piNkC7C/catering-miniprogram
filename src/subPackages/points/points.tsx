@@ -156,6 +156,11 @@ export default function Points() {
                             />
                             <Text
                                 className='points-list-item'
+                                onClick={() => {
+                                    navigateTo({
+                                        url: '/pages/couponList/couponList?type=exchange',
+                                    })
+                                }}
                             >兑换记录</Text>
                         </View>
                     </View>
