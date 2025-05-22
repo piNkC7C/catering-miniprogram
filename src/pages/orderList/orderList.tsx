@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo } from '@tarojs/taro'
 import './orderList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
@@ -170,9 +170,9 @@ export default function OrderList() {
                                 }}
                               >
                                 {item.orderStatus === 0 && '待支付'}
-                                {item.orderStatus === 1 && '已关闭'}
+                                {item.orderStatus === 1 && '已完成'}
                                 {item.orderStatus === 2 && '已取消'}
-                                {item.orderStatus === 3 && '已完成'}
+                                {item.orderStatus === 3 && '已关闭'}
                               </View>
                             </View>
                             <View
@@ -180,6 +180,11 @@ export default function OrderList() {
                               style={{
                                 padding: `${pxTransform(windowHeight * 0.015)} 0`,
                                 height: `calc(40% - ${pxTransform(windowHeight * 0.03)})`,
+                              }}
+                              onClick={() => {
+                                navigateTo({
+                                  url: `/subPackages/orderDetail/orderDetail?id=${item.orderStatus}`
+                                })
                               }}
                             >
                               <ScrollView
@@ -288,7 +293,7 @@ export default function OrderList() {
                                 )
                               }
                               {
-                                item.orderStatus === 1 && (
+                                item.orderStatus === 2 && (
                                   <View
                                     className='order-status1'
                                   >
@@ -303,7 +308,7 @@ export default function OrderList() {
                                 )
                               }
                               {
-                                item.orderStatus === 2 && (
+                                item.orderStatus === 3 && (
                                   <View
                                     className='order-status1'
                                   >
@@ -313,12 +318,12 @@ export default function OrderList() {
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
-                                    >退款记录</Button>
+                                    >退款详情</Button>
                                   </View>
                                 )
                               }
                               {
-                                item.orderStatus === 3 && (
+                                item.orderStatus === 1 && (
                                   <View
                                     className='order-status0'
                                   >

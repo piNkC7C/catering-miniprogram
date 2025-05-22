@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Span } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, switchTab,showToast } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, switchTab, showToast, setStorage, getStorage, useRouter } from '@tarojs/taro'
 import './selectTable.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
@@ -23,9 +23,15 @@ export default function SelectTable() {
     // const [numberKeyboardVisible, setNumberKeyboardVisible] = useState<boolean>(false)
     // const [inputValue, setInputValue] = useState<string>('')
 
+    const [tableId, setTableId] = useState<any>(null)
+
+    const router = useRouter()
+    const { id } = router.params
     useEffect(() => {
-        console.log('selectedNum', selectedNum)
-    }, [selectedNum])
+        if (id) {
+            setTableId(id)
+        }
+    }, [id])
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -106,7 +112,7 @@ export default function SelectTable() {
                                 fontSize: pxTransform(windowWidth * 0.04),
                             }}
                         >
-                            桌号{5}
+                            桌号{tableId}
                         </View>
                     </View>
                     <View

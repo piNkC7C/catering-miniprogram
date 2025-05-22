@@ -14,7 +14,6 @@ export default defineAppConfig({
     {
       root: 'subPackages',
       pages: [
-        // 其他页面
         // 选规格
         'choose/choose',
         // 积分
@@ -33,6 +32,10 @@ export default defineAppConfig({
         'exchangeCoupon/exchangeCoupon',
         // 会员
         'vip/vip',
+        // 支付
+        'payment/payment',
+        // 订单详情
+        'orderDetail/orderDetail',
       ]
     }
   ],

@@ -1,0 +1,111 @@
+.good-list {
+    width: 95%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+
+    .good-list-top {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .good-list-bottom {
+        background-color: #fff;
+
+        .list {
+            overflow: hidden;
+
+            .list-item {
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+
+                .left {
+                    height: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-start;
+
+                    .left-info {
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        justify-content: flex-start;
+                    }
+                }
+
+                .right {
+                    height: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: flex-start;
+                    justify-content: flex-end;
+                }
+            }
+        }
+
+        .fold-goods-list {
+            margin-top: 15rpx;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            color: #666666;
+        }
+    }
+
+    .good-list-coupon {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #fff;
+
+        .good-list-coupon-left {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+        }
+    }
+
+    .good-list-coupon-right {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        color: rgb(249, 44, 26);
+    }
+
+    .good-list-coupon-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+
+        .good-list-coupon-list-item {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    .good-list-total {
+        height: 50rpx;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}

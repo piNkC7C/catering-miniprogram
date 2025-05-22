@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { ILoginState } from '../types/login'
 
 const initialState: ILoginState = {
-  loginStatus: 1,
+  loginStatus: 0,
   userInfo: null
 }
 

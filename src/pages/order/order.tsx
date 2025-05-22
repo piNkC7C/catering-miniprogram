@@ -10,6 +10,7 @@ import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-r
 import { useThrottleFn } from 'ahooks'
 import orderJoinVip from '@/assets/order/order-joinvip@2x.png'
 import LoginPopup from '@/components/LoginPopup'
+import { TABLE_INFO, testGoodsCouponList as goodsCouponList, testOrderPageList as dataList } from '@/utils/constants'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -36,7 +37,7 @@ export default function Order() {
       setTableInfo({ tableId, peopleNum })
       setStorage(
         {
-          key: 'tableInfo',
+          key: TABLE_INFO,
           data: { tableId, peopleNum },
           fail: (err) => {
             console.log('点单页设置桌号失败', err)
@@ -46,7 +47,7 @@ export default function Order() {
     } else {
       getStorage(
         {
-          key: 'tableInfo',
+          key: TABLE_INFO,
           fail: (err) => {
             console.log('点单页获取桌号失败', err)
           },
@@ -125,57 +126,6 @@ export default function Order() {
   const [cartLeftBackground, setCartLeftBackground] = useState<string>('#D61518')
   // 购物车右侧宽度
   // const [cartRightWidth, setCartRightWidth] = useState<string>(`calc(70% - ${pxTransform(windowWidth * 0.18)})`)
-
-  const dataList = [
-    {
-      id: 'zhuanqu',
-      title: '专区',
-      list: [
-        {
-          id: 1,
-          title: '肥牛',
-          price: 29,
-          image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-          detail: true,
-        },
-        {
-          id: 2,
-          title: '肥牛',
-          price: 29,
-          image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-          detail: false,
-        },
-        {
-          id: 3,
-          title: '肥牛',
-          price: 29,
-          image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-          detail: false,
-        },
-      ],
-    }
-  ]
-
-  const goodsCouponList = [
-    {
-      id: 1,
-      title: '当家肥牛卷一份',
-      image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-      startTime: '2025-05-20',
-      endTime: '2025-05-21',
-      type: 0,
-      description: '每件商品限用一张',
-    },
-    {
-      id: 1,
-      title: '当家肥牛卷一份',
-      image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-      startTime: '2025-05-20',
-      endTime: '2025-05-21',
-      type: 1,
-      description: '每件商品限用一张',
-    }
-  ]
 
   return (
     <>
@@ -787,15 +737,26 @@ export default function Order() {
             }}
             onClick={() => {
               if (!(tableInfo.tableId && tableInfo.peopleNum)) {
-                scanCode(
+                // scanCode(
+                //   {
+                //     scanType: ['qrCode'],
+                //     success: (res) => {
+                //       console.log('扫桌码成功', res)
+                //     },
+                //     fail: (err) => {
+                //       console.log('扫桌码失败', err)
+                //     }
+                //   }
+                // )
+                navigateTo(
                   {
-                    scanType: ['qrCode'],
-                    success: (res) => {
-                      console.log('扫桌码成功', res)
-                    },
-                    fail: (err) => {
-                      console.log('扫桌码失败', err)
-                    }
+                    url: '/subPackages/selectTable/selectTable?id=5',
+                  }
+                )
+              } else {
+                navigateTo(
+                  {
+                    url: '/subPackages/payment/payment',
                   }
                 )
               }
