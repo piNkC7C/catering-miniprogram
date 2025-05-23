@@ -2,47 +2,51 @@ export default defineAppConfig({
   pages: [
     // tabbar页面
     // 首页
-    // 'pages/index/index',
-    // // 点单
-    // 'pages/order/order',
-    // // 订单列表
-    // 'pages/orderList/orderList',
-    // // 我的
-    // 'pages/mine/mine',
-
-    // 订单详情
-    // 'subPackages/orderDetail/orderDetail',
-    'subPackages/payment/payment',
+    'pages/index/index',
+    // 点单
+    'pages/order/order',
+    // 订单列表
+    'pages/orderList/orderList',
+    // 我的
+    'pages/mine/mine',
   ],
-  // subPackages: [
-  //   {
-  //     root: 'subPackages',
-  //     pages: [
-  //       // 选规格
-  //       'choose/choose',
-  //       // 积分
-  //       'points/points',
-  //       // 积分明细
-  //       'pointsDetail/pointsDetail',
-  //       // 积分规则
-  //       'pointsRules/pointsRules',
-  //       // 兑换详情
-  //       'exchangeDetail/exchangeDetail',
-  //       // 选桌
-  //       'selectTable/selectTable',
-  //       // 优惠券列表
-  //       'couponList/couponList',
-  //       // 兑换优惠券
-  //       'exchangeCoupon/exchangeCoupon',
-  //       // 会员
-  //       'vip/vip',
-  //       // 支付
-  //       'payment/payment',
-  //       // 订单详情
-  //       'orderDetail/orderDetail',
-  //     ]
-  //   }
-  // ],
+  subPackages: [
+    {
+      root: 'subPackages',
+      pages: [
+        // 选规格
+        'choose/choose',
+        // 积分
+        'points/points',
+        // 积分明细
+        'pointsDetail/pointsDetail',
+        // 积分规则
+        'pointsRules/pointsRules',
+        // 兑换详情
+        'exchangeDetail/exchangeDetail',
+        // 选桌
+        'selectTable/selectTable',
+        // 优惠券列表
+        'couponList/couponList',
+        // 兑换优惠券
+        'exchangeCoupon/exchangeCoupon',
+        // 会员
+        'vip/vip',
+        // 支付
+        'payment/payment',
+        // 订单详情
+        'orderDetail/orderDetail',
+        // 反馈
+        'suggest/suggest',
+        // 反馈列表
+        'suggestList/suggestList',
+        // 地址列表
+        'addressList/addressList',
+        // 添加/编辑地址
+        'address/address',
+      ]
+    }
+  ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#fff',

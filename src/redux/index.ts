@@ -4,6 +4,7 @@ import loginReducer from './modules/login'
 import orderListReducer from './modules/orderList'
 import pointsReducer from './modules/points'
 import orderReducer from './modules/order'
+import addressReducer from './modules/address'
 import { ThunkDispatch } from 'redux-thunk'
 
 const store = configureStore({
@@ -12,7 +13,8 @@ const store = configureStore({
     login: loginReducer,
     orderList: orderListReducer,
     points: pointsReducer,
-    order: orderReducer
+    order: orderReducer,
+    address: addressReducer
   }
 })
 
