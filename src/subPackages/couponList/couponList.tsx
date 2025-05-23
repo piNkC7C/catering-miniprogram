@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, ConfigProvider, Price, Tag, Dialog } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, IconFont, ArrowRight, Ask } from '@nutui/icons-react-taro'
 import exchangeIcon from '@/assets/couponList/exchange@2x.png'
+import { ICouponItem } from '@/redux/types/order'
 
 export default function CouponList() {
     // 获取登录状态和用户信息
@@ -76,17 +77,17 @@ export default function CouponList() {
     // 当前选中的tab
     const [currentTabvalue, setCurrentTabvalue] = useState<string | number>(type === 'all' ? 'allCoupon' : 'allExchange')
 
-    const filterCouponList = (status: number) => {
+    const filterCouponList: (status: number) => ICouponItem[] = (status: number) => {
         if (status === 0) {
             return type === 'all' ? couponList : exchangeList
         }
         if (type === 'all') {
-            return couponList.filter((item) => {
-                return item.status === status
+            return couponList.filter((couponItem) => {
+                return couponItem.couponStatus === status
             })
         } else {
             return exchangeList.filter((item) => {
-                return item.status === status
+                return item.exchangeStatus === status
             })
         }
     }
@@ -221,7 +222,7 @@ export default function CouponList() {
                         type === 'all' ? (
                             <>
                                 {
-                                    filterCouponList(tabsList.find((item) => item.value === currentTabvalue)?.status || 0).map((item) => (
+                                    filterCouponList(tabsList.find((item) => item.value === currentTabvalue)?.status || 0).map((couponItem) => (
                                         <View
                                             className='coupon-item'
                                             style={{
@@ -243,7 +244,7 @@ export default function CouponList() {
                                                 >
                                                     <Price
                                                         color='gray'
-                                                        price={item.minus}
+                                                        price={couponItem.couponDiscount}
                                                         size="xlarge"
                                                         thousands
                                                         digits={0}
@@ -260,7 +261,7 @@ export default function CouponList() {
                                                             color: '#999',
                                                         }}
                                                     >
-                                                        满{item.buy}减{item.minus}元
+                                                        满{couponItem.couponPrice}减{couponItem.couponDiscount}元
                                                     </Text>
                                                 </View>
                                                 <View
@@ -274,22 +275,22 @@ export default function CouponList() {
                                                                 fontSize: pxTransform(viewHeight * 0.02),
                                                                 color: '#333',
                                                             }}
-                                                        >{item.name}</Text>
+                                                        >{couponItem.couponName}</Text>
                                                         <Text
                                                             style={{
                                                                 fontSize: pxTransform(viewHeight * 0.015),
                                                                 color: '#999',
                                                             }}
-                                                        >{item.start}&nbsp;-&nbsp;{item.end}</Text>
+                                                        >{couponItem.couponStartTime}&nbsp;-&nbsp;{couponItem.couponEndTime}</Text>
                                                         <Tag background="#FA2400" plain>
-                                                            {item.tag}
+                                                            {couponItem.couponTag}
                                                         </Tag>
                                                     </View>
                                                     <View
                                                         className='right2'
                                                     >
                                                         {
-                                                            item.status === 1 && (
+                                                            couponItem.couponStatus === 1 && (
                                                                 <Button
                                                                     type='primary'
                                                                     size='normal'
@@ -300,7 +301,7 @@ export default function CouponList() {
                                                             )
                                                         }
                                                         {
-                                                            item.status === 2 && (
+                                                            couponItem.couponStatus === 2 && (
                                                                 <Button
                                                                     type='primary'
                                                                     size='normal'
@@ -312,7 +313,7 @@ export default function CouponList() {
                                                             )
                                                         }
                                                         {
-                                                            item.status === 3 && (
+                                                            couponItem.couponStatus === 3 && (
                                                                 <Button
                                                                     type='default'
                                                                     size='normal'
@@ -340,12 +341,12 @@ export default function CouponList() {
                                                     fontSize: pxTransform(viewHeight * 0.015),
                                                 }}
                                             >
-                                                <Text>{item.desc}</Text>
+                                                <Text>{couponItem.couponTip}</Text>
                                                 <Ask
                                                     size={windowWidth * 0.035}
                                                     color='#A8A8A8'
                                                     onClick={() => {
-                                                        setCouponDescriptionDialogItem(item.desc)
+                                                        setCouponDescriptionDialogItem(couponItem.couponTip)
                                                         setShowCouponDescriptionDialog(true)
                                                     }}
                                                 />
@@ -357,7 +358,7 @@ export default function CouponList() {
                         ) : (
                             <>
                                 {
-                                    filterCouponList(tabsList.find((item) => item.value === currentTabvalue)?.status || 0).map((item) => (
+                                    filterCouponList(tabsList.find((item) => item.value === currentTabvalue)?.status || 0).map((couponItem) => (
                                         <View
                                             className='coupon-item'
                                             style={{
@@ -379,7 +380,7 @@ export default function CouponList() {
                                                 >
                                                     <Price
                                                         color='gray'
-                                                        price={item.minus}
+                                                        price={couponItem.couponDiscount}
                                                         size="xlarge"
                                                         thousands
                                                         digits={0}
@@ -396,7 +397,7 @@ export default function CouponList() {
                                                             color: '#999',
                                                         }}
                                                     >
-                                                        满{item.buy}减{item.minus}元
+                                                        满{couponItem.couponPrice}减{couponItem.couponDiscount}元
                                                     </Text>
                                                 </View>
                                                 <View
@@ -410,15 +411,15 @@ export default function CouponList() {
                                                                 fontSize: pxTransform(viewHeight * 0.02),
                                                                 color: '#333',
                                                             }}
-                                                        >{item.name}</Text>
+                                                        >{couponItem.couponName}</Text>
                                                         <Text
                                                             style={{
                                                                 fontSize: pxTransform(viewHeight * 0.015),
                                                                 color: '#999',
                                                             }}
-                                                        >{item.start}&nbsp;-&nbsp;{item.end}</Text>
+                                                        >{couponItem.couponStartTime}&nbsp;-&nbsp;{couponItem.couponEndTime}</Text>
                                                         <Tag background="#FA2400" plain>
-                                                            {item.tag}
+                                                            {couponItem.couponTag}
                                                         </Tag>
                                                     </View>
                                                     {/* <View
@@ -476,12 +477,12 @@ export default function CouponList() {
                                                     fontSize: pxTransform(viewHeight * 0.015),
                                                 }}
                                             >
-                                                <Text>{item.desc}</Text>
+                                                <Text>{couponItem.couponTip}</Text>
                                                 <Ask
                                                     size={windowWidth * 0.035}
                                                     color='#A8A8A8'
                                                     onClick={() => {
-                                                        setCouponDescriptionDialogItem(item.desc)
+                                                        setCouponDescriptionDialogItem(couponItem.couponTip)
                                                         setShowCouponDescriptionDialog(true)
                                                     }}
                                                 />

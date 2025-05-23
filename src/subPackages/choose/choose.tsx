@@ -396,32 +396,7 @@ export default function Choose() {
             } as any}
             onClick={() => {
               if (selectedAddOneGood) {
-                dispatch(setCartListAction({
-                  type: 'add', data: {
-                    id: selectedIncludeGood?.id,
-                    title: selectedIncludeGood?.title,
-                    count: 1,
-                    image: selectedIncludeGood?.image,
-                    price: selectedIncludeGood?.price,
-                    detail: true,
-                    detailList: [
-                      {
-                        id: selectedIncludeGood?.id,
-                        title: selectedIncludeGood?.title,
-                        count: 1,
-                        image: selectedIncludeGood?.image,
-                        price: selectedIncludeGood?.price,
-                      },
-                      {
-                        id: selectedAddOneGood.id,
-                        title: selectedAddOneGood.title,
-                        count: 1,
-                        image: selectedAddOneGood.image,
-                        price: selectedAddOneGood.price,
-                      },
-                    ],
-                  }
-                }))
+                console.log('selectedAddOneGood', selectedAddOneGood)
                 navigateBack()
               } else {
                 showToast({

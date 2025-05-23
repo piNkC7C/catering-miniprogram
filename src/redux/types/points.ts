@@ -1,8 +1,10 @@
+import { ICouponItem } from "./order"
+
 export interface IPointsState {
     pointsList: any[]
     pointsDetailList: any[]
     pointsNumber: number
-    couponList: any[]
-    exchangeList: any[]
+    couponList: ICouponItem[]
+    exchangeList: ICouponItem[]
     vipLevel: any
 }

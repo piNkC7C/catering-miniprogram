@@ -7,4 +7,5 @@ export interface IUserInfo {
 export interface ILoginState {
   loginStatus: number
   userInfo: IUserInfo | null
+  isRetrieve: boolean
 }

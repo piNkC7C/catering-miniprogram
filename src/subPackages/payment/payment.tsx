@@ -3,14 +3,16 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getStorage } from '@tarojs/taro'
 import './payment.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
+import { setCheckoutOrderCouponAction } from '@/redux/modules/order'
 import { pxTransform, Image, Button, Divider, Tabs, Price, Tag, Popup, Dialog, Cell, TextArea, Ellipsis } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, IconFont, ArrowUp, ArrowDown, ArrowRight } from '@nutui/icons-react-taro'
 import billTop from '@/assets/zip/bill-top@2x-2.png'
 import billBottom from '@/assets/zip/bill-bottom@2x-2.png'
 import tableIcon from '@/assets/zip/table@2x.png'
 import peopleIcon from '@/assets/zip/people@2x.png'
-import { TABLE_INFO, testGoodsList, testGoodsCouponList as goodsCouponList } from '@/utils/constants'
+import { TABLE_INFO } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
+import CouponCard from '@/components/couponCard'
 
 export default function Payment() {
     // 获取登录状态和用户信息
@@ -19,7 +21,12 @@ export default function Payment() {
             loginStatus,
             userInfo
         },
+        order: {
+            checkoutOrder,
+            couponList,
+        }
     } = useAppSelector((state) => state)
+    const dispatch = useAppDispatch()
 
     // 桌号信息
     const [tableInfo, setTableInfo] = useState<any>({
@@ -40,7 +47,10 @@ export default function Payment() {
     }, [])
 
     // 是否收起商品列表
-    const [isFoldGoodsList, setIsFoldGoodsList] = useState(testGoodsList.length > 3)
+    const [isFoldGoodsList, setIsFoldGoodsList] = useState(checkoutOrder?.goodsList.length && checkoutOrder?.goodsList.length > 3)
+
+    // 当前选中的优惠券
+    const [selectedCoupon, setSelectedCoupon] = useState<number | null>(null)
 
     // 是否显示优惠券弹窗
     const [showGoodsCouponPopup, setShowGoodsCouponPopup] = useState(false)
@@ -181,7 +191,7 @@ export default function Payment() {
                         }}
                     >
                         {
-                            testGoodsList.map((item) => {
+                            checkoutOrder?.goodsList.map((goodsItem) => {
                                 return (
                                     <View
                                         className='list-item'
@@ -194,7 +204,7 @@ export default function Payment() {
                                             className='left'
                                         >
                                             <Image
-                                                src={item.image}
+                                                src={goodsItem.goodsImage}
                                                 width={pxTransform(windowHeight * 0.06)}
                                                 height={pxTransform(windowHeight * 0.06)}
                                             ></Image>
@@ -209,12 +219,12 @@ export default function Payment() {
                                                     style={{
                                                         fontWeight: 'bold'
                                                     }}
-                                                >{item.title}</Text>
+                                                >{goodsItem.goodsName}</Text>
                                                 <Text
                                                     style={{
                                                         fontSize: pxTransform(windowHeight * 0.012),
                                                     }}
-                                                >x{item.count}</Text>
+                                                >x{goodsItem.goodsCount}</Text>
                                             </View>
                                         </View>
                                         <View
@@ -225,7 +235,7 @@ export default function Payment() {
                                         >
                                             <Price
                                                 color='gray'
-                                                price={item.price}
+                                                price={goodsItem.totalPrice}
                                                 size="small"
                                                 thousands
                                                 style={{
@@ -239,7 +249,7 @@ export default function Payment() {
                         }
                     </View>
                     {
-                        testGoodsList.length > 3 && (
+                        checkoutOrder?.goodsList.length && checkoutOrder?.goodsList.length > 3 && (
                             <View
                                 className='fold-goods-list'
                                 style={{
@@ -303,13 +313,25 @@ export default function Payment() {
                             className='right'
                         >
                             {
-                                goodsCouponList.length > 0 ? (
+                                couponList.length > 0 ? (
                                     <>
-                                        -<Price
-                                            price={100}
-                                            size="normal"
-                                            thousands
-                                        />
+                                        {
+                                            checkoutOrder?.couponList && checkoutOrder?.couponList.length && checkoutOrder?.couponList.length > 0 ? (
+                                                <>
+                                                    -<Price
+                                                        price={checkoutOrder?.checkoutOrderTotalPrice - checkoutOrder?.checkoutOrderCouponedPrice}
+                                                        size="normal"
+                                                        thousands
+                                                    />
+                                                </>
+                                            ) : (
+                                                <Text
+                                                    style={{
+                                                        color: '#ff0f23'
+                                                    }}
+                                                >有{couponList.length}张可用券</Text>
+                                            )
+                                        }
                                     </>
                                 ) : (
                                     <Text
@@ -348,11 +370,11 @@ export default function Payment() {
                                 fontSize: pxTransform(windowHeight * 0.012),
                             }}
                         >
-                            共{testGoodsList.length}件&nbsp;&nbsp;合计：
+                            共{checkoutOrder?.checkoutOrderTotalCount}件&nbsp;&nbsp;合计：
                         </View>
                         <Price
                             color='gray'
-                            price={100}
+                            price={checkoutOrder?.checkoutOrderTotalPrice}
                             size="normal"
                             thousands
                         />
@@ -454,7 +476,7 @@ export default function Payment() {
                         待支付：
                     </Text>
                     <Price
-                        price={100}
+                        price={checkoutOrder?.checkoutOrderCouponedPrice}
                         size="xlarge"
                         thousands
                     />
@@ -497,103 +519,48 @@ export default function Payment() {
                             fontSize: pxTransform(windowWidth * 0.04),
                         }}
                     >
-                        可用券（{goodsCouponList.length}）
+                        可用券（{couponList.length}）
                     </View>
                     {
-                        goodsCouponList.map((item) => (
-                            <View
-                                className='goods-coupon-item'
-                                style={{
-                                    padding: pxTransform(windowWidth * 0.03),
-                                    height: pxTransform(windowHeight * 0.15),
-                                    width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
-                                }}
-                            >
-                                <View
-                                    className='item-top'
-                                    style={{
-                                        height: `calc(65% - ${pxTransform(windowWidth * 0.03)})`,
-                                    }}
-                                >
-                                    <Image
-                                        src={item.image}
-                                        width={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
-                                        height={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
-                                    />
-                                    <View
-                                        className='item-top-right'
-                                        style={{
-                                            marginLeft: pxTransform(windowWidth * 0.05),
-                                            fontSize: pxTransform(windowWidth * 0.025),
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: pxTransform(windowWidth * 0.04),
-                                                fontWeight: 'bold',
-                                                color: '#333',
-                                            }}
-                                        >{item.title}</Text>
-                                        <Text>
-                                            <Text
-                                                style={{
-                                                    fontSize: pxTransform(windowWidth * 0.04),
-                                                    fontWeight: 'bold',
-                                                    color: '#D61518',
-                                                    marginRight: pxTransform(windowWidth * 0.01),
-                                                }}
-                                            >免费兑换</Text>
-                                            无门槛</Text>
-                                        <Text>有效期：{item.startTime}&nbsp;-&nbsp;{item.endTime}</Text>
-                                    </View>
-                                </View>
-                                <Divider
-                                    style={{
-                                        borderStyle: 'dashed',
-                                        '--nutui-divider-margin': `${pxTransform(windowWidth * 0.03)} 0`,
-                                    } as any}
-                                />
-                                <View
-                                    className='item-bottom'
-                                    style={{
-                                        height: `calc(35% - ${pxTransform(windowWidth * 0.03)})`,
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            fontSize: pxTransform(windowWidth * 0.03),
-                                            color: '#999',
-                                        }}
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            e.preventDefault()
-                                            setGoodsCouponDescriptionDialogItem(item.description)
-                                            setShowGoodsCouponDescriptionDialog(true)
-                                        }}
-                                    >
-                                        使用说明<ArrowDown
-                                            size={windowWidth * 0.03}
-                                            style={{
-                                                marginLeft: pxTransform(windowWidth * 0.01),
-                                            }}
-                                        />
-                                    </View>
-                                    <Button
-                                        type='primary'
-                                        disabled={item.type === 1}
-                                        style={{
-                                            borderRadius: pxTransform(windowWidth * 0.05),
-                                        }}
-                                    >{
-                                            item.type === 0 ? '立即使用' : '已使用'
-                                        }</Button>
-                                </View>
-                            </View>
+                        couponList.map((couponItem) => (
+                            <CouponCard
+                                couponItem={couponItem}
+                                type='payment'
+                                selectedCoupon={selectedCoupon}
+                                setSelectedCoupon={setSelectedCoupon}
+                            />
                         ))
                     }
+                </View>
+                <View
+                    className='use-coupon-button'
+                    style={{
+                        padding: pxTransform(windowWidth * 0.03),
+                        width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
+                    }}
+                >
+                    <Button
+                        type='primary'
+                        size='normal'
+                        style={{
+                            width: '65%',
+                            height: pxTransform(windowHeight * 0.06),
+                            borderRadius: pxTransform(windowWidth * 0.15),
+                        }}
+                        onClick={() => {
+                            if (selectedCoupon) {
+                                dispatch(setCheckoutOrderCouponAction({
+                                    type: 'set',
+                                    data: [selectedCoupon]
+                                }))
+                            } else {
+                                dispatch(setCheckoutOrderCouponAction({
+                                    type: 'clear',
+                                }))
+                            }
+                            setShowGoodsCouponPopup(false)
+                        }}
+                    >确定</Button>
                 </View>
             </Popup>
             <Dialog

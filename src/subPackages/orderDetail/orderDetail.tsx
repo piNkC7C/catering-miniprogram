@@ -27,34 +27,13 @@ export default function OrderDetail() {
             loginStatus,
             userInfo
         },
+        order: {
+            currentOrder
+        }
     } = useAppSelector((state) => state)
 
-    const [orderDetails, setOrderDetails] = useState<IOrderDetail | null>(null)
-    const router = useRouter()
-    const { id } = router.params
-    useEffect(() => {
-        if (id) {
-            setOrderDetails({
-                id: 7756,
-                orderStatus: Number(id),
-                tableNumber: 1,
-                personNumber: 4,
-                goodsList: [],
-                isUseCoupon: 0,
-                totalPrice: 100
-            })
-        } else {
-            setOrderDetails({
-                id: 7756,
-                orderStatus: 2,
-                tableNumber: 1,
-                personNumber: 4,
-                goodsList: [],
-                isUseCoupon: 0,
-                totalPrice: 100
-            })
-        }
-    }, [id])
+    // const router = useRouter()
+    // const { id } = router.params
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -74,7 +53,7 @@ export default function OrderDetail() {
                 className='nav'
                 style={{
                     height: pxTransform(navHeight),
-                    backgroundColor: orderDetails?.orderStatus === 3 ? '#fff' : '#f5f5f5',
+                    backgroundColor: currentOrder?.orderStatus === 4 ? '#fff' : '#f5f5f5',
                 }}
             >
                 <View
@@ -100,7 +79,7 @@ export default function OrderDetail() {
                         />
                     </View>
                     {
-                        orderDetails?.orderStatus === 3 && (
+                        currentOrder?.orderStatus === 4 && (
                             <View
                                 className='nav-middle'
                             >
@@ -113,11 +92,11 @@ export default function OrderDetail() {
             <View
                 className='content'
                 style={{
-                    height: orderDetails?.orderStatus !== 2 && orderDetails?.orderStatus !== 3 ? `calc(${pxTransform(viewHeight - windowHeight * 0.1)} - 20rpx)` : `calc(${pxTransform(viewHeight)} - 20rpx)`,
+                    height: currentOrder?.orderStatus !== 3 && currentOrder?.orderStatus !== 4 ? `calc(${pxTransform(viewHeight - windowHeight * 0.1)} - 20rpx)` : `calc(${pxTransform(viewHeight)} - 20rpx)`,
                 }}
             >
                 {
-                    orderDetails?.orderStatus !== 3 && (
+                    currentOrder?.orderStatus !== 4 && (
                         <View
                             className='top'
                         >
@@ -127,9 +106,9 @@ export default function OrderDetail() {
                                     marginBottom: pxTransform(windowHeight * 0.01),
                                 }}
                             >
-                                {orderDetails?.orderStatus === 0 && '待支付'}
-                                {orderDetails?.orderStatus === 1 && '已完成'}
-                                {orderDetails?.orderStatus === 2 && '已取消'}
+                                {currentOrder?.orderStatus === 1 && '待支付'}
+                                {currentOrder?.orderStatus === 2 && '已完成'}
+                                {currentOrder?.orderStatus === 3 && '已取消'}
                             </View>
                             <View
                                 style={{
@@ -137,7 +116,7 @@ export default function OrderDetail() {
                                     color: '#666666'
                                 }}
                             >
-                                {orderDetails?.orderStatus === 0 ? '支付成功后，完成菜品下单' : '期待您的下次光临'}
+                                {currentOrder?.orderStatus === 1 ? '支付成功后，完成菜品下单' : '期待您的下次光临'}
                             </View>
                         </View>
                     )
@@ -145,10 +124,10 @@ export default function OrderDetail() {
                 <View
                     className='order-content'
                 >
-                    <GoodList orderId={orderDetails?.orderStatus} />
+                    <GoodList orderId={currentOrder?.orderStatus} />
                 </View>
                 {
-                    orderDetails?.orderStatus !== 0 && orderDetails?.orderStatus !== 3 && (
+                    currentOrder?.orderStatus !== 1 && currentOrder?.orderStatus !== 4 && (
                         <View
                             className='order-card'
                         >
@@ -191,7 +170,7 @@ export default function OrderDetail() {
                     )
                 }
                 {
-                    orderDetails?.orderStatus === 3 && (
+                    currentOrder?.orderStatus === 4 && (
                         <View
                             className='order-card'
                         >
@@ -213,18 +192,18 @@ export default function OrderDetail() {
                 }
             </View>
             {
-                orderDetails?.orderStatus !== 2 && orderDetails?.orderStatus !== 3 && (
+                currentOrder?.orderStatus !== 3 && currentOrder?.orderStatus !== 4 && (
                     <View
                         className='bottom'
                         style={{
                             padding: `0 ${pxTransform(windowWidth * 0.05)}`,
                             width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
                             height: pxTransform(windowHeight * 0.1),
-                            justifyContent: orderDetails?.orderStatus === 0 ? 'space-between' : 'flex-end',
+                            justifyContent: currentOrder?.orderStatus === 1 ? 'space-between' : 'flex-end',
                         }}
                     >
                         {
-                            orderDetails?.orderStatus === 0 && (
+                            currentOrder?.orderStatus === 1 && (
                                 <>
                                     <Button
                                         style={{
@@ -260,7 +239,7 @@ export default function OrderDetail() {
                             )
                         }
                         {
-                            orderDetails?.orderStatus === 1 && (
+                            currentOrder?.orderStatus === 2 && (
                                 <Button
                                     style={{
                                         borderRadius: pxTransform(windowHeight * 0.05),

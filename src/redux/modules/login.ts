@@ -3,7 +3,8 @@ import { ILoginState } from '../types/login'
 
 const initialState: ILoginState = {
   loginStatus: 0,
-  userInfo: null
+  userInfo: null,
+  isRetrieve: false,
 }
 
 const loginSlice = createSlice({
@@ -24,9 +25,13 @@ const loginSlice = createSlice({
           break
       }
       return state
+    },
+    setIsRetrieve: (state, { payload }) => {
+      state.isRetrieve = payload
+      return state
     }
   }
 })
 
-export const { setLoginStatus, userInfoAction } = loginSlice.actions
+export const { setLoginStatus, userInfoAction, setIsRetrieve } = loginSlice.actions
 export default loginSlice.reducer

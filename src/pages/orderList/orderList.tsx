@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 import noOrderList from '@/assets/orderlist/noorderlist@2x.png'
 import logoSmall from '@/assets/orderlist/logo-small.png'
 import userNologin from '@/assets/index/user-nologin.png'
-import { setOrderListData } from '@/redux/modules/orderList'
+import { setCurrentOrderAction } from '@/redux/modules/order'
 import LoginPopup from '@/components/LoginPopup'
 
 export default function OrderList() {
@@ -18,18 +18,20 @@ export default function OrderList() {
       loginStatus,
       userInfo
     },
-    orderList: {
-      orderListData
+    order: {
+      orderList,
+      currentOrder
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
-  useEffect(() => {
-    dispatch(setOrderListData({
-      type: 'set',
-      data: 'all'
-    }))
-  }, [])
+  const filterOrderList = (tabValue: number) => {
+    if (tabValue === 0) {
+      return orderList
+    }
+    return orderList.filter((orderItem) => orderItem.orderType === tabValue)
+  }
+
   // useLoad(() => {
   //   console.log('OrderList page loaded.')
   // })
@@ -49,19 +51,19 @@ export default function OrderList() {
   const tabsList = [
     {
       title: '全部订单',
-      value: 'all'
+      value: 0
     },
     {
       title: '门店订单',
-      value: 'shop'
+      value: 1
     },
     {
       title: '外卖订单',
-      value: 'takeout'
+      value: 2
     },
     {
       title: '商城订单',
-      value: 'mail'
+      value: 3
     }
   ]
 
@@ -80,10 +82,6 @@ export default function OrderList() {
           tabStyle={{ position: 'sticky', top: 0, zIndex: 11 }}
           onChange={(value) => {
             setTabvalue(value)
-            dispatch(setOrderListData({
-              type: 'set',
-              data: value
-            }))
           }}
           style={{
             '--nutui-tabs-titles-background-color': '#fff',
@@ -92,13 +90,13 @@ export default function OrderList() {
           } as any}
         >
           {
-            tabsList.map((item) => (
+            tabsList.map((tabItem) => (
               <Tabs.TabPane
-                title={item.title}
-                value={item.value}
+                title={tabItem.title}
+                value={tabItem.value}
               >
                 {
-                  orderListData.length === 0 && (
+                  filterOrderList(tabItem.value).length === 0 && (
                     <View
                       className='orderlist-empty'
                     >
@@ -128,10 +126,10 @@ export default function OrderList() {
                   )
                 }
                 {
-                  orderListData.length > 0 && (
+                  filterOrderList(tabItem.value).length > 0 && (
                     <>
                       {
-                        orderListData.map((item) => (
+                        filterOrderList(tabItem.value).map((orderItem) => (
                           <View
                             className='orderlist-item'
                             style={{
@@ -153,26 +151,27 @@ export default function OrderList() {
                                 className='orderlist-item-top-left'
                               >
                                 <Tag background="#FA2400" plain>
-                                  {item.orderTag}
+                                  {orderItem.orderTag}
                                 </Tag>
                                 <Text
                                   className='orderlist-item-top-left-text'
                                   style={{
                                     fontSize: pxTransform(windowHeight * 0.023),
                                   }}
-                                >{item.orderAddress}</Text>
+                                >{orderItem.shopName}</Text>
                               </View>
                               <View
                                 className='orderlist-item-top-right'
                                 style={{
                                   fontSize: pxTransform(windowHeight * 0.02),
-                                  color: item.orderStatus === 0 ? '#D7181A' : '#676767'
+                                  color: orderItem.orderStatus === 1 ? '#D7181A' : '#676767'
                                 }}
                               >
-                                {item.orderStatus === 0 && '待支付'}
-                                {item.orderStatus === 1 && '已完成'}
-                                {item.orderStatus === 2 && '已取消'}
-                                {item.orderStatus === 3 && '已关闭'}
+                                {orderItem.orderStatus === 1 && '待支付'}
+                                {orderItem.orderStatus === 2 && '已完成'}
+                                {orderItem.orderStatus === 3 && '已取消'}
+                                {orderItem.orderStatus === 4 && '已关闭'}
+                                {/* {orderItem.orderStatus === 5 && '退款中'} */}
                               </View>
                             </View>
                             <View
@@ -182,8 +181,12 @@ export default function OrderList() {
                                 height: `calc(40% - ${pxTransform(windowHeight * 0.03)})`,
                               }}
                               onClick={() => {
+                                dispatch(setCurrentOrderAction({
+                                  type: 'set',
+                                  data: orderItem
+                                }))
                                 navigateTo({
-                                  url: `/subPackages/orderDetail/orderDetail?id=${item.orderStatus}`
+                                  url: `/subPackages/orderDetail/orderDetail?id=${orderItem.orderId}`
                                 })
                               }}
                             >
@@ -192,7 +195,7 @@ export default function OrderList() {
                                 className='orderlist-item-middle-left'
                               >
                                 {
-                                  item.orderGoodsList.map((goods) => (
+                                  orderItem.goodsList.map((goodsItem) => (
                                     <View
                                       className='orderlist-item-middle-left-goods'
                                       style={{
@@ -201,7 +204,7 @@ export default function OrderList() {
                                       }}
                                     >
                                       <Image
-                                        src={goods.goodsImage}
+                                        src={goodsItem.goodsImage}
                                         mode='scaleToFill'
                                         width={pxTransform(windowHeight * 0.08)}
                                         height={pxTransform(windowHeight * 0.06)}
@@ -218,7 +221,7 @@ export default function OrderList() {
                                           fontSize: pxTransform(windowHeight * 0.015),
                                           marginTop: pxTransform(windowHeight * 0.005),
                                         }}
-                                      >{goods.goodsName}</Text>
+                                      >{goodsItem.goodsName}</Text>
                                     </View>
                                   ))
                                 }
@@ -231,7 +234,7 @@ export default function OrderList() {
                                 >
                                   <Price
                                     color="gray"
-                                    price={item.orderPayPrice}
+                                    price={orderItem.totalPrice}
                                     size="normal"
                                     thousands
                                     style={{
@@ -246,7 +249,7 @@ export default function OrderList() {
                                     fontSize: pxTransform(windowHeight * 0.015),
                                   }}
                                 >
-                                  共{item.orderCount}件
+                                  共{orderItem.totalCount}件
                                 </View>
                               </View>
                             </View>
@@ -262,7 +265,7 @@ export default function OrderList() {
                                   fontWeight: 'bold',
                                   color: '#333',
                                 }}
-                              >{item.orderTable}</Text>
+                              >{orderItem.tableNumber}</Text>
                             </View>
                             <View
                               className='orderlist-item-bottom'
@@ -271,7 +274,7 @@ export default function OrderList() {
                               }}
                             >
                               {
-                                item.orderStatus === 0 && (
+                                orderItem.orderStatus === 1 && (
                                   <View
                                     className='order-status0'
                                   >
@@ -293,7 +296,7 @@ export default function OrderList() {
                                 )
                               }
                               {
-                                item.orderStatus === 2 && (
+                                orderItem.orderStatus === 3 && (
                                   <View
                                     className='order-status1'
                                   >
@@ -308,7 +311,7 @@ export default function OrderList() {
                                 )
                               }
                               {
-                                item.orderStatus === 3 && (
+                                orderItem.orderStatus === 4 && (
                                   <View
                                     className='order-status1'
                                   >
@@ -323,7 +326,7 @@ export default function OrderList() {
                                 )
                               }
                               {
-                                item.orderStatus === 1 && (
+                                orderItem.orderStatus === 2 && (
                                   <View
                                     className='order-status0'
                                   >

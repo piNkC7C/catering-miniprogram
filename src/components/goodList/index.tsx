@@ -2,9 +2,8 @@ import { memo, useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
 import { getSystemInfoSync, getMenuButtonBoundingClientRect } from '@tarojs/taro'
 import { pxTransform, Price, Image, Tag, Divider } from '@nutui/nutui-react-taro'
-import { IOrderDetail } from '@/subPackages/orderDetail/orderDetail'
 import { ArrowUp, ArrowDown, Minus } from '@nutui/icons-react-taro'
-import { testGoodsList } from '@/utils/constants'
+import { useAppSelector } from '@/hooks/useAppStore'
 import './index.scss'
 
 interface IGoodListProps {
@@ -12,44 +11,13 @@ interface IGoodListProps {
 }
 
 function PureGoodList<IGoodListProps>({ orderId }) {
-
-    const [orderDetails, setOrderDetails] = useState<IOrderDetail | null>(null)
-
-    useEffect(() => {
-        console.log('orderId', orderId)
-        if (orderId || orderId === 0) {
-            setOrderDetails({
-                id: 7756,
-                orderStatus: orderId,
-                tableNumber: 1,
-                personNumber: 4,
-                goodsList: [],
-                isUseCoupon: 1,
-                couponList: [
-                    {
-                        id: 1,
-                        name: '优惠券1',
-                        price: 100,
-                        Minus: 10,
-                    },
-                    {
-                        id: 2,
-                        name: '优惠券2',
-                        price: 200,
-                        Minus: 20,
-                    }
-                ],
-                totalPrice: 100,
-                shopName: '浙江某某某店',
-            })
+    const {
+        order: {
+            currentOrder
         }
-    }, [orderId])
+    } = useAppSelector((state) => state)
 
-    useEffect(() => {
-        console.log(orderDetails)
-    }, [orderDetails])
-
-    const [isFoldGoodsList, setIsFoldGoodsList] = useState(testGoodsList.length > 3)
+    const [isFoldGoodsList, setIsFoldGoodsList] = useState(currentOrder?.goodsList.length && currentOrder?.goodsList.length > 3)
     const [isFoldCouponList, setIsFoldCouponList] = useState(true)
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
@@ -68,7 +36,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
             style={{
                 marginTop: pxTransform(windowHeight * 0.02),
                 borderRadius: pxTransform(windowHeight * 0.015),
-                backgroundColor: orderDetails?.orderStatus === 0 ? '#E8E8E8' : '#fff'
+                backgroundColor: currentOrder?.orderStatus === 1 ? '#E8E8E8' : '#fff'
             }}
         >
             <View
@@ -80,26 +48,26 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                 }}
             >
                 {
-                    orderDetails?.orderStatus === 0 && (
+                    currentOrder?.orderStatus === 1 && (
                         <>
-                            <Text>{orderDetails?.tableNumber}号桌</Text>
-                            <Text>{orderDetails?.personNumber}人就餐</Text>
+                            <Text>{currentOrder?.tableNumber}号桌</Text>
+                            <Text>{currentOrder?.personNumber}人就餐</Text>
                         </>
                     )
                 }
                 {
-                    orderDetails?.orderStatus !== 0 && orderDetails?.orderStatus !== 3 && (
-                        <Text>{orderDetails?.shopName}</Text>
+                    currentOrder?.orderStatus !== 1 && currentOrder?.orderStatus !== 4 && (
+                        <Text>{currentOrder?.shopName}</Text>
                     )
                 }
                 {
-                    orderDetails?.orderStatus === 3 && (
+                    currentOrder?.orderStatus === 4 && (
                         <Text>退款明细</Text>
                     )
                 }
             </View>
             {
-                orderDetails?.orderStatus !== 0 && (
+                currentOrder?.orderStatus !== 1 && (
                     <Divider
                         style={{
                             '--nutui-divider-margin': 0
@@ -125,7 +93,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                     }}
                 >
                     {
-                        testGoodsList.map((item) => {
+                        currentOrder?.goodsList.map((goodsItem) => {
                             return (
                                 <View
                                     className='list-item'
@@ -138,7 +106,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                         className='left'
                                     >
                                         <Image
-                                            src={item.image}
+                                            src={goodsItem.goodsImage}
                                             width={pxTransform(windowHeight * 0.06)}
                                             height={pxTransform(windowHeight * 0.06)}
                                         ></Image>
@@ -153,12 +121,12 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                                 style={{
                                                     fontWeight: 'bold'
                                                 }}
-                                            >{item.title}</Text>
+                                            >{goodsItem.goodsName}</Text>
                                             <Text
                                                 style={{
                                                     fontSize: pxTransform(windowHeight * 0.012),
                                                 }}
-                                            >x{item.count}</Text>
+                                            >x{goodsItem.goodsCount}</Text>
                                         </View>
                                     </View>
                                     <View
@@ -169,7 +137,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                     >
                                         <Price
                                             color='gray'
-                                            price={item.price}
+                                            price={goodsItem.totalPrice}
                                             size="small"
                                             thousands
                                             style={{
@@ -183,7 +151,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                     }
                 </View>
                 {
-                    testGoodsList.length > 3 && (
+                    currentOrder?.goodsList.length && currentOrder?.goodsList.length > 3 && (
                         <View
                             className='fold-goods-list'
                             style={{
@@ -219,7 +187,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                 }
             </View>
             {
-                orderDetails?.isUseCoupon === 1 && (
+                currentOrder?.isUseCoupon && (
                     <>
                         <View
                             className='good-list-coupon'
@@ -262,7 +230,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                 className='good-list-coupon-right'
                             >
                                 -<Price
-                                    price={orderDetails?.couponList?.reduce((acc, curr) => acc + curr.Minus, 0)}
+                                    price={currentOrder?.totalPrice}
                                     size="normal"
                                     thousands
                                 />
@@ -279,7 +247,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                     }}
                                 >
                                     {
-                                        orderDetails?.couponList?.map((item) => {
+                                        currentOrder?.couponList?.map((couponItem) => {
                                             return (
                                                 <View
                                                     className='good-list-coupon-list-item'
@@ -289,12 +257,12 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                                             fontSize: pxTransform(windowHeight * 0.013),
                                                             color: '#999999'
                                                         }}
-                                                    >{item.name}</Text>
+                                                    >{couponItem.couponName}</Text>
                                                     <View
                                                         className='good-list-coupon-right'
                                                     >
                                                         -<Price
-                                                            price={item.Minus}
+                                                            price={couponItem.couponDiscount}
                                                             size="normal"
                                                             thousands
                                                         />
@@ -310,7 +278,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                 )
             }
             {
-                orderDetails?.orderStatus !== 0 && (
+                currentOrder?.orderStatus !== 1 && (
                     <Divider />
                 )
             }
@@ -333,11 +301,11 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                         fontSize: pxTransform(windowHeight * 0.012),
                     }}
                 >
-                    共{testGoodsList.length}件&nbsp;&nbsp;合计：
+                    共{currentOrder?.totalCount}件&nbsp;&nbsp;合计：
                 </View>
                 <Price
                     color='gray'
-                    price={Number(orderDetails?.totalPrice)}
+                    price={Number(currentOrder?.totalPrice)}
                     size="normal"
                     thousands
                 />

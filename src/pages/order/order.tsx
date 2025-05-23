@@ -4,23 +4,29 @@ import type { IntersectionObserver } from '@tarojs/taro'
 import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setCartListAction } from '@/redux/modules/order'
+import { setCartListAction, setCheckoutOrderAction } from '@/redux/modules/order'
+import { setIsRetrieve } from '@/redux/modules/login'
 import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse, Divider, Dialog } from '@nutui/nutui-react-taro'
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
 import orderJoinVip from '@/assets/order/order-joinvip@2x.png'
 import LoginPopup from '@/components/LoginPopup'
-import { TABLE_INFO, testGoodsCouponList as goodsCouponList, testOrderPageList as dataList } from '@/utils/constants'
+import { TABLE_INFO } from '@/utils/constants'
 
 export default function Order() {
   // 获取登录状态和用户信息
   const {
     login: {
       loginStatus,
-      userInfo
+      userInfo,
+      isRetrieve,
     },
     order: {
       cartList,
+      groupGoodsList,
+      orderTabsList,
+      orderList,
+      goodsCouponList,
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
@@ -30,21 +36,8 @@ export default function Order() {
     peopleNum: null,
   })
 
-  const router = useRouter()
-  const { tableId, peopleNum } = router.params
   useEffect(() => {
-    if (tableId && peopleNum) {
-      setTableInfo({ tableId, peopleNum })
-      setStorage(
-        {
-          key: TABLE_INFO,
-          data: { tableId, peopleNum },
-          fail: (err) => {
-            console.log('点单页设置桌号失败', err)
-          }
-        },
-      )
-    } else {
+    if (isRetrieve || !tableInfo.tableId) {
       getStorage(
         {
           key: TABLE_INFO,
@@ -56,8 +49,9 @@ export default function Order() {
           },
         },
       )
+      dispatch(setIsRetrieve(false))
     }
-  }, [tableId, peopleNum])
+  }, [isRetrieve, tableInfo.tableId])
   // useLoad(() => {
   //   console.log('Order page loaded.')
   // })
@@ -298,8 +292,8 @@ export default function Order() {
             <SideBar.Item title='尊享商品券' value='good-coupon'>
             </SideBar.Item>
             {
-              dataList.map((item) => (
-                <SideBar.Item title={item.title} value={item.id}>
+              orderTabsList.map((item) => (
+                <SideBar.Item title={item.groupName} value={item.groupId}>
                 </SideBar.Item>
               ))
             }
@@ -318,7 +312,6 @@ export default function Order() {
             }}
           >
             <View
-              id='good-coupon'
               className='scrollTarget'
               style={{
                 // position: sideBarValue === item.id ? 'sticky' : 'relative',
@@ -336,10 +329,9 @@ export default function Order() {
               <Text>尊享商品券(每件商品限用一张)</Text>
             </View>
             {
-              dataList.map((item, index) => (
+              groupGoodsList.map((groupItem, index) => (
                 <>
                   <View
-                    id={item.id}
                     className='scrollTarget'
                     style={{
                       // position: sideBarValue === item.id ? 'sticky' : 'relative',
@@ -354,7 +346,7 @@ export default function Order() {
                       // backgroundColor: visibleItems.includes(item.id) ? 'rgba(255,215,0,0.2)' : 'transparent',
                     }}
                   >
-                    <Text>{item.title}</Text>
+                    <Text>{groupItem.groupName}</Text>
                   </View>
                   <View
                     style={{
@@ -363,7 +355,7 @@ export default function Order() {
                     }}
                   >
                     {
-                      item.list.map((listItem) => (
+                      groupItem.goodsList.map((goodsItem) => (
                         <View
                           style={{
                             width: '100%',
@@ -375,7 +367,7 @@ export default function Order() {
                           }}
                         >
                           <Image
-                            src={listItem.image}
+                            src={goodsItem.goodsImage}
                             width={pxTransform(windowWidth * 0.2)}
                             height={pxTransform(windowWidth * 0.2)}
                           />
@@ -391,7 +383,7 @@ export default function Order() {
                               fontWeight: 'bold',
                             }}
                           >
-                            <Text>{listItem.title}</Text>
+                            <Text>{goodsItem.goodsName}</Text>
                             <View
                               style={{
                                 display: 'flex',
@@ -415,7 +407,7 @@ export default function Order() {
                                 >
                                   <Price
                                     color='gray'
-                                    price={listItem.price}
+                                    price={goodsItem.goodsPrice}
                                     size="small"
                                     thousands
                                     style={{
@@ -434,14 +426,14 @@ export default function Order() {
                                 </Text>
                               </View>
                               {
-                                listItem.detail ? (
+                                goodsItem.isPackage ? (
                                   <Badge
                                     style={{
                                       marginRight: pxTransform(windowWidth * 0.02),
                                     }}
                                     value={cartList.find((findItem) => {
-                                      return findItem.id === listItem.id
-                                    })?.count}>
+                                      return findItem.goodsId === goodsItem.goodsId
+                                    })?.goodsCount}>
                                     <Button
                                       type="primary"
                                       size="mini"
@@ -470,7 +462,7 @@ export default function Order() {
                                   >
                                     {
                                       cartList.find((findItem) => {
-                                        return findItem.id === listItem.id
+                                        return findItem.goodsId === goodsItem.goodsId
                                       }) && (
                                         <View
                                           style={{
@@ -491,19 +483,19 @@ export default function Order() {
                                             icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
                                             onClick={() => {
                                               if (cartList.find((findItem) => {
-                                                return findItem.id === listItem.id
-                                              })?.count === 1) {
+                                                return findItem.goodsId === goodsItem.goodsId
+                                              })?.goodsCount === 1) {
                                                 dispatch(setCartListAction({
                                                   type: 'remove', data: {
-                                                    id: listItem.id,
+                                                    goodsId: goodsItem.goodsId,
                                                   }
                                                 }))
                                               } else {
                                                 dispatch(setCartListAction({
                                                   type: 'set', data: [
                                                     ...cartList.map((mapItem) => {
-                                                      if (mapItem.id === listItem.id) {
-                                                        return { ...mapItem, count: mapItem.count - 1 }
+                                                      if (mapItem.goodsId === goodsItem.goodsId) {
+                                                        return { ...mapItem, goodsCount: mapItem.goodsCount - 1 }
                                                       }
                                                       return mapItem
                                                     })
@@ -518,8 +510,8 @@ export default function Order() {
                                               margin: `0 ${pxTransform(windowWidth * 0.02)}`,
                                             }}
                                           >{cartList.find((findItem) => {
-                                            return findItem.id === listItem.id
-                                          })?.count}</Text>
+                                            return findItem.goodsId === goodsItem.goodsId
+                                          })?.goodsCount}</Text>
                                         </View>
                                       )
                                     }
@@ -534,13 +526,13 @@ export default function Order() {
                                       icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                       onClick={() => {
                                         if (cartList.find((findItem) => {
-                                          return findItem.id === listItem.id
+                                          return findItem.goodsId === goodsItem.goodsId
                                         })) {
                                           dispatch(setCartListAction({
                                             type: 'set', data: [
                                               ...cartList.map((mapItem) => {
-                                                if (mapItem.id === listItem.id) {
-                                                  return { ...mapItem, count: mapItem.count + 1 }
+                                                if (mapItem.goodsId === goodsItem.goodsId) {
+                                                  return { ...mapItem, goodsCount: mapItem.goodsCount + 1 }
                                                 }
                                                 return mapItem
                                               })
@@ -549,13 +541,12 @@ export default function Order() {
                                         } else {
                                           dispatch(setCartListAction({
                                             type: 'add', data: {
-                                              id: listItem.id,
-                                              title: listItem.title,
-                                              price: listItem.price,
-                                              image: listItem.image,
-                                              count: 1,
-                                              detail: false,
-                                              detailList: [],
+                                              goodsId: goodsItem.goodsId,
+                                              goodsName: goodsItem.goodsName,
+                                              goodsPrice: goodsItem.goodsPrice,
+                                              goodsImage: goodsItem.goodsImage,
+                                              goodsCount: 1,
+                                              isPackage: goodsItem.isPackage,
                                             }
                                           }))
                                         }
@@ -572,7 +563,7 @@ export default function Order() {
                     }
                   </View>
                   {
-                    index === dataList.length - 1 && (
+                    index === groupGoodsList.length - 1 && (
                       <View
                         style={{
                           width: '100%',
@@ -713,7 +704,7 @@ export default function Order() {
                   >
                     <Price
                       color='gray'
-                      price={cartList.reduce((acc, item) => acc + item.price * item.count, 0)}
+                      price={cartList.reduce((acc, item) => acc + item.goodsPrice * item.goodsCount, 0)}
                       size="xlarge"
                       thousands
                     />
@@ -754,6 +745,20 @@ export default function Order() {
                   }
                 )
               } else {
+                dispatch(setCheckoutOrderAction({
+                  type: 'set', data: {
+                    checkoutOrderId: 1,
+                    checkoutOrderCouponedPrice: cartList.reduce((acc, item) => acc + item.totalPrice, 0),
+                    checkoutOrderTotalPrice: cartList.reduce((acc, item) => acc + item.totalPrice, 0),
+                    checkoutOrderTotalCount: cartList.reduce((acc, item) => acc + item.goodsCount, 0),
+                    checkoutOrderType: 1,
+                    checkoutOrderTableNumber: tableInfo.tableId,
+                    checkoutOrderPersonNumber: tableInfo.peopleNum,
+                    isUseCoupon: false,
+                    couponList: [],
+                    goodsList: cartList,
+                  }
+                }))
                 navigateTo(
                   {
                     url: '/subPackages/payment/payment',
@@ -809,7 +814,7 @@ export default function Order() {
                   indeterminate={cartCheckboxGroupValue.length > 0 && cartCheckboxGroupValue.length < cartList.length}
                   onChange={(state) => {
                     if (state) {
-                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.id))
+                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.goodsId))
                     } else {
                       setCartCheckboxGroupValue([])
                     }
@@ -841,7 +846,7 @@ export default function Order() {
               }}
             >
               {
-                cartList.map((item) => (
+                cartList.map((cartItem) => (
                   <>
                     <View
                       className='content-item'
@@ -857,18 +862,18 @@ export default function Order() {
                           }}
                         >
                           <Checkbox
-                            value={item.id}
-                            checked={cartCheckboxGroupValue.includes(item.id)}
+                            value={cartItem.goodsId}
+                            checked={cartCheckboxGroupValue.includes(cartItem.goodsId)}
                             onChange={(state) => {
                               if (state) {
                                 setCartCheckboxGroupValue((prev) => {
                                   if (prev.length < cartList.length - 1) {
 
                                   }
-                                  return [...prev, item.id]
+                                  return [...prev, cartItem.goodsId]
                                 })
                               } else {
-                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== item.id))
+                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== cartItem.goodsId))
                               }
                             }}
                             style={{
@@ -878,7 +883,7 @@ export default function Order() {
                           />
                         </View>
                         <Image
-                          src={item.image}
+                          src={cartItem.goodsImage}
                           width={pxTransform(windowWidth * 0.1)}
                           height={pxTransform(windowWidth * 0.1)}
                         />
@@ -892,49 +897,51 @@ export default function Order() {
                         }}
                       >
                         {
-                          item.detail ? (
-                            <Collapse
-                              defaultActiveName={['1', '2']} expandIcon={<ArrowDown />}
-                              style={{
-                                width: '100%',
-                                '--nutui-collapse-item-padding': 0,
-                                '--nutui-collapse-item-header-border-bottom': 'none'
-                              } as any}
-                            >
-                              <Collapse.Item title={item.title} name="1">
-                                {
-                                  item.detailList.map((item) => (
-                                    <View
-                                      className='item-detail'
-                                    >
-                                      <View
-                                        style={{
-                                          display: 'flex',
-                                          flexDirection: 'row',
-                                          alignItems: 'center',
-                                        }}
-                                      >
-                                        <Image
-                                          src={item.image}
-                                          width={pxTransform(windowWidth * 0.1)}
-                                          height={pxTransform(windowWidth * 0.1)}
-                                        />
-                                        <Text
-                                          style={{
-                                            marginLeft: pxTransform(windowWidth * 0.02),
-                                          }}
-                                        >{item.title}</Text>
-                                      </View>
-                                      <Text
-                                        style={{
-                                          color: '#939393',
-                                        }}
-                                      >x{item.count}</Text>
-                                    </View>
-                                  ))
-                                }
-                              </Collapse.Item>
-                            </Collapse>
+                          cartItem.isPackage ? (
+                            <></>
+                            // 套餐类商品样式备用
+                            // <Collapse
+                            //   defaultActiveName={['1', '2']} expandIcon={<ArrowDown />}
+                            //   style={{
+                            //     width: '100%',
+                            //     '--nutui-collapse-item-padding': 0,
+                            //     '--nutui-collapse-item-header-border-bottom': 'none'
+                            //   } as any}
+                            // >
+                            //   <Collapse.Item title={cartItem.goodsName} name="1">
+                            //     {
+                            //       cartItem.goodsList.map((goodsItem) => (
+                            //         <View
+                            //           className='item-detail'
+                            //         >
+                            //           <View
+                            //             style={{
+                            //               display: 'flex',
+                            //               flexDirection: 'row',
+                            //               alignItems: 'center',
+                            //             }}
+                            //           >
+                            //             <Image
+                            //               src={goodsItem.goodsImage}
+                            //               width={pxTransform(windowWidth * 0.1)}
+                            //               height={pxTransform(windowWidth * 0.1)}
+                            //             />
+                            //             <Text
+                            //               style={{
+                            //                 marginLeft: pxTransform(windowWidth * 0.02),
+                            //               }}
+                            //             >{goodsItem.goodsName}</Text>
+                            //           </View>
+                            //           <Text
+                            //             style={{
+                            //               color: '#939393',
+                            //             }}
+                            //           >x{goodsItem.goodsCount}</Text>
+                            //         </View>
+                            //       ))
+                            //     }
+                            //   </Collapse.Item>
+                            // </Collapse>
                           ) : (
                             <View
                               style={{
@@ -943,7 +950,7 @@ export default function Order() {
                                 alignItems: 'center',
                               }}
                             >
-                              <Text>{item.title}</Text>
+                              <Text>{cartItem.goodsName}</Text>
                             </View>
                           )
                         }
@@ -958,7 +965,7 @@ export default function Order() {
                           >
                             <Price
                               color='gray'
-                              price={item.price}
+                              price={cartItem.goodsPrice}
                               size="small"
                               thousands
                             />
@@ -979,17 +986,17 @@ export default function Order() {
                                 height: pxTransform(viewHeight * 0.036),
                               }}
                               onClick={() => {
-                                if (item.count === 1) {
-                                  const newCartList = cartList.filter((mapItem) => mapItem.id !== item.id)
+                                if (cartItem.goodsCount === 1) {
+                                  const newCartList = cartList.filter((mapItem) => mapItem.goodsId !== cartItem.goodsId)
                                   dispatch(setCartListAction({ type: 'set', data: newCartList }))
                                 } else {
                                   dispatch(setCartListAction({
                                     type: 'set', data: [
                                       ...cartList.map((mapItem) => {
-                                        if (mapItem.id === item.id) {
+                                        if (mapItem.goodsId === cartItem.goodsId) {
                                           return {
                                             ...mapItem,
-                                            count: mapItem.count - 1,
+                                            goodsCount: mapItem.goodsCount - 1,
                                           }
                                         }
                                         return mapItem
@@ -1005,7 +1012,7 @@ export default function Order() {
                                 width: pxTransform(windowWidth * 0.0848),
                                 fontSize: pxTransform(viewHeight * 0.02),
                               }}
-                            >{item.count}</View>
+                            >{cartItem.goodsCount}</View>
                             <View
                               className="custom-btn plus"
                               style={{
@@ -1015,10 +1022,10 @@ export default function Order() {
                               onClick={() => dispatch(setCartListAction({
                                 type: 'set', data: [
                                   ...cartList.map((mapItem) => {
-                                    if (mapItem.id === item.id) {
+                                    if (mapItem.goodsId === cartItem.goodsId) {
                                       return {
                                         ...mapItem,
-                                        count: mapItem.count + 1,
+                                        goodsCount: mapItem.goodsCount + 1,
                                       }
                                     }
                                     return mapItem
@@ -1080,7 +1087,7 @@ export default function Order() {
             可用券（{goodsCouponList.length}）
           </View>
           {
-            goodsCouponList.map((item) => (
+            goodsCouponList.map((goodsCouponItem) => (
               <View
                 className='goods-coupon-item'
                 style={{
@@ -1096,7 +1103,7 @@ export default function Order() {
                   }}
                 >
                   <Image
-                    src={item.image}
+                    src={goodsCouponItem.goodsCouponImage}
                     width={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
                     height={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
                   />
@@ -1113,7 +1120,7 @@ export default function Order() {
                         fontWeight: 'bold',
                         color: '#333',
                       }}
-                    >{item.title}</Text>
+                    >{goodsCouponItem.goodsCouponName}</Text>
                     <Text>
                       <Text
                         style={{
@@ -1124,7 +1131,7 @@ export default function Order() {
                         }}
                       >免费兑换</Text>
                       无门槛</Text>
-                    <Text>有效期：{item.startTime}&nbsp;-&nbsp;{item.endTime}</Text>
+                    <Text>有效期：{goodsCouponItem.goodsCouponStartTime}&nbsp;-&nbsp;{goodsCouponItem.goodsCouponEndTime}</Text>
                   </View>
                 </View>
                 <Divider
@@ -1148,7 +1155,7 @@ export default function Order() {
                       color: '#999',
                     }}
                     onClick={() => {
-                      setGoodsCouponDescriptionDialogItem(item.description)
+                      setGoodsCouponDescriptionDialogItem(goodsCouponItem.goodsCouponDesc)
                       setShowGoodsCouponDescriptionDialog(true)
                     }}
                   >
@@ -1161,12 +1168,12 @@ export default function Order() {
                   </View>
                   <Button
                     type='primary'
-                    disabled={item.type === 1}
+                    disabled={goodsCouponItem.goodsCouponStatus === 2}
                     style={{
                       borderRadius: pxTransform(windowWidth * 0.05),
                     }}
                   >{
-                      item.type === 0 ? '立即使用' : '已使用'
+                      goodsCouponItem.goodsCouponStatus === 1 ? '立即使用' : '已使用'
                     }</Button>
                 </View>
               </View>

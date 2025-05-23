@@ -3,19 +3,22 @@ import { View, Text, Span } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, switchTab, showToast, setStorage, getStorage, useRouter } from '@tarojs/taro'
 import './selectTable.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
+import { setLoginStatus, userInfoAction, setIsRetrieve } from '@/redux/modules/login'
 import { pxTransform, Button, Image, Grid, Popup, Checkbox, Space, Toast, Radio, Input, NumberKeyboard } from '@nutui/nutui-react-taro'
 import { ArrowRight, Close, Home } from '@nutui/icons-react-taro'
 import userNoLogin from '@/assets/index/user-nologin@2x.png'
+import { TABLE_INFO } from '@/utils/constants'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
     const {
         login: {
             loginStatus,
-            userInfo
+            userInfo,
+            isRetrieve,
         }
     } = useAppSelector((state) => state)
+    const dispatch = useAppDispatch()
 
     // 选中的就餐人数
     const [selectedNum, setSelectedNum] = useState<number>(0)
@@ -61,7 +64,7 @@ export default function SelectTable() {
                     left: windowWidth - widthMenuButton - leftMenuButton,
                 }}
                 onClick={() => {
-                    navigateTo({
+                    switchTab({
                         url: '/pages/index/index',
                     })
                 }}
@@ -192,8 +195,16 @@ export default function SelectTable() {
                             }}
                             onClick={() => {
                                 if (selectedNum && selectedNum !== 0) {
-                                    navigateTo({
-                                        url: `/pages/order/order?tableId=5&peopleNum=${selectedNum}`,
+                                    setStorage({
+                                        key: TABLE_INFO,
+                                        data: {
+                                            tableId: tableId,
+                                            peopleNum: selectedNum,
+                                        },
+                                    })
+                                    dispatch(setIsRetrieve(true))
+                                    switchTab({
+                                        url: '/pages/order/order',
                                     })
                                 } else {
                                     showToast({
