@@ -5,7 +5,7 @@ import './exchangeCoupon.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Input } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, ArrowRight, IconFont } from '@nutui/icons-react-taro'
-import ScanIcon from '@/assets/exchangeCoupon/scan@2x.png'
+import { ScanIcon } from '@/utils/constants'
 
 export default function ExchangeCoupon() {
     // 获取登录状态和用户信息

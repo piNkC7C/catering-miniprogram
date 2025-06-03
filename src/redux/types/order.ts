@@ -59,8 +59,8 @@ export interface IOrderItem {
   couponList?: ICouponItem[]
   totalCount: number
   totalPrice: number
-  orderTag: string
-  shopName?: string
+  orderTag?: string
+  shopName: string
   orderType: 1 | 2 | 3 // 1: 门店, 2: 外卖, 3: 商城
 }
 

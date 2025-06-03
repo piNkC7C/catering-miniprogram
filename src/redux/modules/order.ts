@@ -32,6 +32,7 @@ const initialState: IOrderState = {
       totalPrice: 195,
       orderTag: '堂食',
       orderType: 1,
+      shopName: '浙江某某某店',
     },
     {
       orderId: 2,
@@ -66,6 +67,7 @@ const initialState: IOrderState = {
       totalPrice: 185,
       orderTag: '外卖',
       orderType: 2,
+      shopName: '浙江某某某店',
     },
     {
       orderId: 3,
@@ -87,6 +89,7 @@ const initialState: IOrderState = {
       totalPrice: 195,
       orderTag: '商城',
       orderType: 3,
+      shopName: '浙江某某某店',
     },
     {
       orderId: 4,
@@ -108,6 +111,7 @@ const initialState: IOrderState = {
       totalPrice: 195,
       orderTag: '堂食',
       orderType: 1,
+      shopName: '浙江某某某店',
     }
   ],
   currentOrder: null,

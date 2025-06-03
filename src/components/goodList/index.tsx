@@ -230,7 +230,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                 className='good-list-coupon-right'
                             >
                                 -<Price
-                                    price={currentOrder?.totalPrice}
+                                    price={currentOrder?.couponList?.reduce((acc, couponItem) => acc + couponItem.couponDiscount, 0)}
                                     size="normal"
                                     thousands
                                 />

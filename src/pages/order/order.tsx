@@ -9,9 +9,8 @@ import { setIsRetrieve } from '@/redux/modules/login'
 import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse, Divider, Dialog } from '@nutui/nutui-react-taro'
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
-import orderJoinVip from '@/assets/order/order-joinvip@2x.png'
 import LoginPopup from '@/components/LoginPopup'
-import { TABLE_INFO } from '@/utils/constants'
+import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -445,7 +444,7 @@ export default function Order() {
                                       }}
                                       onClick={() => {
                                         navigateTo({
-                                          url: '/pages/choose/choose',
+                                          url: routes.find((route) => route.name === 'choose')?.path || '',
                                         })
                                       }}
                                     >选规格</Button>
@@ -741,7 +740,7 @@ export default function Order() {
                 // )
                 navigateTo(
                   {
-                    url: '/subPackages/selectTable/selectTable?id=5',
+                    url: routes.find((route) => route.name === 'selectTable')?.path || '' + `?id=5`,
                   }
                 )
               } else {
@@ -761,7 +760,7 @@ export default function Order() {
                 }))
                 navigateTo(
                   {
-                    url: '/subPackages/payment/payment',
+                    url: routes.find((route) => route.name === 'payment')?.path || '',
                   }
                 )
               }

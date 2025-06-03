@@ -6,8 +6,7 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction, setIsRetrieve } from '@/redux/modules/login'
 import { pxTransform, Button, Image, Grid, Popup, Checkbox, Space, Toast, Radio, Input, NumberKeyboard } from '@nutui/nutui-react-taro'
 import { ArrowRight, Close, Home } from '@nutui/icons-react-taro'
-import userNoLogin from '@/assets/index/user-nologin@2x.png'
-import { TABLE_INFO } from '@/utils/constants'
+import { TABLE_INFO, selectTableBg, selectTableNumber, userNologin } from '@/utils/constants'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
@@ -52,6 +51,7 @@ export default function SelectTable() {
             className='select-table'
             style={{
                 fontSize: pxTransform(16),
+                backgroundImage: `url(${selectTableBg})`,
             }}
         >
             <View
@@ -85,7 +85,7 @@ export default function SelectTable() {
                     }}
                 >
                     <Image
-                        src={userNoLogin}
+                        src={userNologin}
                         width={pxTransform(windowWidth * 0.1)}
                         height={pxTransform(windowWidth * 0.1)}
                     />
@@ -113,6 +113,7 @@ export default function SelectTable() {
                             className='table-number'
                             style={{
                                 fontSize: pxTransform(windowWidth * 0.04),
+                                backgroundImage: `url(${selectTableNumber})`,
                             }}
                         >
                             桌号{tableId}

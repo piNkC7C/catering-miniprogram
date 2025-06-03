@@ -5,17 +5,10 @@ import './mine.scss'
 import { useAppSelector } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button } from '@nutui/nutui-react-taro'
 import { ArrowRight } from '@nutui/icons-react-taro'
-import mineNavBgi from '@/assets/mine/mine-bgi@2x.png'
-import userNoLogin from '@/assets/index/user-nologin@2x.png'
-import mineJifen from '@/assets/mine/mine-jifen@2x.png'
-import mineYouhui from '@/assets/mine/mine-yhq@2x.png'
-import mineYuE from '@/assets/mine/mine-ye@2x.png'
-import mineLiPai from '@/assets/mine/mine-lek@2x.png'
-import mineKeFu1 from '@/assets/mine/mine-kf1@2x.png'
-import mineKeFu2 from '@/assets/mine/mine-kf2@2x.png'
-import mineDizhi from '@/assets/mine/mine-address@2x.png'
-import mineHuiyuan from '@/assets/mine/mine-vip@2x.png'
+import { userNologin, mineNavBgi, mineJifen, mineYouhui, mineYuE, mineLiPai, mineKeFu1, mineKeFu2, mineDizhi, mineHuiyuan } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
+// 路由
+import { routes } from '@/utils/constants'
 
 export default function Mine() {
   // 获取登录状态和用户信息
@@ -46,13 +39,13 @@ export default function Mine() {
       title: '积分',
       icon: mineJifen,
       desc: '查看积分',
-      path: '/pages/points/points'
+      path: routes.find((route) => route.name === 'points')?.path || ''
     },
     {
       title: '优惠券',
       icon: mineYouhui,
       desc: '查看优惠券',
-      path: '/pages/couponList/couponList?type=all'
+      path: routes.find((route) => route.name === 'couponList')?.path || ''
     },
     // {
     //   title: '余额',
@@ -72,6 +65,7 @@ export default function Mine() {
     {
       title: '我的地址',
       icon: mineDizhi,
+      path: routes.find((route) => route.name === 'addressList')?.path || ''
     },
     {
       title: '会员码',
@@ -80,11 +74,11 @@ export default function Mine() {
     {
       title: '联系客服',
       icon: mineKeFu1,
-      path: '/subPackages/selectTable/selectTable'
     },
     {
       title: '反馈建议',
       icon: mineKeFu2,
+      path: routes.find((route) => route.name === 'suggestList')?.path || ''
     },
   ]
 
@@ -123,7 +117,7 @@ export default function Mine() {
           <View className='mine-content-top-left'>
             <Image
               mode='scaleToFill'
-              src={userInfo?.avatar || userNoLogin}
+              src={userInfo?.avatar || userNologin}
               width={`${pxTransform(windowWidth * 0.1)}`}
               height={`${pxTransform(windowWidth * 0.1)}`}
             />
@@ -156,7 +150,7 @@ export default function Mine() {
                   rightIcon={<ArrowRight />}
                   onClick={() => {
                     navigateTo({
-                      url: '/subPackages/vip/vip',
+                      url: routes.find((route) => route.name === 'vip')?.path || '',
                     })
                   }}
                 >

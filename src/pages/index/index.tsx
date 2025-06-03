@@ -6,10 +6,9 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
 import { Cell, Avatar, pxTransform, Button, Divider, Image, Grid, Popup, Checkbox, Space, Toast, Tag } from '@nutui/nutui-react-taro'
 import { ArrowRight, Close } from '@nutui/icons-react-taro'
-import userNologin from '@/assets/index/user-nologin.png'
-import iconOrder from '@/assets/index/icon-order.png'
-import iconJifen from '@/assets/index/icon-jifen.png'
-import vipFrame from '@/assets/index/Frame.png'
+// 路由
+import { routes } from '@/utils/constants'
+import { userNologin, iconOrder, iconJifen, vipFrame, bgIndex } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
 
 export default function Index() {
@@ -39,6 +38,10 @@ export default function Index() {
 
   const { windowHeight: viewHeight, windowWidth } = getSystemInfoSync()
 
+  useEffect(() => {
+    console.log(getSystemInfoSync())
+  }, [viewHeight])
+
   // useLoad(() => {
   //   console.log('Page loaded.')
   // })
@@ -48,6 +51,7 @@ export default function Index() {
       className='index'
       style={{
         fontSize: pxTransform(16),
+        backgroundImage: `url(${bgIndex})`,
       }}
     >
       <View className='index-content'>
@@ -91,7 +95,7 @@ export default function Index() {
                   rightIcon={<ArrowRight />}
                   onClick={() => {
                     navigateTo({
-                      url: '/subPackages/vip/vip',
+                      url: routes.find((route) => route.name === 'vip')?.path || '',
                     })
                   }}
                 >
@@ -201,7 +205,7 @@ export default function Index() {
             className='action-card-item'
             onClick={() => {
               navigateTo({
-                url: '/pages/points/points',
+                url: routes.find((route) => route.name === 'points')?.path || '',
               })
             }}
           >

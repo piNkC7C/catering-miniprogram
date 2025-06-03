@@ -3,9 +3,7 @@ import { View, Text, Image } from '@tarojs/components'
 import { Popup, Button, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { pxTransform } from '@nutui/nutui-react-taro'
-import userNologin from '@/assets/index/user-nologin.png'
-import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
+import { userNologin } from '@/utils/constants'
 
 interface LoginPopupProps {
   visible: boolean

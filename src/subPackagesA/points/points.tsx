@@ -5,9 +5,11 @@ import './points.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
-import pointsBg from '@/assets/points/points-bgi@2x.png'
-import pointsNumber from '@/assets/points/points-num@2x.png'
+import { pointsBg, pointsNumber } from '@/utils/constants'
 import { pointsListAction } from '@/redux/modules/points'
+// 路由
+import { routes } from '@/utils/constants'
+
 export default function Points() {
     // 获取登录状态和用户信息
     const {
@@ -128,7 +130,7 @@ export default function Points() {
                                 className='points-list-item'
                                 onClick={() => {
                                     navigateTo({
-                                        url: '/pages/pointsDetail/pointsDetail',
+                                        url: routes.find((route) => route.name === 'pointsDetail')?.path || '',
                                     })
                                 }}
                             >积分明细</Text>
@@ -143,7 +145,7 @@ export default function Points() {
                                 className='points-list-item'
                                 onClick={() => {
                                     navigateTo({
-                                        url: '/pages/pointsRules/pointsRules',
+                                        url: routes.find((route) => route.name === 'pointsRules')?.path || '',
                                     })
                                 }}
                             >积分规则</Text>
@@ -158,7 +160,7 @@ export default function Points() {
                                 className='points-list-item'
                                 onClick={() => {
                                     navigateTo({
-                                        url: '/pages/couponList/couponList?type=exchange',
+                                        url: routes.find((route) => route.name === 'couponList')?.path || '' + `?type=exchange`,
                                     })
                                 }}
                             >兑换记录</Text>
@@ -202,7 +204,7 @@ export default function Points() {
                                     }}
                                     onClick={() => {
                                         navigateTo({
-                                            url: `/pages/exchangeDetail/exchangeDetail?id=${item.id}`,
+                                            url: routes.find((route) => route.name === 'exchangeDetail')?.path || '' + `?id=${item.id}`,
                                         })
                                     }}
                                 >

@@ -7,7 +7,7 @@ import { pxTransform, Divider, Grid, Image, Badge, ConfigProvider, Price, InputN
 import { Check } from '@nutui/icons-react-taro'
 import { useState } from 'react'
 import { IGoodItem } from './type'
-import chooseBack from '@/assets/choose/choose-back.png'
+import { chooseBack } from '@/utils/constants'
 
 export default function Choose() {
   // 获取登录状态和用户信息

@@ -5,8 +5,10 @@ import './couponList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, ConfigProvider, Price, Tag, Dialog } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, IconFont, ArrowRight, Ask } from '@nutui/icons-react-taro'
-import exchangeIcon from '@/assets/couponList/exchange@2x.png'
+import { exchangeIcon } from '@/utils/constants'
 import { ICouponItem } from '@/redux/types/order'
+// 路由
+import { routes } from '@/utils/constants'
 
 export default function CouponList() {
     // 获取登录状态和用户信息
@@ -179,7 +181,7 @@ export default function CouponList() {
                             }}
                             onClick={() => {
                                 navigateTo({
-                                    url: '/subPackages/exchangeCoupon/exchangeCoupon'
+                                    url: routes.find((route) => route.name === 'exchangeCoupon')?.path || ''
                                 })
                             }}
                         >

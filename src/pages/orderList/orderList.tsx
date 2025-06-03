@@ -5,11 +5,11 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
 import { ArrowRight, IconFont } from '@nutui/icons-react-taro'
 import { useState, useEffect } from 'react'
-import noOrderList from '@/assets/orderlist/noorderlist@2x.png'
-import logoSmall from '@/assets/orderlist/logo-small.png'
-import userNologin from '@/assets/index/user-nologin.png'
+import { noOrderList, logoSmall, userNologin } from '@/utils/constants'
 import { setCurrentOrderAction } from '@/redux/modules/order'
 import LoginPopup from '@/components/LoginPopup'
+// 路由
+import { routes, orderTagList } from '@/utils/constants'
 
 export default function OrderList() {
   // 获取登录状态和用户信息
@@ -151,7 +151,7 @@ export default function OrderList() {
                                 className='orderlist-item-top-left'
                               >
                                 <Tag background="#FA2400" plain>
-                                  {orderItem.orderTag}
+                                  {orderTagList.find((tag) => tag.value === orderItem.orderType)?.name || ''}
                                 </Tag>
                                 <Text
                                   className='orderlist-item-top-left-text'
@@ -181,12 +181,15 @@ export default function OrderList() {
                                 height: `calc(40% - ${pxTransform(windowHeight * 0.03)})`,
                               }}
                               onClick={() => {
+                                if (orderItem.orderStatus === 1) {
+                                  return
+                                }
                                 dispatch(setCurrentOrderAction({
                                   type: 'set',
                                   data: orderItem
                                 }))
                                 navigateTo({
-                                  url: `/subPackages/orderDetail/orderDetail?id=${orderItem.orderId}`
+                                  url: routes.find((route) => route.name === 'orderDetail')?.path || '' + `?id=${orderItem.orderId}`
                                 })
                               }}
                             >
@@ -291,6 +294,15 @@ export default function OrderList() {
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
+                                      onClick={() => {
+                                        dispatch(setCurrentOrderAction({
+                                          type: 'set',
+                                          data: orderItem
+                                        }))
+                                        navigateTo({
+                                          url: routes.find((route) => route.name === 'orderDetail')?.path || ''
+                                        })
+                                      }}
                                     >立即支付</Button>
                                   </View>
                                 )
@@ -320,6 +332,15 @@ export default function OrderList() {
                                       size="normal"
                                       style={{
                                         borderRadius: pxTransform(20),
+                                      }}
+                                      onClick={() => {
+                                        dispatch(setCurrentOrderAction({
+                                          type: 'set',
+                                          data: orderItem
+                                        }))
+                                        navigateTo({
+                                          url: routes.find((route) => route.name === 'orderDetail')?.path || ''
+                                        })
                                       }}
                                     >退款详情</Button>
                                   </View>

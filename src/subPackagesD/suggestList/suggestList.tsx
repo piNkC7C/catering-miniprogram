@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, navigateTo } from '@tarojs/taro'
 import './suggestList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, Feedback } from '@nutui/icons-react-taro'
 import SuggestCard from '@/components/suggestCard'
 import { ISuggestItem } from '@/redux/types/address'
+// 路由
+import { routes } from '@/utils/constants'
 
 export default function SuggestList() {
     // 获取登录状态和用户信息
@@ -155,6 +157,11 @@ export default function SuggestList() {
                                 borderRadius: pxTransform(windowWidth * 0.05),
                             }}
                             icon={<Feedback />}
+                            onClick={() => {
+                                navigateTo({
+                                    url: routes.find((route) => route.name === 'suggest')?.path || '',
+                                })
+                            }}
                         >
                             欢迎小主提建议
                         </Button>

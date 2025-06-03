@@ -5,8 +5,7 @@ import './vip.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Swiper } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
-import level1Img from '@/assets/vip/level1@2x.png'
-import level4Img from '@/assets/vip/level4@2x.png'
+import { level1Img, level2Img, level3Img, level4Img } from '@/utils/constants'
 
 export default function VIP() {
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -65,8 +64,8 @@ export default function VIP() {
 
     const list = [
         level1Img,
-        level1Img,
-        level4Img,
+        level2Img,
+        level3Img,
         level4Img,
     ]
 

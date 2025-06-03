@@ -147,7 +147,7 @@ export default function OrderDetail() {
                             }, {
                                 id: '2',
                                 label: '桌号',
-                                value: '4人'
+                                value: '4'
                             }, {
                                 id: '3',
                                 label: '用餐人数',
