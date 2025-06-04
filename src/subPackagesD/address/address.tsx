@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, getLocation,chooseLocation } from '@tarojs/taro'
 import './address.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Form, Input, Checkbox, Tag, Radio } from '@nutui/nutui-react-taro'
 import { ArrowLeft, ArrowRight } from '@nutui/icons-react-taro'
+import { setAddressListAction } from '@/redux/modules/address'
+import { IAddressItem } from '@/redux/types/address'
 
 export default function Address() {
     // 获取登录状态和用户信息
@@ -13,7 +15,12 @@ export default function Address() {
             loginStatus,
             userInfo
         },
+        address: {
+            addressList,
+            currentAddress
+        }
     } = useAppSelector((state) => state)
+    const dispatch = useAppDispatch()
 
     const router = useRouter()
     const { addressId } = router.params
@@ -27,6 +34,27 @@ export default function Address() {
     // 总高度
     const navHeight = finalStatusBarHeight + navBarHeight + 5
     const viewHeight = windowHeight - navHeight
+
+    const [addressForm] = Form.useForm()
+
+    const [userName, setUserName] = useState<string>(addressId ? currentAddress?.userName || '' : '')
+    const [addressSex, setAddressSex] = useState<string>(addressId ? currentAddress?.addressSex || '1' : '1')
+    const [addressName, setAddressName] = useState<string>(addressId ? (currentAddress?.addressName || '') : '')
+    const [addressProvince, setAddressProvince] = useState<string>(addressId ? currentAddress?.addressProvince || '' : '')
+    const [addressCity, setAddressCity] = useState<string>(addressId ? currentAddress?.addressCity || '' : '')
+    const [addressArea, setAddressArea] = useState<string>(addressId ? currentAddress?.addressArea || '' : '')
+    const [addressStreet, setAddressStreet] = useState<string>(addressId ? currentAddress?.addressStreet || '' : '')
+
+    // 当前选中的标签
+    const [selectAddressTag, setSelectAddressTag] = useState<string>(addressId ? currentAddress?.addressTag || '' : '')
+
+    const getAddressTagBgColor = useCallback((tag: string) => {
+        return selectAddressTag === tag ? '#FA2400' : '#F5F5F5'
+    }, [addressId, currentAddress?.addressTag, selectAddressTag])
+
+    const getAddressTagColor = useCallback((tag: string) => {
+        return selectAddressTag === tag ? '#FA2400' : '#9C9C9C'
+    }, [addressId, currentAddress?.addressTag, selectAddressTag])
 
     return (
         <View
@@ -76,33 +104,114 @@ export default function Address() {
                 }}
             >
                 <Form
+                    form={addressForm}
+                    initialValues={{
+                        addressPhone: addressId ? currentAddress?.addressPhone || '' : '',
+                        addressDetail: addressId ? currentAddress?.addressDetail || '' : '',
+                    }}
                     labelPosition="left"
                     divider
                     footer={
-                        <>
-                            <Button nativeType="submit" block type="primary">
+                        <View
+                            className='address-form-footer'
+                        >
+                            <Button
+                                nativeType="submit"
+                                block
+                                type="primary"
+                                onClick={() => {
+                                    if (addressId) {
+                                        dispatch(setAddressListAction({
+                                            type: 'update',
+                                            data: {
+                                                addressId: addressId,
+                                                userName: userName,
+                                                addressSex: addressSex,
+                                                addressPhone: addressForm.getFieldValue('addressPhone'),
+                                                addressName: addressName,
+                                                addressProvince: addressProvince,
+                                                addressCity: addressCity,
+                                                addressArea: addressArea,
+                                                addressStreet: addressStreet,
+                                                addressDetail: addressForm.getFieldValue('addressDetail'),
+                                                addressTag: selectAddressTag,
+                                            }
+                                        }))
+                                    } else {
+                                        dispatch(setAddressListAction({
+                                            type: 'add',
+                                            data: {
+                                                addressId: addressList.length + 1,
+                                                userName: userName,
+                                                addressSex: addressSex,
+                                                addressPhone: addressForm.getFieldValue('addressPhone'),
+                                                addressName: addressName,
+                                                addressProvince: addressProvince,
+                                                addressCity: addressCity,
+                                                addressArea: addressArea,
+                                                addressStreet: addressStreet,
+                                                addressDetail: addressForm.getFieldValue('addressDetail'),
+                                                addressTag: selectAddressTag,
+                                            }
+                                        }))
+                                    }
+                                    navigateBack()
+                                }}
+                            >
                                 保存地址
                             </Button>
-                        </>
+                            {
+                                addressId && (
+                                    <Button nativeType="submit" block type="default" onClick={() => {
+                                        showModal({
+                                            title: '提示',
+                                            content: '确定删除地址吗？',
+                                            success: (res) => {
+                                                if (res.confirm) {
+                                                    dispatch(setAddressListAction({
+                                                        type: 'delete',
+                                                        data: {
+                                                            addressId: addressId,
+                                                        }
+                                                    }))
+                                                    navigateBack()
+                                                }
+                                            },
+                                        })
+                                    }}>
+                                        删除地址
+                                    </Button>
+                                )
+                            }
+                        </View>
                     }
                     style={{
-                        '--nutui-form-item-label-width': pxTransform(windowWidth * 0.1),
+                        '--nutui-form-item-label-width': pxTransform(windowWidth * 0.12),
                     } as any}
                 >
                     <Form.Item
                         align="center"
                         label="收货人"
-                        name="addressName"
                     >
                         <View
                             className='address-name'
                         >
                             <Input
                                 placeholder="名字"
+                                value={userName}
+                                onChange={(value) => {
+                                    setUserName(value)
+                                }}
                             />
                             <Divider
                             />
-                            <Radio.Group direction="horizontal">
+                            <Radio.Group
+                                direction="horizontal"
+                                value={addressSex}
+                                onChange={(value) => {
+                                    setAddressSex(value.toString())
+                                }}
+                            >
                                 <Radio value="1">先生</Radio>
                                 <Radio value="2">女士</Radio>
                             </Radio.Group>
@@ -120,22 +229,38 @@ export default function Address() {
                     <Form.Item
                         align="center"
                         label="地址"
-                        name="address"
                     >
                         <View
                             className='address-select'
+                            onClick={() => {
+                                getLocation({
+                                    success: (res) => {
+                                        chooseLocation({
+                                            latitude: res.latitude,
+                                            longitude: res.longitude,
+                                            success: (res) => {
+                                                setAddressName(res.name)
+                                                setAddressProvince('')
+                                                setAddressCity('')
+                                                setAddressArea('')
+                                                setAddressStreet(res.address)
+                                            }
+                                        })
+                                    }
+                                })
+                            }}
                         >
                             <View
                                 style={{
                                     color: '#9C9C9C'
                                 }}
-                            >请选择所在地区</View>
+                            >{addressName === '' ? '请选择所在地区' : addressName}</View>
                             <ArrowRight />
                         </View>
                     </Form.Item>
                     <Form.Item
                         align="center"
-                        label="详细地址"
+                        label="门牌号"
                         name="addressDetail"
                     >
                         <Input
@@ -145,22 +270,74 @@ export default function Address() {
                     <Form.Item
                         align="center"
                         label="标签"
-                        name="addressTag"
                     >
-                        <Radio.Group direction="horizontal">
-                            <Radio shape="button" value="1">
+                        <View
+                            className='address-tag'
+                        >
+                            <Tag
+                                background={getAddressTagBgColor('1')}
+                                color={getAddressTagColor('1')}
+                                plain
+                                style={{
+                                    marginRight: pxTransform(windowWidth * 0.02),
+                                    '--nutui-tag-height': '18px',
+                                    '--nutui-tag-padding': '2px 17px',
+                                    '--nutui-tag-font-size': '14px'
+                                } as any}
+                                onClick={() => {
+                                    setSelectAddressTag('1')
+                                }}
+                            >
                                 家
-                            </Radio>
-                            <Radio shape="button" value="2">
+                            </Tag>
+                            <Tag
+                                background={getAddressTagBgColor('2')}
+                                color={getAddressTagColor('2')}
+                                plain
+                                style={{
+                                    marginRight: pxTransform(windowWidth * 0.02),
+                                    '--nutui-tag-height': '18px',
+                                    '--nutui-tag-padding': '2px 10px',
+                                    '--nutui-tag-font-size': '14px'
+                                } as any}
+                                onClick={() => {
+                                    setSelectAddressTag('2')
+                                }}
+                            >
                                 公司
-                            </Radio>
-                            <Radio shape="button" value="3">
+                            </Tag>
+                            <Tag
+                                background={getAddressTagBgColor('3')}
+                                color={getAddressTagColor('3')}
+                                plain
+                                style={{
+                                    marginRight: pxTransform(windowWidth * 0.02),
+                                    '--nutui-tag-height': '18px',
+                                    '--nutui-tag-padding': '2px 10px',
+                                    '--nutui-tag-font-size': '14px'
+                                } as any}
+                                onClick={() => {
+                                    setSelectAddressTag('3')
+                                }}
+                            >
                                 学校
-                            </Radio>
-                            <Radio shape="button" value="4">
+                            </Tag>
+                            <Tag
+                                background={getAddressTagBgColor('4')}
+                                color={getAddressTagColor('4')}
+                                plain
+                                style={{
+                                    '--nutui-tag-height': '18px',
+                                    '--nutui-tag-padding': '2px 10px',
+                                    '--nutui-tag-font-size': '14px'
+                                } as any}
+                                onClick={() => {
+                                    setSelectAddressTag('4')
+                                }}
+                            >
                                 其他
-                            </Radio>
-                        </Radio.Group>
+                            </Tag>
+                        </View>
                     </Form.Item>
                 </Form>
             </View>

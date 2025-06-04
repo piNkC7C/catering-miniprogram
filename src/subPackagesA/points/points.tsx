@@ -160,7 +160,7 @@ export default function Points() {
                                 className='points-list-item'
                                 onClick={() => {
                                     navigateTo({
-                                        url: routes.find((route) => route.name === 'couponList')?.path || '' + `?type=exchange`,
+                                        url: (routes.find((route) => route.name === 'couponList')?.path || '') + `?type=exchange`,
                                     })
                                 }}
                             >兑换记录</Text>
@@ -204,7 +204,7 @@ export default function Points() {
                                     }}
                                     onClick={() => {
                                         navigateTo({
-                                            url: routes.find((route) => route.name === 'exchangeDetail')?.path || '' + `?id=${item.id}`,
+                                            url: (routes.find((route) => route.name === 'exchangeDetail')?.path || '') + `?id=${item.id}`,
                                         })
                                     }}
                                 >

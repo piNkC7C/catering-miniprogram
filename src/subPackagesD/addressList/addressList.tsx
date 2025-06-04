@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, navigateTo } from '@tarojs/taro'
 import './addressList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { pxTransform, Image, Button, Divider, Tabs } from '@nutui/nutui-react-taro'
+import { pxTransform, Image, Button, Divider, Tabs, Empty } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
 import AddressCard from '@/components/addressCard'
+import { routes, noAddress } from '@/utils/constants'
 
 export default function AddressList() {
     // 获取登录状态和用户信息
@@ -73,7 +74,7 @@ export default function AddressList() {
                 style={{
                     padding: pxTransform(windowWidth * 0.04),
                     width: `calc(100% - ${pxTransform(windowWidth * 0.08)})`,
-                    height: pxTransform(viewHeight - windowWidth * 0.08),
+                    height: pxTransform(viewHeight * 0.9 - windowWidth * 0.08),
                 }}
             >
                 {
@@ -81,6 +82,47 @@ export default function AddressList() {
                         <AddressCard key={item.addressId} addressItem={item} />
                     ))
                 }
+                {
+                    addressList.length === 0 && (
+                        <Empty
+                            style={{
+                                backgroundColor: 'transparent',
+                            }}
+                            image={
+                                <Image
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                    }}
+                                    src={noAddress}
+                                />
+                            }
+                        />
+                    )
+                }
+            </View>
+            <View
+                className='add-address'
+                style={{
+                    padding: pxTransform(windowWidth * 0.04),
+                    width: `calc(100% - ${pxTransform(windowWidth * 0.08)})`,
+                    height: pxTransform(viewHeight * 0.1 - windowWidth * 0.08),
+                }}
+            >
+                <Button
+                    type='primary'
+                    size='normal'
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: pxTransform(windowWidth * 0.06),
+                    }}
+                    onClick={() => {
+                        navigateTo({
+                            url: routes.find((route) => route.name === 'address')?.path || '',
+                        })
+                    }}
+                >添加地址</Button>
             </View>
         </View>
     )

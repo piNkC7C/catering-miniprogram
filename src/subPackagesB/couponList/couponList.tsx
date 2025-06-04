@@ -24,7 +24,7 @@ export default function CouponList() {
     } = useAppSelector((state) => state)
 
     const router = useRouter()
-    const { type = 'all' } = router.params
+    const { type } = router.params
 
     const tabsList = type === 'all' ?
         [

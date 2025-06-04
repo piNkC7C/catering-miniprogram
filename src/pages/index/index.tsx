@@ -38,9 +38,9 @@ export default function Index() {
 
   const { windowHeight: viewHeight, windowWidth } = getSystemInfoSync()
 
-  useEffect(() => {
-    console.log(getSystemInfoSync())
-  }, [viewHeight])
+  // useEffect(() => {
+  //   console.log(getSystemInfoSync())
+  // }, [viewHeight])
 
   // useLoad(() => {
   //   console.log('Page loaded.')

@@ -3,12 +3,12 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, navigateTo } from '@tarojs/taro'
 import './suggestList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { pxTransform, Image, Button, Divider, Tabs } from '@nutui/nutui-react-taro'
+import { pxTransform, Image, Button, Divider, Tabs, Empty } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, Feedback } from '@nutui/icons-react-taro'
 import SuggestCard from '@/components/suggestCard'
 import { ISuggestItem } from '@/redux/types/address'
 // 路由
-import { routes } from '@/utils/constants'
+import { routes, noSuggest } from '@/utils/constants'
 
 export default function SuggestList() {
     // 获取登录状态和用户信息
@@ -93,7 +93,7 @@ export default function SuggestList() {
                 }}
             >
                 {
-                    !newSuggestId && (
+                    !newSuggestId && suggestList.length > 0 && (
                         <View
                             className='content-top'
                             style={{
@@ -118,6 +118,24 @@ export default function SuggestList() {
                     )
                 }
                 {
+                    suggestList.length === 0 && (
+                        <Empty
+                            style={{
+                                backgroundColor: 'transparent',
+                            }}
+                            image={
+                                <Image
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                    }}
+                                    src={noSuggest}
+                                />
+                            }
+                        />
+                    )
+                }
+                {
                     newSuggestId ? (
                         filterSuggestList(newSuggestId).map((item) => (
                             <SuggestCard key={item.suggestId} suggestItem={item} />
@@ -132,8 +150,9 @@ export default function SuggestList() {
             <View
                 className='footer'
                 style={{
-                    padding: `${pxTransform(windowHeight * 0.02)} 0`,
-                    height: pxTransform(windowHeight * 0.08),
+                    padding: pxTransform(windowWidth * 0.04),
+                    width: `calc(100% - ${pxTransform(windowWidth * 0.08)})`,
+                    height: pxTransform(viewHeight * 0.1 - windowWidth * 0.08),
                 }}
             >
                 {
@@ -141,9 +160,9 @@ export default function SuggestList() {
                         <Button
                             type='primary'
                             style={{
-                                height: pxTransform(windowHeight * 0.04),
-                                width: pxTransform(windowWidth * 0.65),
-                                borderRadius: pxTransform(windowWidth * 0.05),
+                                height: '100%',
+                                width: '100%',
+                                borderRadius: pxTransform(windowWidth * 0.06),
                             }}
                         >
                             查看所有评价
@@ -152,9 +171,9 @@ export default function SuggestList() {
                         <Button
                             type='primary'
                             style={{
-                                height: pxTransform(windowHeight * 0.04),
-                                width: pxTransform(windowWidth * 0.65),
-                                borderRadius: pxTransform(windowWidth * 0.05),
+                                height: '100%',
+                                width: '100%',
+                                borderRadius: pxTransform(windowWidth * 0.06),
                             }}
                             icon={<Feedback />}
                             onClick={() => {

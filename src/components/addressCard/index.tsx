@@ -1,17 +1,22 @@
 import { View, Text } from '@tarojs/components'
-import { memo, ReactNode } from 'react'
+import { memo, ReactNode, useEffect } from 'react'
 import './index.scss'
 import { IAddressItem } from '@/redux/types/address'
-import { getSystemInfoSync, getMenuButtonBoundingClientRect } from '@tarojs/taro'
+import { getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo } from '@tarojs/taro'
 import { pxTransform, Tag } from '@nutui/nutui-react-taro'
 import { Edit } from '@nutui/icons-react-taro'
 import equal from 'fast-deep-equal'
+import { routes } from '@/utils/constants'
+import { useAppDispatch } from '@/hooks/useAppStore'
+import { setCurrentAddressAction } from '@/redux/modules/address'
 
 interface IAddressCardProps {
     addressItem: IAddressItem
 }
 
 function AddressCard({ addressItem }: IAddressCardProps) {
+
+    const dispatch = useAppDispatch()
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -47,16 +52,21 @@ function AddressCard({ addressItem }: IAddressCardProps) {
                                 style={{
                                     marginRight: pxTransform(windowWidth * 0.02),
                                 }}
-                            >{addressItem.addressTag}</Tag>
+                            >
+                                {addressItem.addressTag === '1' && '家'}
+                                {addressItem.addressTag === '2' && '公司'}
+                                {addressItem.addressTag === '3' && '学校'}
+                                {addressItem.addressTag === '4' && '其他'}
+                            </Tag>
                         )
                     }
                     <View
-                    >{addressItem.addressStreet}&nbsp;{addressItem.addressDetail}</View>
+                    >{addressItem.addressName}&nbsp;{addressItem.addressDetail}</View>
                 </View>
                 <View
                     className='address-card-left-bottom'
                     style={{
-                        fontSize: pxTransform(windowHeight * 0.012),
+                        fontSize: pxTransform(windowHeight * 0.013),
                     }}
                 >
                     <Text
@@ -66,7 +76,9 @@ function AddressCard({ addressItem }: IAddressCardProps) {
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                         }}
-                    >{addressItem.addressName}</Text>
+                    >{addressItem.userName}</Text>
+                    &nbsp;
+                    <Text>{addressItem.addressSex === '1' ? '(先生)' : '(女士)'}</Text>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Text>{addressItem.addressPhone.slice(0, 3)}****{addressItem.addressPhone.slice(-4)}</Text>
                 </View>
@@ -76,6 +88,15 @@ function AddressCard({ addressItem }: IAddressCardProps) {
             >
                 <Edit
                     size={pxTransform(windowWidth * 0.05)}
+                    onClick={() => {
+                        dispatch(setCurrentAddressAction({
+                            type: 'set',
+                            data: addressItem
+                        }))
+                        navigateTo({
+                            url: (routes.find((route) => route.name === 'address')?.path || '') + `?addressId=${addressItem.addressId}`,
+                        })
+                    }}
                 />
             </View>
         </View>

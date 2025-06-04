@@ -64,6 +64,18 @@ export const routes = [
     {
         name: 'address',
         path: '/subPackagesD/address/address'
+    },
+    {
+        name: 'chooseShop',
+        path: '/subPackagesE/chooseShop/chooseShop'
+    },
+    {
+        name: 'index',
+        path: '/pages/index/index'
+    },
+    {
+        name: 'order',
+        path: '/pages/order/order'
     }
 ]
 
@@ -117,3 +129,9 @@ export const level1Img = 'https://minio-dev.imissniu.com/xfn/assets%2Fvip%2Fleve
 export const level2Img = 'https://minio-dev.imissniu.com/xfn/assets%2Fvip%2Flevel2%402x.png'
 export const level3Img = 'https://minio-dev.imissniu.com/xfn/assets%2Fvip%2Flevel3%402x.png'
 export const level4Img = 'https://minio-dev.imissniu.com/xfn/assets%2Fvip%2Flevel4%402x.png'
+
+export const noAddress = 'https://minio-dev.imissniu.com/xfn/assets%2Fzip%2FnoAddress%402x.png'
+export const noSuggest = 'https://minio-dev.imissniu.com/xfn/assets%2Fzip%2FnoSuggest%402x.png'
+export const locationLogo = 'https://minio-dev.imissniu.com/xfn/assets%2Findex%2Flocation-logo.png'
+export const callmeIcon = 'https://minio-dev.imissniu.com/xfn/assets%2Findex%2Fcallme-icon.png'
+export const getLocationIcon = 'https://minio-dev.imissniu.com/xfn/assets%2Findex%2Fgetlocation-icon.png'

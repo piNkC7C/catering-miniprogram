@@ -37,6 +37,7 @@ export default defineConfig(async (merge, { command, mode }) => {
     outputRoot: 'dist',
     plugins: ['@tarojs/plugin-http', '@tarojs/plugin-html'],
     defineConstants: {
+      LOCATION_APIKEY: JSON.stringify('PJ3BZ-BOPWZ-IPHXC-76G2M-OTHXS-FGF4B'),
     },
     copy: {
       patterns: [

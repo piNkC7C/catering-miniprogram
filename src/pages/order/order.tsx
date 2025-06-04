@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
-import { useLoad, useReady, useUnload, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
+import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction, setCheckoutOrderAction } from '@/redux/modules/order'
@@ -26,9 +26,21 @@ export default function Order() {
       orderTabsList,
       orderList,
       goodsCouponList,
+    },
+    address: {
+      currentShop,
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
+
+  // 每次进入页面都检查是否选择了门店
+  useDidShow(() => {
+    if (!currentShop) {
+      navigateTo({
+        url: (routes.find((route) => route.name === 'chooseShop')?.path || '') + '?type=init',
+      })
+    }
+  })
 
   const [tableInfo, setTableInfo] = useState<any>({
     tableId: null,
@@ -198,7 +210,12 @@ export default function Order() {
                   fontSize: pxTransform(viewHeight * 0.025),
                   fontWeight: 'bold',
                 }}
-              >浙江某某某店</View>
+                onClick={() => {
+                  navigateTo({
+                    url: (routes.find((route) => route.name === 'chooseShop')?.path || ''),
+                  })
+                }}
+              >{(currentShop?.shopName + ' >') || ''}</View>
             </View>
             <Button
               type="default"
@@ -740,7 +757,7 @@ export default function Order() {
                 // )
                 navigateTo(
                   {
-                    url: routes.find((route) => route.name === 'selectTable')?.path || '' + `?id=5`,
+                    url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?id=5`,
                   }
                 )
               } else {

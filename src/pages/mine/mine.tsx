@@ -45,7 +45,7 @@ export default function Mine() {
       title: '优惠券',
       icon: mineYouhui,
       desc: '查看优惠券',
-      path: routes.find((route) => route.name === 'couponList')?.path || ''
+      path: routes.find((route) => route.name === 'couponList')?.path || '' + '?type=all'
     },
     // {
     //   title: '余额',

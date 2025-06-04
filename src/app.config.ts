@@ -9,6 +9,17 @@ export default defineAppConfig({
     'pages/orderList/orderList',
     // 我的
     'pages/mine/mine',
+
+    // // 地址列表
+    // 'subPackagesD/addressList/addressList',
+    // // 添加/编辑地址
+    // 'subPackagesD/address/address',
+    // 反馈列表
+    // 'subPackagesD/suggestList/suggestList',
+    // // 反馈
+    // 'subPackagesD/suggest/suggest',
+    // 选择店铺
+    // 'subPackagesE/chooseShop/chooseShop',
   ],
   subPackages: [
     {
@@ -62,7 +73,14 @@ export default defineAppConfig({
         // 添加/编辑地址
         'address/address',
       ]
-    }
+    },
+    {
+      root: 'subPackagesE',
+      pages: [
+        // 选择店铺
+        'chooseShop/chooseShop',
+      ]
+    },
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -101,5 +119,14 @@ export default defineAppConfig({
     selectedColor: '#1aad19',
     backgroundColor: '#fff',
     borderStyle: 'white'
+  },
+  requiredPrivateInfos: [
+    'getLocation',
+    'chooseLocation',
+  ],
+  permission: {
+    'scope.userLocation': {
+      desc: '你的位置信息将用于小程序位置接口的效果展示'
+    }
   }
 })

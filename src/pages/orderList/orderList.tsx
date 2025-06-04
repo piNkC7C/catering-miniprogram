@@ -189,7 +189,7 @@ export default function OrderList() {
                                   data: orderItem
                                 }))
                                 navigateTo({
-                                  url: routes.find((route) => route.name === 'orderDetail')?.path || '' + `?id=${orderItem.orderId}`
+                                  url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
                                 })
                               }}
                             >
