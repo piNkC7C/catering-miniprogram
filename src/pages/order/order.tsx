@@ -87,31 +87,6 @@ export default function Order() {
   // 创建一个手动滚动事件来检测元素可见性
   // const [visibleItems, setVisibleItems] = useState<string[]>([]);
 
-  const { run: handleScroll } = useThrottleFn(
-    () => {
-      nextTick(() => {
-        createSelectorQuery()
-          .selectAll('.scrollTarget')
-          .boundingClientRect()
-          .exec(res => {
-            // console.log('res', res);
-            if (res[0] && res[0].length > 0) {
-              const visible = res[0]
-                .filter(item => item.top <= 300)
-                .map(item => item.id);
-
-              if (visible.length > 0) {
-                // console.log('可见元素:', visible);
-                setSideBarValue(visible[visible.length - 1]);
-                // setVisibleItems(visible);
-              }
-            }
-          });
-      });
-    },
-    { wait: 100 }
-  );
-
   const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
   const finalStatusBarHeight = statusBarHeight || 0
   // 获取胶囊按钮信息
@@ -124,13 +99,78 @@ export default function Order() {
   const viewHeight = windowHeight - navHeight
 
   // 侧边栏选中值
-  const [sideBarValue, setSideBarValue] = useState<number | string>('good-coupon')
+  const [sideBarValue, setSideBarValue] = useState<number | string>(0)
 
   // 购物车左侧显示
   const [cartLeftWidth, setCartLeftWidth] = useState<string>('30%')
   const [cartLeftBackground, setCartLeftBackground] = useState<string>('#D61518')
   // 购物车右侧宽度
   // const [cartRightWidth, setCartRightWidth] = useState<string>(`calc(70% - ${pxTransform(windowWidth * 0.18)})`)
+
+  const [activeStickyIndex, setActiveStickyIndex] = useState<number>(0)
+  const [activeStickyId, setActiveStickyId] = useState<string>('sticky-0')
+  const stickyPositions = useRef<{ id: string; top: number }[]>([])
+
+  // 初始化获取所有吸顶元素的位置
+  useEffect(() => {
+    const query = createSelectorQuery()
+    query.selectAll('.sticky-header').boundingClientRect()
+    query.exec((res) => {
+      if (res && res[0]) {
+        stickyPositions.current = res[0].map((rect, index) => ({
+          id: `sticky-${index}`,
+          top: rect.top
+        }))
+      }
+    })
+  }, [groupGoodsList])
+
+  // 滚动事件处理
+  const handleScroll = (e: any) => {
+    const scrollTop = e.detail.scrollTop
+
+    // 找出当前应该吸顶的元素
+    for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
+      const position = stickyPositions.current[i]
+
+      if (scrollTop >= position.top) {
+        if (orderTabsList[i + 1]) {
+          setSideBarValue(orderTabsList[i + 1].groupId)
+        } else {
+          setSideBarValue(orderTabsList[orderTabsList.length - 1].groupId)
+        }
+        break
+      }
+    }
+  }
+
+  // const { run: handleScroll } = useThrottleFn(
+  //   (e: any) => {
+  //     const scrollTop = e.detail.scrollTop
+  //     // console.log('scrollTop', scrollTop);
+
+
+  //     // 找出当前应该吸顶的元素
+  //     for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
+  //       const position = stickyPositions.current[i]
+  //       // console.log('position', position);
+
+  //       if (scrollTop >= position.top) {
+  //         // console.log('position.top', position);
+  //         // setActiveStickyIndex(i)
+  //         // setActiveStickyId(position.id)
+  //         // console.log('orderTabsList[i].groupId', orderTabsList[i].groupId);
+  //         if (orderTabsList[i]) {
+  //           setSideBarValue(orderTabsList[i].groupId)
+  //         } else {
+  //           setSideBarValue(orderTabsList[orderTabsList.length - 1].groupId)
+  //         }
+  //         break
+  //       }
+  //     }
+  //   },
+  //   { wait: 100 }
+  // );
 
   return (
     <>
@@ -215,7 +255,7 @@ export default function Order() {
                     url: (routes.find((route) => route.name === 'chooseShop')?.path || ''),
                   })
                 }}
-              >{(currentShop?.shopName + ' >') || ''}</View>
+              >{currentShop ? (currentShop?.shopName + ' >') : '未选门店'}</View>
             </View>
             <Button
               type="default"
@@ -305,11 +345,15 @@ export default function Order() {
               setSideBarValue(key)
             }}
           >
-            <SideBar.Item title='尊享商品券' value='good-coupon'>
-            </SideBar.Item>
             {
               orderTabsList.map((item) => (
-                <SideBar.Item title={item.groupName} value={item.groupId}>
+                <SideBar.Item title={
+                  <>
+                    <Badge value={cartList.filter((findItem) => {
+                      return findItem.groupId === item.groupId
+                    }).length}>{item.groupName}</Badge>
+                  </>
+                } value={item.groupId}>
                 </SideBar.Item>
               ))
             }
@@ -317,280 +361,267 @@ export default function Order() {
           <ScrollView
             id='parentScroll'
             scrollY
-            scrollIntoView={`${sideBarValue}`}
+            scrollIntoView={`sticky-${sideBarValue}`}
             onScroll={handleScroll}
             style={{
               flex: 1,
               padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(windowWidth * 0.05)}`,
               height: `calc(100% - ${pxTransform(viewHeight * 0.04)})`,
               backgroundColor: '#fff',
-              overflow: 'scroll',
+              overflow: 'auto',
             }}
           >
             <View
-              className='scrollTarget'
               style={{
-                // position: sideBarValue === item.id ? 'sticky' : 'relative',
-                // top: sideBarValue === item.id ? 0 : 'auto',
-                zIndex: 10,
+                position: 'relative',
                 width: '100%',
-                marginBottom: pxTransform(viewHeight * 0.02),
-                backgroundColor: '#fff',
-                color: '#6A6A6A',
-                fontSize: pxTransform(viewHeight * 0.018),
-                // 高亮显示可见元素
-                // backgroundColor: visibleItems.includes(item.id) ? 'rgba(255,215,0,0.2)' : 'transparent',
               }}
             >
-              <Text>尊享商品券(每件商品限用一张)</Text>
-            </View>
-            {
-              groupGoodsList.map((groupItem, index) => (
-                <>
-                  <View
-                    className='scrollTarget'
-                    style={{
-                      // position: sideBarValue === item.id ? 'sticky' : 'relative',
-                      // top: sideBarValue === item.id ? 0 : 'auto',
-                      zIndex: 10,
-                      width: '100%',
-                      marginBottom: pxTransform(viewHeight * 0.02),
-                      backgroundColor: '#fff',
-                      color: '#6A6A6A',
-                      fontSize: pxTransform(viewHeight * 0.018),
-                      // 高亮显示可见元素
-                      // backgroundColor: visibleItems.includes(item.id) ? 'rgba(255,215,0,0.2)' : 'transparent',
-                    }}
-                  >
-                    <Text>{groupItem.groupName}</Text>
-                  </View>
-                  <View
-                    style={{
-                      width: '100%',
-                      marginBottom: pxTransform(viewHeight * 0.02),
-                    }}
-                  >
-                    {
-                      groupItem.goodsList.map((goodsItem) => (
-                        <View
-                          style={{
-                            width: '100%',
-                            height: pxTransform(windowWidth * 0.2),
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginBottom: pxTransform(viewHeight * 0.02),
-                          }}
-                        >
-                          <Image
-                            src={goodsItem.goodsImage}
-                            width={pxTransform(windowWidth * 0.2)}
-                            height={pxTransform(windowWidth * 0.2)}
-                          />
+              {
+                groupGoodsList.map((groupItem, index) => (
+                  <View key={index} style={{ position: 'relative', width: '100%' }}>
+                    <View
+                      id={`sticky-${groupItem.groupId}`}
+                      className={`sticky-header`}
+                      style={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: index + 1,
+                        width: '100%',
+                        marginBottom: pxTransform(viewHeight * 0.02),
+                        backgroundColor: '#fff',
+                        color: '#6A6A6A',
+                        fontSize: pxTransform(viewHeight * 0.018),
+                        padding: `${pxTransform(viewHeight * 0.01)} 0`,
+                      }}
+                    >
+                      <Text>{groupItem.groupName}</Text>
+                    </View>
+                    <View
+                      style={{
+                        width: '100%',
+                        marginBottom: pxTransform(viewHeight * 0.02),
+                      }}
+                    >
+                      {
+                        groupItem.goodsList.map((goodsItem) => (
                           <View
                             style={{
-                              height: '100%',
-                              flex: 1,
-                              marginLeft: pxTransform(windowWidth * 0.02),
+                              width: '100%',
+                              height: pxTransform(windowWidth * 0.2),
                               display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between',
-                              fontSize: pxTransform(viewHeight * 0.018),
-                              fontWeight: 'bold',
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              marginBottom: pxTransform(viewHeight * 0.02),
                             }}
                           >
-                            <Text>{goodsItem.goodsName}</Text>
+                            <Image
+                              src={goodsItem.goodsImage}
+                              width={pxTransform(windowWidth * 0.2)}
+                              height={pxTransform(windowWidth * 0.2)}
+                            />
                             <View
                               style={{
+                                height: '100%',
+                                flex: 1,
+                                marginLeft: pxTransform(windowWidth * 0.02),
                                 display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
+                                flexDirection: 'column',
                                 justifyContent: 'space-between',
+                                fontSize: pxTransform(viewHeight * 0.018),
+                                fontWeight: 'bold',
                               }}
                             >
+                              <Text>{goodsItem.goodsName}</Text>
                               <View
                                 style={{
                                   display: 'flex',
                                   flexDirection: 'row',
-                                  alignItems: 'flex-end',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
                                 }}
                               >
-                                <ConfigProvider
-                                  theme={{
-                                    nutuiPricePrimaryColor: '#333',
-                                    nutuiPriceSymbolLargeSize: pxTransform(viewHeight * 0.02),
-                                  }}
-                                >
-                                  <Price
-                                    color='gray'
-                                    price={goodsItem.goodsPrice}
-                                    size="small"
-                                    thousands
-                                    style={{
-                                      fontWeight: 'bold',
-                                    }}
-                                  />
-                                </ConfigProvider>
-                                <Text
+                                <View
                                   style={{
-                                    marginLeft: pxTransform(windowWidth * 0.01),
-                                    fontSize: pxTransform(viewHeight * 0.012),
-                                    color: '#999',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    alignItems: 'flex-end',
                                   }}
                                 >
-                                  起
-                                </Text>
-                              </View>
-                              {
-                                goodsItem.isPackage ? (
-                                  <Badge
-                                    style={{
-                                      marginRight: pxTransform(windowWidth * 0.02),
-                                    }}
-                                    value={cartList.find((findItem) => {
-                                      return findItem.goodsId === goodsItem.goodsId
-                                    })?.goodsCount}>
-                                    <Button
-                                      type="primary"
-                                      size="mini"
-                                      style={{
-                                        // width: pxTransform(windowWidth * 0.13),
-                                        // height: pxTransform(viewHeight * 0.035),
-                                        borderRadius: pxTransform(viewHeight * 0.05),
-                                        // fontSize: pxTransform(viewHeight * 0.03),
-                                      }}
-                                      onClick={() => {
-                                        navigateTo({
-                                          url: routes.find((route) => route.name === 'choose')?.path || '',
-                                        })
-                                      }}
-                                    >选规格</Button>
-                                  </Badge>
-                                ) : (
-                                  <View
-                                    style={{
-                                      marginRight: pxTransform(windowWidth * 0.02),
-                                      display: 'flex',
-                                      flexDirection: 'row',
-                                      alignItems: 'flex-end',
-                                      justifyContent: 'space-between',
+                                  <ConfigProvider
+                                    theme={{
+                                      nutuiPricePrimaryColor: '#333',
+                                      nutuiPriceSymbolLargeSize: pxTransform(viewHeight * 0.02),
                                     }}
                                   >
-                                    {
-                                      cartList.find((findItem) => {
-                                        return findItem.goodsId === goodsItem.goodsId
-                                      }) && (
-                                        <View
-                                          style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                          }}
-                                        >
-                                          <Button
-                                            type="primary"
-                                            size="small"
-                                            fill='outline'
-                                            style={{
-                                              width: pxTransform(windowWidth * 0.05),
-                                              height: pxTransform(windowWidth * 0.05),
-                                              borderRadius: pxTransform(windowWidth * 0.05),
-                                            }}
-                                            icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
-                                            onClick={() => {
-                                              if (cartList.find((findItem) => {
-                                                return findItem.goodsId === goodsItem.goodsId
-                                              })?.goodsCount === 1) {
-                                                dispatch(setCartListAction({
-                                                  type: 'remove', data: {
-                                                    goodsId: goodsItem.goodsId,
-                                                  }
-                                                }))
-                                              } else {
-                                                dispatch(setCartListAction({
-                                                  type: 'set', data: [
-                                                    ...cartList.map((mapItem) => {
-                                                      if (mapItem.goodsId === goodsItem.goodsId) {
-                                                        return { ...mapItem, goodsCount: mapItem.goodsCount - 1 }
-                                                      }
-                                                      return mapItem
-                                                    })
-                                                  ]
-                                                }))
-                                              }
-                                            }}
-                                          >
-                                          </Button>
-                                          <Text
-                                            style={{
-                                              margin: `0 ${pxTransform(windowWidth * 0.02)}`,
-                                            }}
-                                          >{cartList.find((findItem) => {
-                                            return findItem.goodsId === goodsItem.goodsId
-                                          })?.goodsCount}</Text>
-                                        </View>
-                                      )
-                                    }
-                                    <Button
-                                      type="primary"
+                                    <Price
+                                      color='gray'
+                                      price={goodsItem.goodsPrice}
                                       size="small"
+                                      thousands
                                       style={{
-                                        width: pxTransform(windowWidth * 0.05),
-                                        height: pxTransform(windowWidth * 0.05),
-                                        borderRadius: pxTransform(windowWidth * 0.05),
+                                        fontWeight: 'bold',
                                       }}
-                                      icon={<Add color='#fff' size={windowWidth * 0.036} />}
-                                      onClick={() => {
-                                        if (cartList.find((findItem) => {
-                                          return findItem.goodsId === goodsItem.goodsId
-                                        })) {
-                                          dispatch(setCartListAction({
-                                            type: 'set', data: [
-                                              ...cartList.map((mapItem) => {
-                                                if (mapItem.goodsId === goodsItem.goodsId) {
-                                                  return { ...mapItem, goodsCount: mapItem.goodsCount + 1 }
-                                                }
-                                                return mapItem
-                                              })
-                                            ]
-                                          }))
-                                        } else {
-                                          dispatch(setCartListAction({
-                                            type: 'add', data: {
-                                              goodsId: goodsItem.goodsId,
-                                              goodsName: goodsItem.goodsName,
-                                              goodsPrice: goodsItem.goodsPrice,
-                                              goodsImage: goodsItem.goodsImage,
-                                              goodsCount: 1,
-                                              isPackage: goodsItem.isPackage,
-                                            }
-                                          }))
-                                        }
+                                    />
+                                  </ConfigProvider>
+                                  <Text
+                                    style={{
+                                      marginLeft: pxTransform(windowWidth * 0.01),
+                                      fontSize: pxTransform(viewHeight * 0.012),
+                                      color: '#999',
+                                    }}
+                                  >
+                                    起
+                                  </Text>
+                                </View>
+                                {
+                                  goodsItem.isPackage ? (
+                                    <Badge
+                                      style={{
+                                        marginRight: pxTransform(windowWidth * 0.02),
+                                      }}
+                                      value={cartList.find((findItem) => {
+                                        return findItem.goodsId === goodsItem.goodsId
+                                      })?.goodsCount}>
+                                      <Button
+                                        type="primary"
+                                        size="mini"
+                                        style={{
+                                          borderRadius: pxTransform(viewHeight * 0.05),
+                                        }}
+                                        onClick={() => {
+                                          navigateTo({
+                                            url: routes.find((route) => route.name === 'choose')?.path || '',
+                                          })
+                                        }}
+                                      >选规格</Button>
+                                    </Badge>
+                                  ) : (
+                                    <View
+                                      style={{
+                                        marginRight: pxTransform(windowWidth * 0.02),
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        alignItems: 'flex-end',
+                                        justifyContent: 'space-between',
                                       }}
                                     >
-                                    </Button>
-                                  </View>
-                                )
-                              }
+                                      {
+                                        cartList.find((findItem) => {
+                                          return findItem.goodsId === goodsItem.goodsId
+                                        }) && (
+                                          <View
+                                            style={{
+                                              display: 'flex',
+                                              flexDirection: 'row',
+                                              alignItems: 'center',
+                                            }}
+                                          >
+                                            <Button
+                                              type="primary"
+                                              size="small"
+                                              fill='outline'
+                                              style={{
+                                                width: pxTransform(windowWidth * 0.05),
+                                                height: pxTransform(windowWidth * 0.05),
+                                                borderRadius: pxTransform(windowWidth * 0.05),
+                                              }}
+                                              icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
+                                              onClick={() => {
+                                                if (cartList.find((findItem) => {
+                                                  return findItem.goodsId === goodsItem.goodsId
+                                                })?.goodsCount === 1) {
+                                                  dispatch(setCartListAction({
+                                                    type: 'remove', data: {
+                                                      goodsId: goodsItem.goodsId,
+                                                    }
+                                                  }))
+                                                } else {
+                                                  dispatch(setCartListAction({
+                                                    type: 'set', data: [
+                                                      ...cartList.map((mapItem) => {
+                                                        if (mapItem.goodsId === goodsItem.goodsId) {
+                                                          return { ...mapItem, goodsCount: mapItem.goodsCount - 1 }
+                                                        }
+                                                        return mapItem
+                                                      })
+                                                    ]
+                                                  }))
+                                                }
+                                              }}
+                                            >
+                                            </Button>
+                                            <Text
+                                              style={{
+                                                margin: `0 ${pxTransform(windowWidth * 0.02)}`,
+                                              }}
+                                            >{cartList.find((findItem) => {
+                                              return findItem.goodsId === goodsItem.goodsId
+                                            })?.goodsCount}</Text>
+                                          </View>
+                                        )
+                                      }
+                                      <Button
+                                        type="primary"
+                                        size="small"
+                                        style={{
+                                          width: pxTransform(windowWidth * 0.05),
+                                          height: pxTransform(windowWidth * 0.05),
+                                          borderRadius: pxTransform(windowWidth * 0.05),
+                                        }}
+                                        icon={<Add color='#fff' size={windowWidth * 0.036} />}
+                                        onClick={() => {
+                                          if (cartList.find((findItem) => {
+                                            return findItem.goodsId === goodsItem.goodsId
+                                          })) {
+                                            dispatch(setCartListAction({
+                                              type: 'set', data: [
+                                                ...cartList.map((mapItem) => {
+                                                  if (mapItem.goodsId === goodsItem.goodsId) {
+                                                    return { ...mapItem, goodsCount: mapItem.goodsCount + 1 }
+                                                  }
+                                                  return mapItem
+                                                })
+                                              ]
+                                            }))
+                                          } else {
+                                            dispatch(setCartListAction({
+                                              type: 'add', data: {
+                                                goodsId: goodsItem.goodsId,
+                                                goodsName: goodsItem.goodsName,
+                                                goodsPrice: goodsItem.goodsPrice,
+                                                goodsImage: goodsItem.goodsImage,
+                                                goodsCount: 1,
+                                                isPackage: goodsItem.isPackage,
+                                              }
+                                            }))
+                                          }
+                                        }}
+                                      >
+                                      </Button>
+                                    </View>
+                                  )
+                                }
+                              </View>
                             </View>
                           </View>
-                        </View>
-                      ))
+                        ))
+                      }
+                    </View>
+                    {
+                      index === groupGoodsList.length - 1 && (
+                        <View
+                          style={{
+                            width: '100%',
+                            height: pxTransform(viewHeight * 0.1),
+                          }}
+                        ></View>
+                      )
                     }
                   </View>
-                  {
-                    index === groupGoodsList.length - 1 && (
-                      <View
-                        style={{
-                          width: '100%',
-                          height: pxTransform(viewHeight * 0.1),
-                        }}
-                      ></View>
-                    )
-                  }
-                </>
-              ))
-            }
+                ))
+              }
+            </View>
           </ScrollView>
         </View>
         <View

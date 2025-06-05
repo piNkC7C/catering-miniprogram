@@ -3,6 +3,7 @@ import { IOrderState } from '../types/order'
 
 const initialState: IOrderState = {
   cartList: Array.from({ length: 5 }, (_, index) => ({
+    groupId: 1,
     goodsId: index + 1,
     goodsName: '原切前胸牛肉',
     goodsPrice: 39,
@@ -18,6 +19,7 @@ const initialState: IOrderState = {
       tableNumber: 1,
       personNumber: 1,
       goodsList: Array.from({ length: 5 }, (_, index) => ({
+        groupId: 1,
         goodsId: index + 1,
         goodsName: '原切前胸牛肉',
         goodsPrice: 39,
@@ -40,6 +42,7 @@ const initialState: IOrderState = {
       tableNumber: 1,
       personNumber: 1,
       goodsList: Array.from({ length: 5 }, (_, index) => ({
+        groupId: 2,
         goodsId: index + 1,
         goodsName: '原切前胸牛肉',
         goodsPrice: 39,
@@ -75,6 +78,7 @@ const initialState: IOrderState = {
       tableNumber: 1,
       personNumber: 1,
       goodsList: Array.from({ length: 5 }, (_, index) => ({
+        groupId: 3,
         goodsId: index + 1,
         goodsName: '原切前胸牛肉',
         goodsPrice: 39,
@@ -97,6 +101,7 @@ const initialState: IOrderState = {
       tableNumber: 1,
       personNumber: 1,
       goodsList: Array.from({ length: 5 }, (_, index) => ({
+        groupId: 4,
         goodsId: index + 1,
         goodsName: '原切前胸牛肉',
         goodsPrice: 39,
@@ -117,6 +122,10 @@ const initialState: IOrderState = {
   currentOrder: null,
   orderTabsList: [
     {
+      groupId: 0,
+      groupName: '尊享商品券',
+    },
+    {
       groupId: 1,
       groupName: '专区',
     },
@@ -124,8 +133,29 @@ const initialState: IOrderState = {
       groupId: 2,
       groupName: '饮品',
     },
+    {
+      groupId: 3,
+      groupName: '小吃',
+    },
+    {
+      groupId: 4,
+      groupName: '主食',
+    },
+    {
+      groupId: 5,
+      groupName: '甜品',
+    },
+    {
+      groupId: 6,
+      groupName: '酒水',
+    },
   ],
   groupGoodsList: [
+    {
+      groupId: 0,
+      groupName: '尊享商品券(每件商品限用一张)',
+      goodsList: [],
+    },
     {
       groupId: 1,
       groupName: '专区',
@@ -166,6 +196,135 @@ const initialState: IOrderState = {
         },
         {
           goodsId: 5,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        }
+      ],
+    },
+    {
+      groupId: 3,
+      groupName: '小吃',
+      goodsList: [
+        {
+          goodsId: 6,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 7,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        }
+      ],
+    },
+    {
+      groupId: 4,
+      groupName: '主食',
+      goodsList: [
+        {
+          goodsId: 8,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 9,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        }
+      ],
+    },
+    {
+      groupId: 5,
+      groupName: '甜品',
+      goodsList: [
+        {
+          goodsId: 10,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 11,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 12,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 13,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        }
+      ],
+    },
+    {
+      groupId: 6,
+      groupName: '酒水',
+      goodsList: [
+        {
+          goodsId: 14,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 15,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 16,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 17,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 18,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 19,
+          goodsName: '原切前胸牛肉',
+          goodsPrice: 39,
+          goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
+          isPackage: false,
+        },
+        {
+          goodsId: 20,
           goodsName: '原切前胸牛肉',
           goodsPrice: 39,
           goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',

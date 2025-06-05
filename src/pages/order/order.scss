@@ -5,6 +5,20 @@
     background: #fff;
   }
 
+  // sticky header 样式
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+    
+    &.active {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid #f0f0f0;
+    }
+  }
+
   .order-cart {
     .order-cart-left {
       // width: 80px;

@@ -40,6 +40,7 @@ export interface ICouponItem {
 }
 
 export interface ICartItem extends IGoodsItem {
+  groupId: number
   goodsCount: number
   totalPrice: number
   // packageList?: IGoodsItem[] // 套餐商品列表
