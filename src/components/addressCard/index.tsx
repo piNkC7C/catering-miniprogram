@@ -94,7 +94,7 @@ function AddressCard({ addressItem }: IAddressCardProps) {
                             data: addressItem
                         }))
                         navigateTo({
-                            url: (routes.find((route) => route.name === 'address')?.path || '') + `?addressId=${addressItem.addressId}`,
+                            url: (routes.find((route) => route.name === 'address')?.path || '') + `?addressId=${addressItem.id}`,
                         })
                     }}
                 />

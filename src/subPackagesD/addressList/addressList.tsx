@@ -1,12 +1,15 @@
 import { useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, navigateTo, useDidShow } from '@tarojs/taro'
 import './addressList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Empty } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
 import AddressCard from '@/components/addressCard'
 import { routes, noAddress } from '@/utils/constants'
+import { taroGet } from '@/service'
+import { getAddressListURL } from '@/service/config'
+import { setAddressListAction } from '@/redux/modules/address'
 
 export default function AddressList() {
     // 获取登录状态和用户信息
@@ -19,6 +22,26 @@ export default function AddressList() {
             addressList
         }
     } = useAppSelector((state) => state)
+
+    const dispatch = useAppDispatch()
+
+    const getAddressList = () => {
+        taroGet({
+            url: getAddressListURL,
+            success: (res) => {
+                dispatch(setAddressListAction({ type: 'set', data: res.data }))
+                // 这里可以处理成功响应
+            },
+            fail: (err) => {
+                console.log('获取收获地址列表失败:', err)
+                // 这里可以处理失败响应
+            }
+        })
+    }
+
+    useDidShow(() => {
+        getAddressList()
+    })
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -79,7 +102,7 @@ export default function AddressList() {
             >
                 {
                     addressList.map((item) => (
-                        <AddressCard key={item.addressId} addressItem={item} />
+                        <AddressCard key={item.id} addressItem={item} />
                     ))
                 }
                 {

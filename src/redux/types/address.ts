@@ -1,5 +1,5 @@
 export interface IAddressItem {
-  addressId: number
+  id: number
   userName: string
   addressName: string
   addressSex: string

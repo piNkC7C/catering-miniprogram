@@ -33,6 +33,10 @@ export default function Order() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
+  // 页面加载，初始化获取商品列表
+  useLoad(() => {
+  })
+
   // 每次进入页面都检查是否选择了门店
   useDidShow(() => {
     if (!currentShop) {
@@ -42,11 +46,13 @@ export default function Order() {
     }
   })
 
+  // 桌号信息
   const [tableInfo, setTableInfo] = useState<any>({
     tableId: null,
     peopleNum: null,
   })
 
+  // 获取桌号
   useEffect(() => {
     if (isRetrieve || !tableInfo.tableId) {
       getStorage(

@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, getLocation,chooseLocation } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, getLocation, chooseLocation, showToast } from '@tarojs/taro'
 import './address.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Form, Input, Checkbox, Tag, Radio } from '@nutui/nutui-react-taro'
 import { ArrowLeft, ArrowRight } from '@nutui/icons-react-taro'
 import { setAddressListAction } from '@/redux/modules/address'
 import { IAddressItem } from '@/redux/types/address'
+import { addAddressURL, editAddressURL } from '@/service/config'
+import { taroPost, taroPut, taroDelete } from '@/service'
+import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
+import { qqmapsdkKey } from '@/utils/constants'
 
 export default function Address() {
     // 获取登录状态和用户信息
@@ -21,6 +25,35 @@ export default function Address() {
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
+
+    let qqmapsdk: any
+
+    useLoad(() => {
+        qqmapsdk = new QQMapWX({
+            key: qqmapsdkKey
+        })
+    })
+
+    // 逆解析经纬度获取地址信息
+    const getAddressByLocation = (latitude, longitude) => {
+        qqmapsdk.reverseGeocoder({
+            location: {
+                latitude,
+                longitude
+            },
+            success(res) {
+                console.log('逆解析成功:', res.result);
+                const { province, city, district, street } = res.result.address_component;
+                setAddressProvince(province)
+                setAddressCity(city)
+                setAddressArea(district)
+                setAddressStreet(street)
+            },
+            fail(err) {
+                console.error('逆解析失败:', err);
+            }
+        });
+    };
 
     const router = useRouter()
     const { addressId } = router.params
@@ -55,6 +88,108 @@ export default function Address() {
     const getAddressTagColor = useCallback((tag: string) => {
         return selectAddressTag === tag ? '#FA2400' : '#9C9C9C'
     }, [addressId, currentAddress?.addressTag, selectAddressTag])
+
+    const addOrEditAddress = () => {
+        const addressPhone = addressForm.getFieldValue('addressPhone')
+        if (userName === '') {
+            showToast({
+                title: '名字不能为空哦',
+                icon: 'none',
+            })
+            return
+        }
+        if (addressPhone === '') {
+            showToast({
+                title: '手机号是必填的',
+                icon: 'none',
+            })
+            return
+        }
+        if (addressProvince === '' && addressCity === '' && addressArea === '' && addressStreet === '') {
+            showToast({
+                title: '地址是必选项',
+                icon: 'none',
+            })
+            return
+        }
+        if (addressForm.getFieldValue('addressDetail') === '') {
+            showToast({
+                title: '门牌号是必填的',
+                icon: 'none',
+            })
+            return
+        }
+        if (!userName.match(/[\u4e00-\u9fa5a-zA-Z]/)) {
+            showToast({
+                title: '名字必须包含文字或字母',
+                icon: 'none',
+            })
+            return
+        }
+        if (addressPhone.length !== 11) {
+            showToast({
+                title: '手机号格式不正确',
+                icon: 'none',
+            })
+            return
+        }
+        if (addressId) {
+            // 编辑地址
+            taroPut({
+                url: editAddressURL,
+                data: {
+                    id: addressId,
+                    userName,
+                    addressName,
+                    addressPhone: addressForm.getFieldValue('addressPhone'),
+                    addressTag: selectAddressTag,
+                    addressSex,
+                    addressDetail: addressForm.getFieldValue('addressDetail'),
+                    addressProvince,
+                    addressCity,
+                    addressArea,
+                    addressStreet,
+                },
+                success: (res) => {
+                    // console.log('编辑地址成功:', res)
+                    navigateBack()
+                },
+                fail: (err) => {
+                    console.log('编辑地址失败:', err)
+                }
+            })
+        } else {
+            // 新增地址
+            taroPost({
+                url: addAddressURL,
+                data: {
+                    // userId: userInfo.userId,
+                    userName,
+                    addressName,
+                    addressPhone: addressForm.getFieldValue('addressPhone'),
+                    addressTag: selectAddressTag,
+                    addressSex,
+                    addressDetail: addressForm.getFieldValue('addressDetail'),
+                    addressProvince,
+                    addressCity,
+                    addressArea,
+                    addressStreet,
+                },
+                success: (res) => {
+                    // console.log('新增地址成功:', res)
+                    navigateBack()
+                },
+                fail: (err) => {
+                    console.log('新增地址失败:', err)
+                }
+            })
+        }
+        // navigateBack()
+    }
+
+    const deleteAddress = () => {
+        navigateBack()
+    }
 
     return (
         <View
@@ -120,42 +255,7 @@ export default function Address() {
                                 block
                                 type="primary"
                                 onClick={() => {
-                                    if (addressId) {
-                                        dispatch(setAddressListAction({
-                                            type: 'update',
-                                            data: {
-                                                addressId: addressId,
-                                                userName: userName,
-                                                addressSex: addressSex,
-                                                addressPhone: addressForm.getFieldValue('addressPhone'),
-                                                addressName: addressName,
-                                                addressProvince: addressProvince,
-                                                addressCity: addressCity,
-                                                addressArea: addressArea,
-                                                addressStreet: addressStreet,
-                                                addressDetail: addressForm.getFieldValue('addressDetail'),
-                                                addressTag: selectAddressTag,
-                                            }
-                                        }))
-                                    } else {
-                                        dispatch(setAddressListAction({
-                                            type: 'add',
-                                            data: {
-                                                addressId: addressList.length + 1,
-                                                userName: userName,
-                                                addressSex: addressSex,
-                                                addressPhone: addressForm.getFieldValue('addressPhone'),
-                                                addressName: addressName,
-                                                addressProvince: addressProvince,
-                                                addressCity: addressCity,
-                                                addressArea: addressArea,
-                                                addressStreet: addressStreet,
-                                                addressDetail: addressForm.getFieldValue('addressDetail'),
-                                                addressTag: selectAddressTag,
-                                            }
-                                        }))
-                                    }
-                                    navigateBack()
+                                    addOrEditAddress()
                                 }}
                             >
                                 保存地址
@@ -168,13 +268,7 @@ export default function Address() {
                                             content: '确定删除地址吗？',
                                             success: (res) => {
                                                 if (res.confirm) {
-                                                    dispatch(setAddressListAction({
-                                                        type: 'delete',
-                                                        data: {
-                                                            addressId: addressId,
-                                                        }
-                                                    }))
-                                                    navigateBack()
+                                                    deleteAddress()
                                                 }
                                             },
                                         })
@@ -239,11 +333,12 @@ export default function Address() {
                                             latitude: res.latitude,
                                             longitude: res.longitude,
                                             success: (res) => {
+                                                getAddressByLocation(res.latitude, res.longitude)
                                                 setAddressName(res.name)
-                                                setAddressProvince('')
-                                                setAddressCity('')
-                                                setAddressArea('')
-                                                setAddressStreet(res.address)
+                                                // setAddressProvince('')
+                                                // setAddressCity('')
+                                                // setAddressArea('')
+                                                // setAddressStreet(res.address)
                                             }
                                         })
                                     }
