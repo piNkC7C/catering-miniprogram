@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, navigateTo } from '@tarojs/taro'
 import './suggest.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Form, Input, Checkbox, Tag, Radio, TextArea, Uploader, Picker } from '@nutui/nutui-react-taro'
-import { ArrowLeft, ArrowRight } from '@nutui/icons-react-taro'
+import type { PickerOptions, PickerValue, PickerOnChangeCallbackParameter, PickerOption } from '@nutui/nutui-react-taro'
+import { ArrowLeft, ArrowRight, Loading } from '@nutui/icons-react-taro'
+import { routes } from '@/utils/constants'
+import type { UploaderFileItem, UploaderFileStatus } from '@nutui/nutui-react-taro'
+import { taroPost, taroPost9500 } from '@/service'
+import { uploadURL } from '@/service/config'
 
 export default function Suggest() {
     // 获取登录状态和用户信息
@@ -13,17 +18,71 @@ export default function Suggest() {
             loginStatus,
             userInfo
         },
+        address: {
+            addSuggestChooseShop
+        }
     } = useAppSelector((state) => state)
 
+    const dispatch = useAppDispatch()
+
     const [visible, setVisible] = useState(false)
-    const [value, setValue] = useState([])
-    const [options, setOptions] = useState([])
-    const changePicker = (value: any) => {
-        setValue(value)
+    const [value, setValue] = useState<string | number>('请选择反馈类型')
+    const options = [[
+        {
+            value: '1',
+            label: '商品相关'
+        },
+        {
+            value: '2',
+            label: '客户服务'
+        },
+        {
+            value: '3',
+            label: '优惠活动'
+        },
+        {
+            value: '4',
+            label: '会员积分'
+        },
+        {
+            value: '5',
+            label: '产品功能'
+        },
+        {
+            value: '6',
+            label: '其他'
+        }
+    ]]
+    // const changePicker = ({
+    //     value,
+    //     index,
+    //     selectedOptions,
+    // }: PickerOnChangeCallbackParameter) => {
+    //     console.log('changePicker', value, index, selectedOptions)
+    // }
+    const confirmPicker = (
+        selectedOptions: PickerOptions,
+        selectedValue: PickerValue[]
+    ) => {
+        // console.log('confirmPicker', selectedOptions, selectedValue)
+        setValue(selectedOptions[0].label)
     }
-    const confirmPicker = (value: any) => {
-        setValue(value)
+
+    const [imageList, setImageList] = useState<UploaderFileItem[]>([])
+
+    const addSuggest = () => {
+        const reqData = {
+            userId: 0,
+            shopId: addSuggestChooseShop?.shopId || null,
+            suggestContent: '',
+            // suggestTime: '',
+            suggestType: value,
+            suggestImageList: [],
+            contactInfo: '',
+        }
+        console.log('addSuggest', reqData)
     }
+
 
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
@@ -93,11 +152,16 @@ export default function Suggest() {
                 >
                     <View
                         className='choose-shop'
+                        onClick={() => {
+                            navigateTo({
+                                url: (routes.find((route) => route.name === 'chooseShop')?.path || '') + '?type=suggest',
+                            })
+                        }}
                     >
                         <View
                             className='choose-shop-item'
                         >
-                            <Text> 请选择门店 </Text>
+                            <Text> {addSuggestChooseShop?.shopName || '请选择门店'} </Text>
                         </View>
                         <ArrowRight
                             size={pxTransform(windowWidth * 0.05)}
@@ -114,7 +178,7 @@ export default function Suggest() {
                         <View
                             className='choose-type-item'
                         >
-                            <Text> 请选择反馈类型 </Text>
+                            <Text> {value} </Text>
                         </View>
                         <ArrowRight
                             size={pxTransform(windowWidth * 0.05)}
@@ -146,8 +210,44 @@ export default function Suggest() {
                         className='upload-image'
                     >
                         <Uploader
+                            // autoUpload={false}
                             maxCount={6}
                             uploadLabel="添加图片"
+                            multiple
+                            deletable
+                            mediaType={['image']}
+                            // value={imageList}
+                            onChange={(files) => {
+                                console.log('onChange', files);
+                            }}
+                            upload={(file) => {
+                                return new Promise((resolve, reject) => {
+                                    taroPost9500({
+                                        url: uploadURL,
+                                        headers: {
+                                            'Content-Type': 'multipart/form-data',
+                                        },
+                                        data: {
+                                            file: file,
+                                        },
+                                        success: (res) => {
+                                            console.log('res', res);
+                                            resolve({
+                                                status: 'success' as UploaderFileStatus,
+                                                message: '上传成功',
+                                                url: res.data,
+                                            })
+                                        },
+                                        fail: (err) => {
+                                            console.log('err', err);
+                                            reject({
+                                                status: 'error' as UploaderFileStatus,
+                                                message: '上传失败',
+                                            })
+                                        },
+                                    })
+                                })
+                            }}
                         />
                     </View>
                 </View>
@@ -182,6 +282,9 @@ export default function Suggest() {
                         width: '90%',
                         height: pxTransform(windowHeight * 0.05),
                     }}
+                    onClick={() => {
+                        addSuggest()
+                    }}
                 >
                     提交
                 </Button>
@@ -189,9 +292,8 @@ export default function Suggest() {
             <Picker
                 title="请选择反馈类型"
                 visible={visible}
-                value={value}
                 options={options}
-                onChange={changePicker}
+                // onChange={changePicker}
                 onConfirm={confirmPicker}
                 onClose={() => setVisible(false)}
             />

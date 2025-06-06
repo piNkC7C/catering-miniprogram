@@ -3,14 +3,7 @@ import { IAddressState } from '../types/address'
 
 const initialState: IAddressState = {
   addressList: [],
-  suggestList: [{
-    suggestId: 1,
-    suggestShopName: '浙江某某某店',
-    suggestContent: '优惠活动内容',
-    suggestTime: '2025-01-01',
-    suggestType: '优惠活动',
-    suggestImageList: ['https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg'],
-  }],
+  suggestList: [],
   currentAddress: null,
   shopList: [
     {
@@ -30,6 +23,7 @@ const initialState: IAddressState = {
     }
   ],
   currentShop: null,
+  addSuggestChooseShop: null,
 }
 
 const addressSlice = createSlice({
@@ -87,9 +81,18 @@ const addressSlice = createSlice({
         default:
           break
       }
-    }
+    },
+    setAddSuggestChooseShopAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.addSuggestChooseShop = data
+          break
+        default:
+          break
+      }
+    },
   }
 })
 
-export const { setAddressListAction, setSuggestListAction, setCurrentAddressAction, setCurrentShopAction } = addressSlice.actions
+export const { setAddressListAction, setSuggestListAction, setCurrentAddressAction, setCurrentShopAction, setAddSuggestChooseShopAction } = addressSlice.actions
 export default addressSlice.reducer

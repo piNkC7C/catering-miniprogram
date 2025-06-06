@@ -4,13 +4,15 @@ import type { IntersectionObserver } from '@tarojs/taro'
 import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setCartListAction, setCheckoutOrderAction } from '@/redux/modules/order'
+import { setCartListAction, setCheckoutOrderAction, setOrderTabsListAction } from '@/redux/modules/order'
 import { setIsRetrieve } from '@/redux/modules/login'
 import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse, Divider, Dialog } from '@nutui/nutui-react-taro'
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
+import { taroPost } from '@/service'
+import { getOrderTabsListURL, getOrderListURL } from '@/service/config'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -33,8 +35,41 @@ export default function Order() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
+  const getOrderTabsList = () => {
+    taroPost({
+      url: getOrderTabsListURL,
+      success: (res) => {
+        console.log('res', res);
+        const tabs = res.data.map((item: any) => {
+          return {
+            groupId: item.id,
+            groupName: item.classificationName,
+          }
+        })
+        // setSideBarValue(tabs[0].groupId)
+        dispatch(setOrderTabsListAction({
+          type: 'set',
+          data: tabs,
+        }))
+      },
+      fail: (err) => {
+        console.log('err', err);
+      },
+    })
+    // taroPost({
+    //   url: getOrderListURL,
+    //   success: (res) => {
+    //     console.log('res', res);
+    //   },
+    //   fail: (err) => {
+    //     console.log('err', err);
+    //   },
+    // })
+  }
+
   // 页面加载，初始化获取商品列表
   useLoad(() => {
+    getOrderTabsList()
   })
 
   // 每次进入页面都检查是否选择了门店
@@ -107,14 +142,20 @@ export default function Order() {
   // 侧边栏选中值
   const [sideBarValue, setSideBarValue] = useState<number | string>(0)
 
+  useEffect(() => {
+    if (orderTabsList.length > 0) {
+      setSideBarValue(orderTabsList[0].groupId)
+    }
+  }, [orderTabsList])
+
   // 购物车左侧显示
   const [cartLeftWidth, setCartLeftWidth] = useState<string>('30%')
   const [cartLeftBackground, setCartLeftBackground] = useState<string>('#D61518')
   // 购物车右侧宽度
   // const [cartRightWidth, setCartRightWidth] = useState<string>(`calc(70% - ${pxTransform(windowWidth * 0.18)})`)
 
-  const [activeStickyIndex, setActiveStickyIndex] = useState<number>(0)
-  const [activeStickyId, setActiveStickyId] = useState<string>('sticky-0')
+  // const [activeStickyIndex, setActiveStickyIndex] = useState<number>(0)
+  // const [activeStickyId, setActiveStickyId] = useState<string>('sticky-0')
   const stickyPositions = useRef<{ id: string; top: number }[]>([])
 
   // 初始化获取所有吸顶元素的位置

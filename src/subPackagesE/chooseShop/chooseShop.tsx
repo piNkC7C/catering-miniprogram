@@ -166,6 +166,7 @@ export default function ChooseShop() {
                                 <ShopCard 
                                 key={item.shopId} 
                                 shopItem={item} 
+                                type={type}
                                 />
                             ))
                         }

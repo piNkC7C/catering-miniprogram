@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, navigateTo, useDidShow } from '@tarojs/taro'
 import './suggestList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Empty } from '@nutui/nutui-react-taro'
@@ -9,6 +9,9 @@ import SuggestCard from '@/components/suggestCard'
 import { ISuggestItem } from '@/redux/types/address'
 // 路由
 import { routes, noSuggest } from '@/utils/constants'
+import { getSuggestListURL } from '@/service/config'
+import { taroGet } from '@/service'
+import { setSuggestListAction } from '@/redux/modules/address'
 
 export default function SuggestList() {
     // 获取登录状态和用户信息
@@ -21,6 +24,23 @@ export default function SuggestList() {
             suggestList
         }
     } = useAppSelector((state) => state)
+    const dispatch = useAppDispatch()
+
+    const getSuggestList = () => {
+        taroGet({
+            url: getSuggestListURL,
+            success: (res) => {
+                dispatch(setSuggestListAction({ type: 'set', data: res.data }))
+            },
+            fail: (err) => {
+                console.log('获取建议列表失败:', err)
+            }
+        })
+    }
+
+    useDidShow(() => {
+        getSuggestList()
+    })
 
     const filterSuggestList: (suggestId: number) => ISuggestItem[] = (suggestId: number) => {
         return suggestList.filter((item) => item.suggestId === suggestId)

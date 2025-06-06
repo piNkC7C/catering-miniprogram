@@ -9,15 +9,18 @@ import { userNologin, locationLogo, callmeIcon, getLocationIcon, routes } from '
 import { formatDistance } from '@/utils/formatUtils'
 import { IShopItem } from '@/redux/types/address'
 import equal from 'fast-deep-equal'
-import { setCurrentShopAction } from '@/redux/modules/address'
+import { setCurrentShopAction, setAddSuggestChooseShopAction } from '@/redux/modules/address'
 
-function ShopCard({ shopItem }: { shopItem: IShopItem }) {
+function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
     // 获取登录状态和用户信息
     const {
         login: {
             loginStatus,
             userInfo
         },
+        address: {
+            addSuggestChooseShop
+        }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
 
@@ -60,6 +63,14 @@ function ShopCard({ shopItem }: { shopItem: IShopItem }) {
                 borderColor: isClickShop ? '#FA2400' : '#CCC',
             }}
             onClick={() => {
+                if (type && type === 'suggest') {
+                    dispatch(setAddSuggestChooseShopAction({
+                        type: 'set',
+                        data: shopItem
+                    }))
+                    navigateBack()
+                    return
+                }
                 setIsClickShop(true)
                 dispatch(setCurrentShopAction({
                     type: 'set',
@@ -131,6 +142,9 @@ function ShopCard({ shopItem }: { shopItem: IShopItem }) {
 
 export default memo(ShopCard, (prevProps, nextProps) => {
     if (!equal(prevProps.shopItem, nextProps.shopItem)) {
+        return false
+    }
+    if (prevProps.type !== nextProps.type) {
         return false
     }
     return true

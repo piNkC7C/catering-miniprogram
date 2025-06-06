@@ -24,3 +24,10 @@ export const BASE_URL = 'http://192.168.110.8:9503/app-api'
 export const getAddressListURL = '/user/address/list'
 export const addAddressURL = '/user/address/create'
 export const editAddressURL = '/user/address/update'
+export const deleteAddressURL = '/user/address/delete'
+export const getSuggestListURL = '/user/suggest/list'
+
+export const getOrderTabsListURL = '/mini-app/commodity/classification/list'
+export const getOrderListURL = '/mini-app/commodity/list'
+
+export const uploadURL = '/admin-api/infra/file/upload'

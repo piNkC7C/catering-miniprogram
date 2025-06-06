@@ -121,34 +121,34 @@ const initialState: IOrderState = {
   ],
   currentOrder: null,
   orderTabsList: [
-    {
-      groupId: 0,
-      groupName: '尊享商品券',
-    },
-    {
-      groupId: 1,
-      groupName: '专区',
-    },
-    {
-      groupId: 2,
-      groupName: '饮品',
-    },
-    {
-      groupId: 3,
-      groupName: '小吃',
-    },
-    {
-      groupId: 4,
-      groupName: '主食',
-    },
-    {
-      groupId: 5,
-      groupName: '甜品',
-    },
-    {
-      groupId: 6,
-      groupName: '酒水',
-    },
+    // {
+    //   groupId: 0,
+    //   groupName: '尊享商品券',
+    // },
+    // {
+    //   groupId: 1,
+    //   groupName: '专区',
+    // },
+    // {
+    //   groupId: 2,
+    //   groupName: '饮品',
+    // },
+    // {
+    //   groupId: 3,
+    //   groupName: '小吃',
+    // },
+    // {
+    //   groupId: 4,
+    //   groupName: '主食',
+    // },
+    // {
+    //   groupId: 5,
+    //   groupName: '甜品',
+    // },
+    // {
+    //   groupId: 6,
+    //   groupName: '酒水',
+    // },
   ],
   groupGoodsList: [
     {
@@ -447,9 +447,16 @@ const orderSlice = createSlice({
         default:
           break
       }
+    },
+    setOrderTabsListAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.orderTabsList = [...data]
+          break
+      }
     }
   }
 })
 
-export const { setCartListAction, setCurrentOrderAction, setCheckoutOrderAction, setCheckoutOrderCouponAction } = orderSlice.actions
+export const { setCartListAction, setCurrentOrderAction, setCheckoutOrderAction, setCheckoutOrderCouponAction, setOrderTabsListAction } = orderSlice.actions
 export default orderSlice.reducer
