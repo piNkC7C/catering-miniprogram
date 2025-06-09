@@ -11,8 +11,8 @@ import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-r
 import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
-import { taroPost } from '@/service'
-import { getOrderTabsListURL, getOrderListURL } from '@/service/config'
+import { IResponseApi } from '@/api/type'
+import { getOrderTabsListAPI, getOrderListAPI } from '@/api/order'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -35,41 +35,36 @@ export default function Order() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
-  const getOrderTabsList = () => {
-    taroPost({
-      url: getOrderTabsListURL,
-      success: (res) => {
-        console.log('res', res);
-        const tabs = res.data.map((item: any) => {
-          return {
-            groupId: item.id,
-            groupName: item.classificationName,
-          }
-        })
-        // setSideBarValue(tabs[0].groupId)
-        dispatch(setOrderTabsListAction({
-          type: 'set',
-          data: tabs,
-        }))
-      },
-      fail: (err) => {
-        console.log('err', err);
-      },
-    })
-    // taroPost({
-    //   url: getOrderListURL,
-    //   success: (res) => {
-    //     console.log('res', res);
-    //   },
-    //   fail: (err) => {
-    //     console.log('err', err);
-    //   },
-    // })
+  const getOrderTabsList = (res: IResponseApi) => {
+    if (res.success) {
+      const tabs = res.data.map((item: any) => {
+        return {
+          groupId: item.id,
+          groupName: item.classificationName,
+        }
+      })
+      // setSideBarValue(tabs[0].groupId)
+      dispatch(setOrderTabsListAction({
+        type: 'set',
+        data: tabs,
+      }))
+      // taroPost({
+      //   url: getOrderListURL,
+      //   success: (res) => {
+      //     console.log('res', res);
+      //   },
+      //   fail: (err) => {
+      //     console.log('err', err);
+      //   },
+      // })
+    } else {
+      console.log('获取点单导航栏失败:', res)
+    }
   }
 
   // 页面加载，初始化获取商品列表
   useLoad(() => {
-    getOrderTabsList()
+    getOrderTabsListAPI(getOrderTabsList)
   })
 
   // 每次进入页面都检查是否选择了门店

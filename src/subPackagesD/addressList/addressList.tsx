@@ -7,9 +7,9 @@ import { pxTransform, Image, Button, Divider, Tabs, Empty } from '@nutui/nutui-r
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
 import AddressCard from '@/components/addressCard'
 import { routes, noAddress } from '@/utils/constants'
-import { taroGet } from '@/service'
-import { getAddressListURL } from '@/service/config'
 import { setAddressListAction } from '@/redux/modules/address'
+import { getAddressListAPI } from '@/api/address'
+import type { IResponseApi } from '@/api/type'
 
 export default function AddressList() {
     // 获取登录状态和用户信息
@@ -25,22 +25,19 @@ export default function AddressList() {
 
     const dispatch = useAppDispatch()
 
-    const getAddressList = () => {
-        taroGet({
-            url: getAddressListURL,
-            success: (res) => {
-                dispatch(setAddressListAction({ type: 'set', data: res.data }))
-                // 这里可以处理成功响应
-            },
-            fail: (err) => {
-                console.log('获取收获地址列表失败:', err)
-                // 这里可以处理失败响应
-            }
-        })
+    const getAddressList = (apiRes: IResponseApi) => {
+        if (apiRes.success) {
+            dispatch(setAddressListAction({
+                type: 'set',
+                data: apiRes.data
+            }))
+        } else {
+            console.log('获取地址列表出错：', apiRes.data);
+        }
     }
 
     useDidShow(() => {
-        getAddressList()
+        getAddressListAPI(getAddressList)
     })
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()

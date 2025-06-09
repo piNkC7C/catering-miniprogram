@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
+import { useCallback, useState } from 'react'
+import { View, Text } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, getLocation, chooseLocation, showToast } from '@tarojs/taro'
 import './address.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { pxTransform, Image, Button, Divider, Tabs, Form, Input, Checkbox, Tag, Radio } from '@nutui/nutui-react-taro'
+import { pxTransform, Button, Divider, Form, Input, Tag, Radio } from '@nutui/nutui-react-taro'
 import { ArrowLeft, ArrowRight } from '@nutui/icons-react-taro'
-import { setAddressListAction } from '@/redux/modules/address'
-import { IAddressItem } from '@/redux/types/address'
-import { addAddressURL, editAddressURL } from '@/service/config'
-import { taroPost, taroPut, taroDelete } from '@/service'
 import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
 import { qqmapsdkKey } from '@/utils/constants'
+import { addAddressAPI, editAddressAPI } from '@/api/address'
 
 export default function Address() {
     // 获取登录状态和用户信息
@@ -135,9 +132,7 @@ export default function Address() {
         }
         if (addressId) {
             // 编辑地址
-            taroPut({
-                url: editAddressURL,
-                data: {
+            editAddressAPI({
                     id: addressId,
                     userName,
                     addressName,
@@ -149,38 +144,34 @@ export default function Address() {
                     addressCity,
                     addressArea,
                     addressStreet,
-                },
-                success: (res) => {
-                    // console.log('编辑地址成功:', res)
+            }, (res) => {
+                if (res.success) {
+                    console.log('编辑地址成功:', res)
                     navigateBack()
-                },
-                fail: (err) => {
-                    console.log('编辑地址失败:', err)
+                } else {
+                    console.log('编辑地址失败:', res)
                 }
             })
         } else {
             // 新增地址
-            taroPost({
-                url: addAddressURL,
-                data: {
-                    // userId: userInfo.userId,
-                    userName,
-                    addressName,
-                    addressPhone: addressForm.getFieldValue('addressPhone'),
-                    addressTag: selectAddressTag,
-                    addressSex,
-                    addressDetail: addressForm.getFieldValue('addressDetail'),
-                    addressProvince,
-                    addressCity,
-                    addressArea,
-                    addressStreet,
-                },
-                success: (res) => {
-                    // console.log('新增地址成功:', res)
+            addAddressAPI({
+                // userId: userInfo.userId,
+                userName,
+                addressName,
+                addressPhone: addressForm.getFieldValue('addressPhone'),
+                addressTag: selectAddressTag,
+                addressSex,
+                addressDetail: addressForm.getFieldValue('addressDetail'),
+                addressProvince,
+                addressCity,
+                addressArea,
+                addressStreet,
+            }, (res) => {
+                if (res.success) {
+                    console.log('新增地址成功:', res)
                     navigateBack()
-                },
-                fail: (err) => {
-                    console.log('新增地址失败:', err)
+                } else {
+                    console.log('新增地址失败:', res)
                 }
             })
         }

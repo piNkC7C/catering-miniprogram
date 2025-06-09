@@ -4,14 +4,14 @@ export default defineAppConfig({
     // 首页
     // 'pages/index/index',
     // // 点单
-    'pages/order/order',
+    // 'pages/order/order',
     // // 订单列表
     // 'pages/orderList/orderList',
     // // 我的
     // 'pages/mine/mine',
 
     // // 地址列表
-    // 'subPackagesD/addressList/addressList',
+    'subPackagesD/addressList/addressList',
     // // 添加/编辑地址
     // 'subPackagesD/address/address',
     // 反馈列表

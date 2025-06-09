@@ -1,8 +1,93 @@
+import { BASE_URL, TIME_OUT } from './config'
+import TaroRequest from './request'
+
+// 创建Taro请求实例
+export const taroRequest = new TaroRequest({
+  baseURL: BASE_URL,
+  timeout: TIME_OUT,
+  header: {
+    'Authorization': `Bearer test1`,
+    'tenant-id': '1'
+  },
+  interceptors: {
+    requestSuccessFn: (config) => {
+      return config
+    },
+    requestFailureFn: (error) => {
+      console.log('Taro请求失败', error)
+      return Promise.reject(error)
+    },
+    responseSuccessFn: (res) => {
+      // 统一处理响应数据
+      if (res.statusCode === 200) {
+        if (res.data.code == 0) {
+          return res.data
+        } else {
+          throw res.data
+        }
+      } else {
+        throw res
+      }
+    },
+    responseFailureFn: (error) => {
+      console.log('Taro响应失败', error)
+      return Promise.reject(error)
+    }
+  }
+})
+
+// 简化的请求方法，可以直接替换原生Taro.request
+export const taroHttpRequest = taroRequest.request.bind(taroRequest)
+export const taroGet = taroRequest.get.bind(taroRequest)
+export const taroPost = taroRequest.post.bind(taroRequest)
+export const taroPut = taroRequest.put.bind(taroRequest)
+export const taroDelete = taroRequest.delete.bind(taroRequest)
+
+// 创建Taro请求实例
+export const taroRequest9500 = new TaroRequest({
+  baseURL: 'http://192.168.110.13:9500',
+  timeout: TIME_OUT,
+  header: {
+    'Authorization': `Bearer test1`,
+    'tenant-id': '1'
+  },
+  interceptors: {
+    requestSuccessFn: (config) => {
+      return config
+    },
+    requestFailureFn: (error) => {
+      console.log('Taro请求失败', error)
+      return Promise.reject(error)
+    },
+    responseSuccessFn: (res) => {
+      // 统一处理响应数据
+      if (res.statusCode === 200) {
+        if (res.data.code == 0) {
+          return res.data
+        } else {
+          throw res.data
+        }
+      } else {
+        throw res
+      }
+    },
+    responseFailureFn: (error) => {
+      console.log('Taro响应失败', error)
+      return Promise.reject(error)
+    }
+  }
+})
+
+// 简化的请求方法，可以直接替换原生Taro.request
+export const taroHttpRequest9500 = taroRequest9500.request.bind(taroRequest9500)
+export const taroGet9500 = taroRequest9500.get.bind(taroRequest9500)
+export const taroPost9500 = taroRequest9500.post.bind(taroRequest9500)
+export const taroPut9500 = taroRequest9500.put.bind(taroRequest9500)
+export const taroDelete9500 = taroRequest9500.delete.bind(taroRequest9500)
+
 // import Taro from '@tarojs/taro'
 // import { AxiosRequestHeaders, AxiosError } from 'axios'
-import { BASE_URL, TIME_OUT } from './config'
 // import ZZRequest from './request'
-import TaroRequest from './taroRequest'
 
 // // 封装消息提示函数，只使用Taro原生API
 // const showMessage = (message: string, type: 'success' | 'error' | 'loading' | 'none' = 'none') => {
@@ -109,87 +194,3 @@ import TaroRequest from './taroRequest'
 // })
 
 // export { baseRequest }
-
-// 创建Taro请求实例
-export const taroRequest = new TaroRequest({
-  baseURL: BASE_URL,
-  timeout: TIME_OUT,
-  header: {
-    'Authorization': `Bearer test1`,
-    'tenant-id': '1'
-  },
-  interceptors: {
-    requestSuccessFn: (config) => {
-      return config
-    },
-    requestFailureFn: (error) => {
-      console.log('Taro请求失败', error)
-      return Promise.reject(error)
-    },
-    responseSuccessFn: (res) => {
-      // 统一处理响应数据
-      if (res.statusCode === 200) {
-        if (res.data.code == 0) {
-          return res.data
-        } else {
-          throw res.data
-        }
-      } else {
-        throw res
-      }
-    },
-    responseFailureFn: (error) => {
-      console.log('Taro响应失败', error)
-      return Promise.reject(error)
-    }
-  }
-})
-
-// 简化的请求方法，可以直接替换原生Taro.request
-export const taroHttpRequest = taroRequest.request.bind(taroRequest)
-export const taroGet = taroRequest.get.bind(taroRequest)
-export const taroPost = taroRequest.post.bind(taroRequest)
-export const taroPut = taroRequest.put.bind(taroRequest)
-export const taroDelete = taroRequest.delete.bind(taroRequest)
-
-// 创建Taro请求实例
-export const taroRequest9500 = new TaroRequest({
-  baseURL: 'http://192.168.110.13:9500',
-  timeout: TIME_OUT,
-  header: {
-    'Authorization': `Bearer test1`,
-    'tenant-id': '1'
-  },
-  interceptors: {
-    requestSuccessFn: (config) => {
-      return config
-    },
-    requestFailureFn: (error) => {
-      console.log('Taro请求失败', error)
-      return Promise.reject(error)
-    },
-    responseSuccessFn: (res) => {
-      // 统一处理响应数据
-      if (res.statusCode === 200) {
-        if (res.data.code == 0) {
-          return res.data
-        } else {
-          throw res.data
-        }
-      } else {
-        throw res
-      }
-    },
-    responseFailureFn: (error) => {
-      console.log('Taro响应失败', error)
-      return Promise.reject(error)
-    }
-  }
-})
-
-// 简化的请求方法，可以直接替换原生Taro.request
-export const taroHttpRequest9500 = taroRequest9500.request.bind(taroRequest9500)
-export const taroGet9500 = taroRequest9500.get.bind(taroRequest9500)
-export const taroPost9500 = taroRequest9500.post.bind(taroRequest9500)
-export const taroPut9500 = taroRequest9500.put.bind(taroRequest9500)
-export const taroDelete9500 = taroRequest9500.delete.bind(taroRequest9500)
