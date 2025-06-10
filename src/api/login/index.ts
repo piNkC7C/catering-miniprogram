@@ -2,7 +2,7 @@ import { taroPost } from '@/service'
 import { loginByPhoneURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 
-export const loginByPhoneAPI = (data: any, callback: (res: IResponseApi) => void) => {
+export const loginByPhoneAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
     taroPost({
         url: loginByPhoneURL,
         data,

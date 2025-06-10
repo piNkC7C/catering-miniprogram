@@ -26,7 +26,7 @@ export default function SuggestList() {
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
 
-    const getSuggestList = (res: IResponseApi) => {
+    const getSuggestList = (res: IResponseApi<any>) => {
         if (res.success) {
             dispatch(setSuggestListAction({ type: 'set', data: res.data }))
         } else {

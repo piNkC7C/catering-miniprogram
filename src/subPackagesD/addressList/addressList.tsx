@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, navigateTo, useDidShow } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, navigateTo, useDidShow, Snapshot } from '@tarojs/taro'
 import './addressList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Empty } from '@nutui/nutui-react-taro'
@@ -25,7 +25,7 @@ export default function AddressList() {
 
     const dispatch = useAppDispatch()
 
-    const getAddressList = (apiRes: IResponseApi) => {
+    const getAddressList = (apiRes: IResponseApi<any>) => {
         if (apiRes.success) {
             dispatch(setAddressListAction({
                 type: 'set',

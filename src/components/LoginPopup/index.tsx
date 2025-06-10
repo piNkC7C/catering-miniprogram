@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { View, Text, Image } from '@tarojs/components'
 import { login, showToast } from '@tarojs/taro'
-import { Popup, Button, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
+import { Popup, Button, Space, Checkbox, Toast, Overlay, Loading } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { pxTransform } from '@nutui/nutui-react-taro'
 import { userNologin } from '@/utils/constants'
@@ -26,24 +26,30 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
   const [checkAgree, setCheckAgree] = useState<boolean>(false)
   const [agreeToastShow, setAgreeToastShow] = useState<boolean>(false)
 
-  const setLoginInfo = (apiResponse: IResponseApi) => {
+  const setLoginInfo = (apiResponse: IResponseApi<any>) => {
     if (apiResponse.success) {
       console.log(apiResponse.data)
+      setOverlayVisible(false)
 
       // const { userInfo } = apiResponse.data
       // dispatch(setLoginStatus(true))
       // dispatch(userInfoAction(userInfo))
       onClose()
     } else {
+      setOverlayVisible(false)
       showToast({
-        title: '登录失败，请稍后重试',
+        title: '登录失败',
         icon: 'error',
         duration: 1000,
       })
     }
   }
 
+  // loading
+  const [overlayVisible, setOverlayVisible] = useState(false)
+
   const loginByPhone = (phoneCode: string) => {
+    setOverlayVisible(true)
     login({
       success: (res) => {
         console.log('loginByPhone success', res)
@@ -56,7 +62,7 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
       fail: (err) => {
         console.log(err)
         showToast({
-          title: '登录失败，请稍后重试',
+          title: '登录失败',
           icon: 'error',
           duration: 1000,
         })
@@ -222,6 +228,16 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
           setAgreeToastShow(false)
         }}
       />
+      <Overlay visible={overlayVisible}>
+        <View className="wrapper" style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+        }}>
+          <Loading direction="vertical">登录中</Loading>
+        </View>
+      </Overlay>
     </Popup>
   )
 }
