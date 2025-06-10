@@ -1,4 +1,4 @@
-export type IResponseApi = {
+export type IResponseApi<T> = {
     success: boolean
-    data: any
+    data: T
 }

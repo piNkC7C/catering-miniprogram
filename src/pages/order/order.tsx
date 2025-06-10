@@ -4,7 +4,7 @@ import type { IntersectionObserver } from '@tarojs/taro'
 import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setCartListAction, setCheckoutOrderAction, setOrderTabsListAction } from '@/redux/modules/order'
+import { setCartListAction, setCheckoutOrderAction, setOrderTabsListAction, setGroupGoodsListAction } from '@/redux/modules/order'
 import { setIsRetrieve } from '@/redux/modules/login'
 import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse, Divider, Dialog } from '@nutui/nutui-react-taro'
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
@@ -12,7 +12,8 @@ import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
-import { getOrderTabsListAPI, getOrderListAPI } from '@/api/order'
+import { getGroupGoodsListAPI } from '@/api/order'
+import type { IGroupGoodsList } from '@/redux/types/order'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -35,18 +36,18 @@ export default function Order() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
-  const getOrderTabsList = (res: IResponseApi) => {
+  const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
     if (res.success) {
-      const tabs = res.data.map((item: any) => {
-        return {
-          groupId: item.id,
-          groupName: item.classificationName,
-        }
-      })
-      // setSideBarValue(tabs[0].groupId)
+      const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
+      console.log('11111', orderData);
+
       dispatch(setOrderTabsListAction({
         type: 'set',
-        data: tabs,
+        data: orderData,
+      }))
+      dispatch(setGroupGoodsListAction({
+        type: 'set',
+        data: orderData
       }))
     } else {
       console.log('获取点单导航栏失败:', res)
@@ -55,7 +56,7 @@ export default function Order() {
 
   // 页面加载，初始化获取商品列表
   useLoad(() => {
-    getOrderTabsListAPI(getOrderTabsList)
+    getGroupGoodsListAPI(getGroupGoodsList)
   })
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
@@ -67,8 +68,8 @@ export default function Order() {
       })
     }
     // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
-  const { windowHeight } = getSystemInfoSync()
-  setRealWindowHeight(windowHeight)
+    const { windowHeight } = getSystemInfoSync()
+    setRealWindowHeight(windowHeight)
   })
 
   const { statusBarHeight, windowWidth } = getSystemInfoSync()
@@ -82,7 +83,7 @@ export default function Order() {
   // 获取可视区域高度
   const viewHeight = realWindowHeight - navHeight
 
-  console.log('viewHeight', viewHeight)
+  // console.log('viewHeight', viewHeight)
 
   // 桌号信息
   const [tableInfo, setTableInfo] = useState<any>({
@@ -136,7 +137,7 @@ export default function Order() {
 
   useEffect(() => {
     if (orderTabsList.length > 0) {
-      setSideBarValue(orderTabsList[0].groupId)
+      setSideBarValue(orderTabsList[0].classificationId)
     }
   }, [orderTabsList])
 
@@ -174,9 +175,9 @@ export default function Order() {
 
       if (scrollTop >= position.top) {
         if (orderTabsList[i + 1]) {
-          setSideBarValue(orderTabsList[i + 1].groupId)
+          setSideBarValue(orderTabsList[i + 1].classificationId)
         } else {
-          setSideBarValue(orderTabsList[orderTabsList.length - 1].groupId)
+          setSideBarValue(orderTabsList[orderTabsList.length - 1].classificationId)
         }
         break
       }
@@ -391,10 +392,10 @@ export default function Order() {
                 <SideBar.Item title={
                   <>
                     <Badge value={cartList.filter((findItem) => {
-                      return findItem.groupId === item.groupId
-                    }).length}>{item.groupName}</Badge>
+                      return findItem.classificationId === item.classificationId
+                    }).length}>{item.classificationName}</Badge>
                   </>
-                } value={item.groupId}>
+                } value={item.classificationId}>
                 </SideBar.Item>
               ))
             }
@@ -423,7 +424,7 @@ export default function Order() {
                 groupGoodsList.map((groupItem, index) => (
                   <View key={index} style={{ position: 'relative', width: '100%' }}>
                     <View
-                      id={`sticky-${groupItem.groupId}`}
+                      id={`sticky-${groupItem.classificationId}`}
                       className={`sticky-header`}
                       style={{
                         position: 'sticky',
@@ -437,7 +438,7 @@ export default function Order() {
                         padding: `${pxTransform(viewHeight * 0.01)} 0`,
                       }}
                     >
-                      <Text>{groupItem.groupName}</Text>
+                      <Text>{groupItem.classificationName}</Text>
                     </View>
                     <View
                       style={{
@@ -458,7 +459,7 @@ export default function Order() {
                             }}
                           >
                             <Image
-                              src={goodsItem.goodsImage}
+                              src={goodsItem.mealImage}
                               width={pxTransform(windowWidth * 0.2)}
                               height={pxTransform(windowWidth * 0.2)}
                             />
@@ -474,7 +475,7 @@ export default function Order() {
                                 fontWeight: 'bold',
                               }}
                             >
-                              <Text>{goodsItem.goodsName}</Text>
+                              <Text>{goodsItem.mealName}</Text>
                               <View
                                 style={{
                                   display: 'flex',
@@ -498,7 +499,7 @@ export default function Order() {
                                   >
                                     <Price
                                       color='gray'
-                                      price={goodsItem.goodsPrice}
+                                      price={Number(goodsItem.standardPrice) || 0}
                                       size="small"
                                       thousands
                                       style={{
@@ -517,13 +518,13 @@ export default function Order() {
                                   </Text>
                                 </View>
                                 {
-                                  goodsItem.isPackage ? (
+                                  goodsItem.isSet ? (
                                     <Badge
                                       style={{
                                         marginRight: pxTransform(windowWidth * 0.02),
                                       }}
                                       value={cartList.find((findItem) => {
-                                        return findItem.goodsId === goodsItem.goodsId
+                                        return findItem.id === goodsItem.id
                                       })?.goodsCount}>
                                       <Button
                                         type="primary"
@@ -550,7 +551,7 @@ export default function Order() {
                                     >
                                       {
                                         cartList.find((findItem) => {
-                                          return findItem.goodsId === goodsItem.goodsId
+                                          return findItem.id === goodsItem.id
                                         }) && (
                                           <View
                                             style={{
@@ -571,18 +572,18 @@ export default function Order() {
                                               icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
                                               onClick={() => {
                                                 if (cartList.find((findItem) => {
-                                                  return findItem.goodsId === goodsItem.goodsId
+                                                  return findItem.id === goodsItem.id
                                                 })?.goodsCount === 1) {
                                                   dispatch(setCartListAction({
                                                     type: 'remove', data: {
-                                                      goodsId: goodsItem.goodsId,
+                                                      goodsId: goodsItem.id,
                                                     }
                                                   }))
                                                 } else {
                                                   dispatch(setCartListAction({
                                                     type: 'set', data: [
                                                       ...cartList.map((mapItem) => {
-                                                        if (mapItem.goodsId === goodsItem.goodsId) {
+                                                        if (mapItem.id === goodsItem.id) {
                                                           return { ...mapItem, goodsCount: mapItem.goodsCount - 1 }
                                                         }
                                                         return mapItem
@@ -598,7 +599,7 @@ export default function Order() {
                                                 margin: `0 ${pxTransform(windowWidth * 0.02)}`,
                                               }}
                                             >{cartList.find((findItem) => {
-                                              return findItem.goodsId === goodsItem.goodsId
+                                              return findItem.id === goodsItem.id
                                             })?.goodsCount}</Text>
                                           </View>
                                         )
@@ -614,12 +615,12 @@ export default function Order() {
                                         icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                         onClick={() => {
                                           if (cartList.find((findItem) => {
-                                            return findItem.goodsId === goodsItem.goodsId
+                                            return findItem.id === goodsItem.id
                                           })) {
                                             dispatch(setCartListAction({
                                               type: 'set', data: [
                                                 ...cartList.map((mapItem) => {
-                                                  if (mapItem.goodsId === goodsItem.goodsId) {
+                                                  if (mapItem.id === goodsItem.id) {
                                                     return { ...mapItem, goodsCount: mapItem.goodsCount + 1 }
                                                   }
                                                   return mapItem
@@ -629,12 +630,12 @@ export default function Order() {
                                           } else {
                                             dispatch(setCartListAction({
                                               type: 'add', data: {
-                                                goodsId: goodsItem.goodsId,
-                                                goodsName: goodsItem.goodsName,
-                                                goodsPrice: goodsItem.goodsPrice,
-                                                goodsImage: goodsItem.goodsImage,
+                                                id: goodsItem.id,
+                                                mealName: goodsItem.mealName,
+                                                standardPrice: goodsItem.standardPrice,
+                                                mealImage: goodsItem.mealImage,
                                                 goodsCount: 1,
-                                                isPackage: goodsItem.isPackage,
+                                                isSet: goodsItem.isSet,
                                               }
                                             }))
                                           }
@@ -664,14 +665,14 @@ export default function Order() {
                 ))
               }
             </View>
-            {/* <View
+            <View
               style={{
-                position:'relative',
+                position: 'relative',
                 width: '100%',
                 height: pxTransform(windowWidth * 0.1),
                 background: '#fff',
               }}
-            ></View> */}
+            ></View>
           </ScrollView>
         </View>
         <View
@@ -794,7 +795,7 @@ export default function Order() {
                   >
                     <Price
                       color='gray'
-                      price={cartList.reduce((acc, item) => acc + item.goodsPrice * item.goodsCount, 0)}
+                      price={cartList.reduce((acc, item) => acc + Number(item.standardPrice) * item.goodsCount, 0)}
                       size="xlarge"
                       thousands
                     />
@@ -904,7 +905,7 @@ export default function Order() {
                   indeterminate={cartCheckboxGroupValue.length > 0 && cartCheckboxGroupValue.length < cartList.length}
                   onChange={(state) => {
                     if (state) {
-                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.goodsId))
+                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.id))
                     } else {
                       setCartCheckboxGroupValue([])
                     }
@@ -952,18 +953,18 @@ export default function Order() {
                           }}
                         >
                           <Checkbox
-                            value={cartItem.goodsId}
-                            checked={cartCheckboxGroupValue.includes(cartItem.goodsId)}
+                            value={cartItem.id}
+                            checked={cartCheckboxGroupValue.includes(cartItem.id)}
                             onChange={(state) => {
                               if (state) {
                                 setCartCheckboxGroupValue((prev) => {
                                   if (prev.length < cartList.length - 1) {
 
                                   }
-                                  return [...prev, cartItem.goodsId]
+                                  return [...prev, cartItem.id]
                                 })
                               } else {
-                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== cartItem.goodsId))
+                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== cartItem.id))
                               }
                             }}
                             style={{
@@ -973,7 +974,7 @@ export default function Order() {
                           />
                         </View>
                         <Image
-                          src={cartItem.goodsImage}
+                          src={cartItem.mealImage}
                           width={pxTransform(windowWidth * 0.1)}
                           height={pxTransform(windowWidth * 0.1)}
                         />
@@ -987,7 +988,7 @@ export default function Order() {
                         }}
                       >
                         {
-                          cartItem.isPackage ? (
+                          cartItem.isSet ? (
                             <></>
                             // 套餐类商品样式备用
                             // <Collapse
@@ -1040,7 +1041,7 @@ export default function Order() {
                                 alignItems: 'center',
                               }}
                             >
-                              <Text>{cartItem.goodsName}</Text>
+                              <Text>{cartItem.mealName}</Text>
                             </View>
                           )
                         }
@@ -1055,7 +1056,7 @@ export default function Order() {
                           >
                             <Price
                               color='gray'
-                              price={cartItem.goodsPrice}
+                              price={Number(cartItem.standardPrice)}
                               size="small"
                               thousands
                             />
@@ -1077,13 +1078,13 @@ export default function Order() {
                               }}
                               onClick={() => {
                                 if (cartItem.goodsCount === 1) {
-                                  const newCartList = cartList.filter((mapItem) => mapItem.goodsId !== cartItem.goodsId)
+                                  const newCartList = cartList.filter((mapItem) => mapItem.id !== cartItem.id)
                                   dispatch(setCartListAction({ type: 'set', data: newCartList }))
                                 } else {
                                   dispatch(setCartListAction({
                                     type: 'set', data: [
                                       ...cartList.map((mapItem) => {
-                                        if (mapItem.goodsId === cartItem.goodsId) {
+                                        if (mapItem.id === cartItem.id) {
                                           return {
                                             ...mapItem,
                                             goodsCount: mapItem.goodsCount - 1,
@@ -1112,7 +1113,7 @@ export default function Order() {
                               onClick={() => dispatch(setCartListAction({
                                 type: 'set', data: [
                                   ...cartList.map((mapItem) => {
-                                    if (mapItem.goodsId === cartItem.goodsId) {
+                                    if (mapItem.id === cartItem.id) {
                                       return {
                                         ...mapItem,
                                         goodsCount: mapItem.goodsCount + 1,

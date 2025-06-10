@@ -1,28 +1,11 @@
 import { taroGet, taroPost } from '@/service'
-import { getOrderTabsListURL, getOrderListURL } from '@/service/config'
+import { getGroupGoodsListURL } from '@/service/config'
 import type { IResponseApi } from '../type'
+import type { IGroupGoodsList } from '@/redux/types/order'
 
-export const getOrderTabsListAPI = (callback: (res: IResponseApi) => void) => {
+export const getGroupGoodsListAPI = (callback: (res: IResponseApi<IGroupGoodsList[]>) => void) => {
     taroPost({
-        url: getOrderTabsListURL,
-        success: (res) => {
-            callback({
-                success: true,
-                data: res.data
-            })
-        },
-        fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
-        }
-    })
-}
-
-export const getOrderListAPI = (callback: (res: IResponseApi) => void) => {
-    taroPost({
-        url: getOrderListURL,
+        url: getGroupGoodsListURL,
         success: (res) => {
             callback({
                 success: true,

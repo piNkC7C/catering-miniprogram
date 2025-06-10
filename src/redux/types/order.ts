@@ -1,14 +1,15 @@
 export interface IGroupItem {
-  groupId: number
-  groupName: string
+  classificationId: number // 分类id
+  classificationName: string // 分类名称
+  classificationSorting: number // 分类排序
 }
 
 export interface IGoodsItem {
-  goodsId: number
-  goodsName: string
-  goodsPrice: number
-  goodsImage: string
-  isPackage: boolean // 是否是套餐
+  id: number // 商品id
+  mealName: string // 商品名称
+  standardPrice: number // 商品价格
+  mealImage: string // 商品图片
+  isSet: boolean // 是否是套餐
   // packageId?: number // 套餐id
   // packageName?: string // 套餐名称
   // packagePrice?: number // 套餐价格
@@ -40,9 +41,9 @@ export interface ICouponItem {
 }
 
 export interface ICartItem extends IGoodsItem {
-  groupId: number
-  goodsCount: number
-  totalPrice: number
+  classificationId: number // 分类id
+  goodsCount: number // 商品数量
+  totalPrice: number // 总价格
   // packageList?: IGoodsItem[] // 套餐商品列表
 }
 

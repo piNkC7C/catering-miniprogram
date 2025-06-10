@@ -136,4 +136,4 @@ export const locationLogo = 'https://minio-dev.imissniu.com/xfn/assets%2Findex%2
 export const callmeIcon = 'https://minio-dev.imissniu.com/xfn/assets%2Findex%2Fcallme-icon.png'
 export const getLocationIcon = 'https://minio-dev.imissniu.com/xfn/assets%2Findex%2Fgetlocation-icon.png'
 
-export const qqmapsdkKey = 'PJ3BZ-BOPWZ-IPHXC-76G2M-OTHXS-FGF4B'
+export const qqmapsdkKey = 'KQQBZ-QQZ6T-E6PXY-VTMSE-VHH7Z-JSFDH'

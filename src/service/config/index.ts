@@ -19,7 +19,7 @@
 // console.log(import.meta.env.VITE_BASE_URL)
 
 export const TIME_OUT = 999999999999999
-export const BASE_URL = 'http://192.168.110.221:9503/app-api'
+export const BASE_URL = 'http://192.168.110.20:9503/app-api'
 
 export const getAddressListURL = '/user/address/list'
 export const addAddressURL = '/user/address/create'
@@ -27,8 +27,7 @@ export const editAddressURL = '/user/address/update'
 export const deleteAddressURL = '/user/address/delete'
 export const getSuggestListURL = '/user/suggest/list'
 
-export const getOrderTabsListURL = '/mini-app/commodity/classification/list'
-export const getOrderListURL = '/mini-app/commodity/list'
+export const getGroupGoodsListURL = '/mini-app/commodity/list'
 
 export const loginByPhoneURL = '/member/auth/weixin-mini-app-login'
 
