@@ -70,6 +70,10 @@ export const routes = [
         path: '/subPackagesE/chooseShop/chooseShop'
     },
     {
+        name: 'refundList',
+        path: '/subPackagesE/refundList/refundList'
+    },
+    {
         name: 'index',
         path: '/pages/index/index'
     },

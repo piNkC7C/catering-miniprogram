@@ -28,6 +28,7 @@ export const deleteAddressURL = '/user/address/delete'
 export const getSuggestListURL = '/user/suggest/list'
 
 export const getGroupGoodsListURL = '/mini-app/commodity/list'
+export const getSetGoodURL = '/mini-app/commodity/set/detail'
 
 export const loginByPhoneURL = '/member/auth/weixin-mini-app-login'
 

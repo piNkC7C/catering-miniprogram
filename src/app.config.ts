@@ -20,6 +20,7 @@ export default defineAppConfig({
     // 'subPackagesD/suggest/suggest',
     // // 选择店铺
     // 'subPackagesE/chooseShop/chooseShop',
+    // 'subPackagesE/refundList/refundList',
   ],
   subPackages: [
     {
@@ -79,6 +80,8 @@ export default defineAppConfig({
       pages: [
         // 选择店铺
         'chooseShop/chooseShop',
+        // 退款记录
+        'refundList/refundList',
       ]
     },
   ],

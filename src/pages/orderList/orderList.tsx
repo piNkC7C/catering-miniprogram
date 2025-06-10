@@ -181,7 +181,7 @@ export default function OrderList() {
                                 height: `calc(40% - ${pxTransform(windowHeight * 0.03)})`,
                               }}
                               onClick={() => {
-                                if (orderItem.orderStatus === 1) {
+                                if (orderItem.orderStatus === 1 || orderItem.orderStatus === 4) {
                                   return
                                 }
                                 dispatch(setCurrentOrderAction({
@@ -207,7 +207,7 @@ export default function OrderList() {
                                       }}
                                     >
                                       <Image
-                                        src={goodsItem.goodsImage}
+                                        src={goodsItem.mealImage}
                                         mode='scaleToFill'
                                         width={pxTransform(windowHeight * 0.08)}
                                         height={pxTransform(windowHeight * 0.06)}
@@ -224,7 +224,7 @@ export default function OrderList() {
                                           fontSize: pxTransform(windowHeight * 0.015),
                                           marginTop: pxTransform(windowHeight * 0.005),
                                         }}
-                                      >{goodsItem.goodsName}</Text>
+                                      >{goodsItem.mealName}</Text>
                                     </View>
                                   ))
                                 }
@@ -339,10 +339,10 @@ export default function OrderList() {
                                           data: orderItem
                                         }))
                                         navigateTo({
-                                          url: routes.find((route) => route.name === 'orderDetail')?.path || ''
+                                          url: (routes.find((route) => route.name === 'refundList')?.path + `?id=${orderItem.orderId}`) || ''
                                         })
                                       }}
-                                    >退款详情</Button>
+                                    >退款记录</Button>
                                   </View>
                                 )
                               }
