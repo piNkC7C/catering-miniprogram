@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist/",
   "projectname": "catering-miniprogram",
   "description": "基于taro框架使用react开发的微信小程序",
-  "appid": "wxd3a5530a4763cc45",
+  "appid": "wx5f9220d47f1eb9f8",
   "setting": {
     "urlCheck": true,
     "es6": true,

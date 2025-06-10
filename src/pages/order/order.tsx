@@ -48,15 +48,6 @@ export default function Order() {
         type: 'set',
         data: tabs,
       }))
-      // taroPost({
-      //   url: getOrderListURL,
-      //   success: (res) => {
-      //     console.log('res', res);
-      //   },
-      //   fail: (err) => {
-      //     console.log('err', err);
-      //   },
-      // })
     } else {
       console.log('获取点单导航栏失败:', res)
     }
@@ -67,6 +58,7 @@ export default function Order() {
     getOrderTabsListAPI(getOrderTabsList)
   })
 
+  const [realWindowHeight, setRealWindowHeight] = useState(0)
   // 每次进入页面都检查是否选择了门店
   useDidShow(() => {
     if (!currentShop) {
@@ -74,7 +66,23 @@ export default function Order() {
         url: (routes.find((route) => route.name === 'chooseShop')?.path || '') + '?type=init',
       })
     }
+    // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
+  const { windowHeight } = getSystemInfoSync()
+  setRealWindowHeight(windowHeight)
   })
+
+  const { statusBarHeight, windowWidth } = getSystemInfoSync()
+  const finalStatusBarHeight = statusBarHeight || 0
+  // 获取胶囊按钮信息
+  const { top: topMenuButton, height: heightMenuButton } = getMenuButtonBoundingClientRect()
+  // 导航栏高度 = 胶囊按钮顶部位置 + (胶囊按钮高度 + 两边距离和)/2
+  const navBarHeight = (topMenuButton - finalStatusBarHeight) * 2 + heightMenuButton
+  // 总高度
+  const navHeight = finalStatusBarHeight + navBarHeight + 5
+  // 获取可视区域高度
+  const viewHeight = realWindowHeight - navHeight
+
+  console.log('viewHeight', viewHeight)
 
   // 桌号信息
   const [tableInfo, setTableInfo] = useState<any>({
@@ -122,17 +130,6 @@ export default function Order() {
 
   // 创建一个手动滚动事件来检测元素可见性
   // const [visibleItems, setVisibleItems] = useState<string[]>([]);
-
-  const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
-  const finalStatusBarHeight = statusBarHeight || 0
-  // 获取胶囊按钮信息
-  const { top: topMenuButton, height: heightMenuButton } = getMenuButtonBoundingClientRect()
-  // 导航栏高度 = 胶囊按钮顶部位置 + (胶囊按钮高度 + 两边距离和)/2
-  const navBarHeight = (topMenuButton - finalStatusBarHeight) * 2 + heightMenuButton
-  // 总高度
-  const navHeight = finalStatusBarHeight + navBarHeight + 5
-  // 获取可视区域高度
-  const viewHeight = windowHeight - navHeight
 
   // 侧边栏选中值
   const [sideBarValue, setSideBarValue] = useState<number | string>(0)
@@ -220,7 +217,7 @@ export default function Order() {
         className='custom-nav'
         style={{
           position: 'relative',
-          height: `${navHeight}px`,
+          height: pxTransform(navHeight),
         }}
       >
         <View
@@ -253,7 +250,7 @@ export default function Order() {
       </View>
       <View className='order-page'
         style={{
-          height: `${viewHeight}px`,
+          height: pxTransform(viewHeight),
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -389,6 +386,8 @@ export default function Order() {
           >
             {
               orderTabsList.map((item) => (
+                // @ts-ignore
+                // 忽视ts，title类型为string，但是这里需要传入一个组件
                 <SideBar.Item title={
                   <>
                     <Badge value={cartList.filter((findItem) => {
@@ -411,6 +410,7 @@ export default function Order() {
               height: `calc(100% - ${pxTransform(viewHeight * 0.04)})`,
               backgroundColor: '#fff',
               overflow: 'auto',
+              boxSizing: 'border-box',
             }}
           >
             <View
@@ -664,15 +664,16 @@ export default function Order() {
                 ))
               }
             </View>
+            {/* <View
+              style={{
+                position:'relative',
+                width: '100%',
+                height: pxTransform(windowWidth * 0.1),
+                background: '#fff',
+              }}
+            ></View> */}
           </ScrollView>
         </View>
-        <View
-          style={{
-            width: '100%',
-            height: pxTransform(windowWidth * 0.1),
-            background: '#fff',
-          }}
-        ></View>
         <View
           className='order-cart'
           style={{
@@ -862,7 +863,7 @@ export default function Order() {
         <LoginPopup
           visible={loginPopupVisible}
           onClose={() => setLoginPopupVisible(false)}
-          viewHeight={windowHeight}
+          viewHeight={realWindowHeight}
         />
         <Popup
           visible={showCartPopup}
@@ -886,7 +887,7 @@ export default function Order() {
               style={{
                 padding: `0 ${pxTransform(windowWidth * 0.05)}`,
                 width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
-                height: pxTransform(windowHeight * 0.05),
+                height: pxTransform(realWindowHeight * 0.05),
               }}
             >
               <View
@@ -1161,7 +1162,7 @@ export default function Order() {
           style={{
             padding: pxTransform(windowWidth * 0.03),
             width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
-            height: pxTransform(windowHeight * 0.7),
+            height: pxTransform(realWindowHeight * 0.7),
           }}
         >
           <View
@@ -1169,7 +1170,7 @@ export default function Order() {
             style={{
               // marginLeft: pxTransform(windowWidth * 0.03),
               paddingBottom: pxTransform(windowWidth * 0.03),
-              height: pxTransform(windowHeight * 0.03),
+              height: pxTransform(realWindowHeight * 0.03),
               fontSize: pxTransform(windowWidth * 0.04),
             }}
           >
@@ -1181,7 +1182,7 @@ export default function Order() {
                 className='goods-coupon-item'
                 style={{
                   padding: pxTransform(windowWidth * 0.03),
-                  height: pxTransform(windowHeight * 0.15),
+                  height: pxTransform(realWindowHeight * 0.15),
                   width: `calc(100% - ${pxTransform(windowWidth * 0.06)})`,
                 }}
               >
@@ -1193,8 +1194,8 @@ export default function Order() {
                 >
                   <Image
                     src={goodsCouponItem.goodsCouponImage}
-                    width={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
-                    height={pxTransform(windowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
+                    width={pxTransform(realWindowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
+                    height={pxTransform(realWindowHeight * 0.15 * 0.65 - windowWidth * 0.03)}
                   />
                   <View
                     className='item-top-right'

@@ -1,9 +1,15 @@
 import { memo } from 'react'
 import { View, Text, Image } from '@tarojs/components'
+import { login, showToast } from '@tarojs/taro'
 import { Popup, Button, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { pxTransform } from '@nutui/nutui-react-taro'
 import { userNologin } from '@/utils/constants'
+import { loginByPhoneAPI } from '@/api/login'
+import type { IResponseApi } from '@/api/type'
+import { useAppDispatch } from '@/hooks/useAppStore'
+import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
+import { on } from 'events'
 
 interface LoginPopupProps {
   visible: boolean
@@ -16,8 +22,47 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
   onClose,
   viewHeight
 }) => {
+  const dispatch = useAppDispatch()
   const [checkAgree, setCheckAgree] = useState<boolean>(false)
-  const [showToast, setShowToast] = useState<boolean>(false)
+  const [agreeToastShow, setAgreeToastShow] = useState<boolean>(false)
+
+  const setLoginInfo = (apiResponse: IResponseApi) => {
+    if (apiResponse.success) {
+      console.log(apiResponse.data)
+
+      // const { userInfo } = apiResponse.data
+      // dispatch(setLoginStatus(true))
+      // dispatch(userInfoAction(userInfo))
+      onClose()
+    } else {
+      showToast({
+        title: '登录失败，请稍后重试',
+        icon: 'error',
+        duration: 1000,
+      })
+    }
+  }
+
+  const loginByPhone = (phoneCode: string) => {
+    login({
+      success: (res) => {
+        console.log('loginByPhone success', res)
+        loginByPhoneAPI({
+          phoneCode,
+          loginCode: res.code,
+          state: 'STATE'
+        }, setLoginInfo)
+      },
+      fail: (err) => {
+        console.log(err)
+        showToast({
+          title: '登录失败，请稍后重试',
+          icon: 'error',
+          duration: 1000,
+        })
+      }
+    })
+  }
 
   return (
     <Popup
@@ -94,14 +139,24 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
               borderRadius: pxTransform(viewHeight * 0.05),
             }}
             {...(checkAgree ? {
-              openType: 'getRealtimePhoneNumber|agreePrivacyAuthorization',
-              onGetRealTimePhoneNumber: (realTimePhoneNumber) => {
-                console.log(realTimePhoneNumber.detail)
+              openType: 'getPhoneNumber|agreePrivacyAuthorization',
+              onGetPhoneNumber: (PhoneNumber) => {
+                console.log('onGetPhoneNumber', PhoneNumber.detail)
+
+                if (PhoneNumber.detail.code) {
+                  loginByPhone(PhoneNumber.detail.code)
+                } else {
+                  showToast({
+                    title: '获取手机号失败',
+                    icon: 'error',
+                    duration: 1000,
+                  })
+                }
               }
             } : {})}
             onClick={() => {
               if (!checkAgree) {
-                setShowToast(true)
+                setAgreeToastShow(true)
                 return
               }
             }}
@@ -134,8 +189,8 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
             checked={checkAgree}
             onChange={(val) => {
               setCheckAgree(val)
-              if (!val && showToast) {
-                setShowToast(false)
+              if (!val && agreeToastShow) {
+                setAgreeToastShow(false)
               }
             }}
             style={{
@@ -162,9 +217,9 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
         content='请同意用户协议'
         duration={2}
         icon='error'
-        visible={showToast}
+        visible={agreeToastShow}
         onClose={() => {
-          setShowToast(false)
+          setAgreeToastShow(false)
         }}
       />
     </Popup>

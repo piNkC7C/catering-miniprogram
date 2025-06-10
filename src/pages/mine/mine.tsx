@@ -32,6 +32,8 @@ export default function Mine() {
   const navHeight = finalStatusBarHeight + navBarHeight + 5
   // 获取可视区域高度
   const viewHeight = windowHeight - navHeight
+  console.log('viewHeight', viewHeight)
+
   const contentHeight = (windowHeight * 0.25 - navHeight) / 2 + navHeight
 
   const mineContentMiddleBottomItemList = [

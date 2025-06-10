@@ -35,7 +35,7 @@ function App({ children }: PropsWithChildren<any>) {
         //         })
         //     }
         // })
-        // 小程序登录
+        // 小程序游客登录
         // login({
         //     success: (res) => {
         //         console.log('login success', res)
