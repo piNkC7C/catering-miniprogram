@@ -8,6 +8,8 @@ import '@nutui/nutui-react-taro/dist/style.scss'
 import { Provider } from 'react-redux'
 import store from './redux'
 
+import { loginAPI } from './api/login'
+
 function App({ children }: PropsWithChildren<any>) {
 
     // useLaunch(() => {
@@ -36,16 +38,23 @@ function App({ children }: PropsWithChildren<any>) {
         //     }
         // })
         // 小程序游客登录
-        // login({
-        //     success: (res) => {
-        //         console.log('login success', res)
-        //     },
-        //     fail: (err) => {
-        //         console.log('login fail', err)
-        //     },
-        //     timeout: 10000,
-        //     force: true
-        // })
+        login({
+            success: (res) => {
+                console.log('login success', res)
+                loginAPI({
+                    type: 10,
+                    code: res.code,
+                    state: 'weixin'
+                }, (res) => {
+                    console.log('loginAPI success', res)
+                })
+            },
+            fail: (err) => {
+                console.log('login fail', err)
+            },
+            timeout: 10000,
+            force: true
+        })
     }, [])
 
     // children 是将要会渲染的页面

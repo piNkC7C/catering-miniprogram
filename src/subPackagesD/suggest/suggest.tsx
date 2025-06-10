@@ -8,7 +8,7 @@ import type { PickerOptions, PickerValue, PickerOnChangeCallbackParameter, Picke
 import { ArrowLeft, ArrowRight, Loading } from '@nutui/icons-react-taro'
 import { routes } from '@/utils/constants'
 import type { UploaderFileItem, UploaderFileStatus } from '@nutui/nutui-react-taro'
-import { taroPost, taroPost9500 } from '@/service'
+import { taroPost } from '@/service'
 import { uploadURL } from '@/service/config'
 
 export default function Suggest() {
@@ -222,7 +222,7 @@ export default function Suggest() {
                             }}
                             upload={(file) => {
                                 return new Promise((resolve, reject) => {
-                                    taroPost9500({
+                                    taroPost({
                                         url: uploadURL,
                                         headers: {
                                             'Content-Type': 'multipart/form-data',
