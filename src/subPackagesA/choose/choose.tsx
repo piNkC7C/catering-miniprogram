@@ -12,10 +12,6 @@ import { chooseBack } from '@/utils/constants'
 export default function Choose() {
   // 获取登录状态和用户信息
   const {
-    login: {
-      loginStatus,
-      userInfo
-    },
     order: {
       cartList
     }

@@ -2,11 +2,11 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, navigateTo, getMenuButtonBoundingClientRect, navigateBack } from '@tarojs/taro'
 import './refundList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
+import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast, Divider } from '@nutui/nutui-react-taro'
 import { ArrowRight, IconFont, ArrowLeft } from '@nutui/icons-react-taro'
 import { useState, useEffect } from 'react'
 import { noOrderList, logoSmall, userNologin } from '@/utils/constants'
-import { setCurrentOrderAction } from '@/redux/modules/order'
+import { setCurrentRefundAction, setCurrentOrderAction } from '@/redux/modules/order'
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
@@ -14,30 +14,19 @@ import { routes, orderTagList } from '@/utils/constants'
 export default function RefundList() {
     // 获取登录状态和用户信息
     const {
-        login: {
-            loginStatus,
-            userInfo
-        },
         order: {
-            orderList,
+            refundList,
             currentOrder
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
-
-    const filterOrderList = (tabValue: number) => {
-        if (tabValue === 0) {
-            return orderList
-        }
-        return orderList.filter((orderItem) => orderItem.orderType === tabValue)
-    }
 
     // useLoad(() => {
     //   console.log('OrderList page loaded.')
     // })
 
     // 底部弹层
-    const [showBottomPopup, setShowBottomPopup] = useState<boolean>(false)
+    // const [showBottomPopup, setShowBottomPopup] = useState<boolean>(false)
 
     // 登录状态为0时，初始化显示底部弹层
     // useEffect(() => {
@@ -55,28 +44,6 @@ export default function RefundList() {
     // 总高度
     const navHeight = finalStatusBarHeight + navBarHeight + 5
     const viewHeight = windowHeight - navHeight
-
-    const tabsList = [
-        {
-            title: '全部订单',
-            value: 0
-        },
-        {
-            title: '门店订单',
-            value: 1
-        },
-        {
-            title: '外卖订单',
-            value: 2
-        },
-        {
-            title: '商城订单',
-            value: 3
-        }
-    ]
-
-    // 当前选中的tab
-    const [tabvalue, setTabvalue] = useState<string | number>('all')
 
     return (
         <View className='refundlist-page'>
@@ -121,10 +88,10 @@ export default function RefundList() {
                 }}
             >
                 {
-                    orderList.length > 0 && (
+                    refundList.length > 0 && (
                         <>
                             {
-                                orderList.map((orderItem) => (
+                                refundList.map((refundItem) => (
                                     <View
                                         className='refundlist-item'
                                         style={{
@@ -133,11 +100,6 @@ export default function RefundList() {
                                             height: pxTransform(windowHeight * 0.2),
                                             backgroundColor: '#fff',
                                             borderRadius: pxTransform(10),
-                                        }}
-                                        onClick={() => {
-                                            navigateTo({
-                                                url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
-                                            })
                                         }}
                                     >
                                         <View
@@ -154,37 +116,47 @@ export default function RefundList() {
                                                     style={{
                                                         fontSize: pxTransform(viewHeight * 0.018),
                                                     }}
-                                                >{orderItem.shopName}</Text>
+                                                >{currentOrder?.shopName}</Text>
                                             </View>
                                             <View
                                                 className='refundlist-item-top-right'
                                                 style={{
                                                     fontSize: pxTransform(viewHeight * 0.018),
-                                                    color: orderItem.orderStatus === 1 ? '#D7181A' : '#676767'
+                                                    color: '#D7181A'
                                                 }}
                                             >
-                                                {orderItem.orderStatus === 1 && '退款成功'}
-                                                {orderItem.orderStatus === 2 && '退款中'}
-                                                {orderItem.orderStatus === 3 && '退款失败'}
-                                                {orderItem.orderStatus === 4 && '退款关闭'}
-                                                {/* {orderItem.orderStatus === 5 && '退款中'} */}
+                                                {
+                                                    (refundItem.refundStatus === 1) || (refundItem.refundStatus == 11) || (refundItem.refundStatus == 14) ? '商家处理' :
+                                                        (refundItem.refundStatus == 2) || (refundItem.refundStatus == 13) ? '退款成功' : refundItem.refundStatus == 3 ? '部分退款失败' : '商家拒绝退款'
+                                                }
+                                                {/* {orderItem.refundStatus === 5 && '退款中'} */}
                                             </View>
                                         </View>
+                                        <Divider
+                                            style={{
+                                                '--nutui-divider-margin': 0
+                                            } as any}
+                                        />
                                         <View
                                             className='refundlist-item-middle'
                                             style={{
                                                 padding: `${pxTransform(viewHeight * 0.015)} 0`,
                                             }}
                                             onClick={() => {
-                                                if (orderItem.orderStatus === 1) {
-                                                    return
-                                                }
                                                 dispatch(setCurrentOrderAction({
                                                     type: 'set',
-                                                    data: orderItem
+                                                    data: {
+                                                        ...currentOrder,
+                                                        isUseCoupon: false,
+                                                        goodsList: refundItem.goodsList
+                                                    }
+                                                }))
+                                                dispatch(setCurrentRefundAction({
+                                                    type: 'set',
+                                                    data: refundItem
                                                 }))
                                                 navigateTo({
-                                                    url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
+                                                    url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
                                                 })
                                             }}
                                         >
@@ -193,7 +165,7 @@ export default function RefundList() {
                                                 className='refundlist-item-middle-left'
                                             >
                                                 {
-                                                    orderItem.goodsList.map((goodsItem) => (
+                                                    refundItem.goodsList.map((goodsItem) => (
                                                         <View
                                                             className='refundlist-item-middle-left-goods'
                                                             style={{
@@ -224,7 +196,7 @@ export default function RefundList() {
                                                     ))
                                                 }
                                             </ScrollView>
-                                            <View
+                                            {/* <View
                                                 className='refundlist-item-middle-right'
                                             >
                                                 <View
@@ -232,7 +204,7 @@ export default function RefundList() {
                                                 >
                                                     <Price
                                                         color="gray"
-                                                        price={orderItem.totalPrice}
+                                                        price={refundItem.refundPrice}
                                                         size="normal"
                                                         thousands
                                                         style={{
@@ -247,9 +219,9 @@ export default function RefundList() {
                                                         fontSize: pxTransform(viewHeight * 0.015),
                                                     }}
                                                 >
-                                                    共{orderItem.totalCount}件
+                                                    共{refundItem.totalCount}件
                                                 </View>
-                                            </View>
+                                            </View> */}
                                         </View>
                                         {/* <View
                                             className='refundlist-item-table'
@@ -265,13 +237,18 @@ export default function RefundList() {
                                                 }}
                                             >{orderItem.tableNumber}</Text>
                                         </View> */}
+                                        <Divider
+                                            style={{
+                                                '--nutui-divider-margin': 0
+                                            } as any}
+                                        />
                                         <View
                                             className='refundlist-item-bottom'
                                         >
                                             <View className='refund-status1'>
                                                 退款合计：<Price
                                                     color="gray"
-                                                    price={orderItem.totalPrice}
+                                                    price={refundItem.refundPrice}
                                                     size="normal"
                                                     thousands
                                                     style={{

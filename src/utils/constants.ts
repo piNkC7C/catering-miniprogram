@@ -1,4 +1,5 @@
 export const TABLE_INFO = 'tableInfo'
+export const OPEN_ID = 'openId'
 
 export const routes = [
     {

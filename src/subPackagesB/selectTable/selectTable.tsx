@@ -3,10 +3,11 @@ import { View, Text, Span } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, switchTab, showToast, setStorage, getStorage, useRouter } from '@tarojs/taro'
 import './selectTable.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setLoginStatus, userInfoAction, setIsRetrieve } from '@/redux/modules/login'
+import { setTableInfo } from '@/redux/modules/login'
 import { pxTransform, Button, Image, Grid, Popup, Checkbox, Space, Toast, Radio, Input, NumberKeyboard } from '@nutui/nutui-react-taro'
 import { ArrowRight, Close, Home } from '@nutui/icons-react-taro'
 import { TABLE_INFO, selectTableBg, selectTableNumber, userNologin } from '@/utils/constants'
+import { setCurrentShopAction } from '@/redux/modules/address'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
@@ -14,7 +15,6 @@ export default function SelectTable() {
         login: {
             loginStatus,
             userInfo,
-            isRetrieve,
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
@@ -26,14 +26,54 @@ export default function SelectTable() {
     // const [inputValue, setInputValue] = useState<string>('')
 
     const [tableId, setTableId] = useState<any>(null)
+    const [tableNum, setTableNum] = useState<any>(null)
 
     const router = useRouter()
-    const { id } = router.params
+    const { scene } = router.params
     useEffect(() => {
-        if (id) {
-            setTableId(id)
+        if (scene) {
+            const { id, shopId, desNum } = decodeURIComponent(scene).split('&').reduce((acc: any, pair: any) => {
+                const [key, value] = pair.split('=');
+                if (key && value) {
+                  // 尝试转换为数字
+                  acc[key] = isNaN(Number(value)) ? value : Number(value);
+                }
+                return acc;
+              }, {});
+
+
+            console.log('id', id);
+            console.log('shopId', shopId);
+            console.log('desNum', desNum);
+
+            if (id) {
+                setTableId(id)
+            }
+            if (desNum) {
+                setTableNum(desNum)
+            }
+            if (shopId) {
+                dispatch(setCurrentShopAction({
+                    type: 'set',
+                    data: {
+                        shopId: 8,
+                        shopName: '浙江杭州拱墅信义坊总店',
+                        shopProvince: '浙江省',
+                        shopCity: '杭州市',
+                        shopArea: '拱墅区',
+                        shopStreet: '湖墅南路',
+                        shopDetail: '信义坊商街1号1楼',
+                        shopPhone: '13800138000',
+                        shopLongitude: 120.21201,
+                        shopLatitude: 30.2084,
+                        shopDistance: 10000,
+                        businessStartTime: '09:00',
+                        businessEndTime: '22:00',
+                    }
+                }))
+            }
         }
-    }, [id])
+    }, [])
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -116,7 +156,7 @@ export default function SelectTable() {
                                 backgroundImage: `url(${selectTableNumber})`,
                             }}
                         >
-                            桌号{tableId}
+                            桌号{tableNum}
                         </View>
                     </View>
                     <View
@@ -196,17 +236,22 @@ export default function SelectTable() {
                             }}
                             onClick={() => {
                                 if (selectedNum && selectedNum !== 0) {
-                                    setStorage({
-                                        key: TABLE_INFO,
-                                        data: {
-                                            tableId: tableId,
-                                            peopleNum: selectedNum,
-                                        },
-                                    })
-                                    dispatch(setIsRetrieve(true))
-                                    switchTab({
-                                        url: '/pages/order/order',
-                                    })
+                                    // setStorage({
+                                    //     key: TABLE_INFO,
+                                    //     data: {
+                                    //         tableId: tableId,
+                                    //         peopleNum: selectedNum,
+                                    //     },
+                                    // })
+                                    // dispatch(setIsRetrieve(true))
+                                    dispatch(setTableInfo({
+                                        tableId: tableId,
+                                        tableNum: tableNum,
+                                        peopleNum: selectedNum,
+                                    }))
+                                    // switchTab({
+                                    //     url: '/pages/order/order',
+                                    // })
                                 } else {
                                     showToast({
                                         title: '请选择就餐人数',

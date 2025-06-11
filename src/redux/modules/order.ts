@@ -3,186 +3,10 @@ import { IOrderState } from '../types/order'
 
 const initialState: IOrderState = {
   cartList: [],
-  orderList: [
-    {
-      orderId: 1,
-      orderStatus: 1,
-      tableNumber: 1,
-      personNumber: 1,
-      goodsList: Array.from({ length: 5 }, (_, index) => ({
-        classificationId: 1,
-        id: index + 1,
-        mealName: '原切前胸牛肉',
-        goodsPrice: 39,
-        mealImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-        goodsCount: 1,
-        isSet: false,
-        totalPrice: 39,
-      })),
-      isUseCoupon: false,
-      couponList: [],
-      totalCount: 5,
-      totalPrice: 195,
-      orderTag: '堂食',
-      orderType: 1,
-      shopName: '浙江某某某店',
-    },
-    {
-      orderId: 2,
-      orderStatus: 2,
-      tableNumber: 1,
-      personNumber: 1,
-      goodsList: Array.from({ length: 5 }, (_, index) => ({
-        groupId: 2,
-        goodsId: index + 1,
-        goodsName: '原切前胸牛肉',
-        goodsPrice: 39,
-        goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-        goodsCount: 1,
-        isPackage: false,
-        totalPrice: 39,
-      })),
-      isUseCoupon: true,
-      couponList: [{
-        couponId: 1,
-        couponName: '满100减10',
-        couponTip:'仅限100家门店使用',
-        couponDesc: '使用规则使用规则使用规则使用规则使用规则使用规则',
-        couponPrice: 10,
-        couponDiscount: 10,
-        couponStatus: 2,
-        couponStartTime: '2025-01-01',
-        couponEndTime: '2025-01-01',
-        couponTag: '仅限堂食',
-        isExchange: false,
-        exchangeStatus: null,
-      }],
-      totalCount: 5,
-      totalPrice: 185,
-      orderTag: '外卖',
-      orderType: 2,
-      shopName: '浙江某某某店',
-    },
-    {
-      orderId: 3,
-      orderStatus: 3,
-      tableNumber: 1,
-      personNumber: 1,
-      goodsList: Array.from({ length: 5 }, (_, index) => ({
-        groupId: 3,
-        goodsId: index + 1,
-        goodsName: '原切前胸牛肉',
-        goodsPrice: 39,
-        goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-        goodsCount: 1,
-        isPackage: false,
-        totalPrice: 39,
-      })),
-      isUseCoupon: false,
-      couponList: [],
-      totalCount: 5,
-      totalPrice: 195,
-      orderTag: '商城',
-      orderType: 3,
-      shopName: '浙江某某某店',
-    },
-    {
-      orderId: 4,
-      orderStatus: 4,
-      tableNumber: 1,
-      personNumber: 1,
-      goodsList: Array.from({ length: 5 }, (_, index) => ({
-        groupId: 4,
-        goodsId: index + 1,
-        goodsName: '原切前胸牛肉',
-        goodsPrice: 39,
-        goodsImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-        goodsCount: 1,
-        isPackage: false,
-        totalPrice: 39,
-      })),
-      isUseCoupon: false,
-      couponList: [],
-      totalCount: 5,
-      totalPrice: 195,
-      orderTag: '堂食',
-      orderType: 1,
-      shopName: '浙江某某某店',
-    }
-  ],
-  currentOrder: null,
-  orderTabsList: [
-    // {
-    //   groupId: 0,
-    //   groupName: '尊享商品券',
-    // },
-    // {
-    //   groupId: 1,
-    //   groupName: '专区',
-    // },
-    // {
-    //   groupId: 2,
-    //   groupName: '饮品',
-    // },
-    // {
-    //   groupId: 3,
-    //   groupName: '小吃',
-    // },
-    // {
-    //   groupId: 4,
-    //   groupName: '主食',
-    // },
-    // {
-    //   groupId: 5,
-    //   groupName: '甜品',
-    // },
-    // {
-    //   groupId: 6,
-    //   groupName: '酒水',
-    // },
-  ],
+  orderTabsList: [],
   groupGoodsList: [],
-  goodsCouponList: [
-    {
-      goodsCouponId: 1,
-      goodsCouponName: '当家肥牛套餐',
-      goodsCouponImage: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-      goodsCouponDesc: '使用规则使用规则使用规则使用规则使用规则使用规则',
-      goodsCouponStatus: 1,
-      goodsCouponStartTime: '2025-01-01',
-      goodsCouponEndTime: '2025-01-01',
-    }
-  ],
-  couponList: [
-    {
-      couponId: 1,
-      couponName: '满100减10',
-      couponTip: '仅限100家门店使用',
-      couponDesc: '使用规则使用规则使用规则使用规则使用规则使用规则',
-      couponPrice: 100,
-      couponDiscount: 10,
-      couponStatus: 1,
-      couponStartTime: '2025-01-01',
-      couponEndTime: '2025-01-01',
-      couponTag: '仅限堂食',
-      isExchange: false,
-      exchangeStatus: null,
-    },
-    {
-      couponId: 2,
-      couponName: '满100减10',
-      couponTip: '仅限100家门店使用',
-      couponDesc: '使用规则使用规则使用规则使用规则使用规则使用规则',
-      couponPrice: 100,
-      couponDiscount: 10,
-      couponStatus: 1,
-      couponStartTime: '2025-01-01',
-      couponEndTime: '2025-01-01',
-      couponTag: '仅限堂食',
-      isExchange: false,
-      exchangeStatus: null,
-    }
-  ],
+  goodsCouponList: [],
+  couponList: [],
   // checkoutOrder: null,
   checkoutOrder: {
     checkoutOrderId: 1,
@@ -196,6 +20,10 @@ const initialState: IOrderState = {
     couponList: [],
     goodsList: [],
   },
+  orderList: [],
+  refundList: [],
+  currentOrder: null,
+  currentRefund: null,
 }
 
 const orderSlice = createSlice({
@@ -271,8 +99,34 @@ const orderSlice = createSlice({
           break
       }
     },
+    setOrderListAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.orderList = [...data]
+          break
+      }
+    },
+    setRefundListAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.refundList = [...data]
+          break
+      }
+    },
+    setCurrentRefundAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.currentRefund = data
+          break
+        case 'clear':
+          state.currentRefund = null
+          break
+        default:
+          break
+      }
+    },
   }
 })
 
-export const { setCartListAction, setCurrentOrderAction, setCheckoutOrderAction, setCheckoutOrderCouponAction, setOrderTabsListAction, setGroupGoodsListAction } = orderSlice.actions
+export const { setCartListAction, setCurrentOrderAction, setCheckoutOrderAction, setCheckoutOrderCouponAction, setOrderTabsListAction, setGroupGoodsListAction, setOrderListAction, setRefundListAction,setCurrentRefundAction } = orderSlice.actions
 export default orderSlice.reducer

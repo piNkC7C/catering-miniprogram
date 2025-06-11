@@ -52,6 +52,13 @@
             align-items: center;
             justify-content: center;
 
+            .search-address {
+                width: 100%;
+                // box-sizing: border-box;
+                // font-weight: bold;
+                // text-align: left;
+            }
+
             .shop-list-title {
                 margin-bottom: 10rpx;
                 width: 100%;

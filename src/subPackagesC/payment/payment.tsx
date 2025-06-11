@@ -16,7 +16,8 @@ export default function Payment() {
     const {
         login: {
             loginStatus,
-            userInfo
+            userInfo,
+            tableInfo
         },
         order: {
             checkoutOrder,
@@ -26,22 +27,22 @@ export default function Payment() {
     const dispatch = useAppDispatch()
 
     // 桌号信息
-    const [tableInfo, setTableInfo] = useState<any>({
-        tableId: null,
-        peopleNum: null,
-    })
+    // const [tableInfo, setTableInfo] = useState<any>({
+    //     tableId: null,
+    //     peopleNum: null,
+    // })
 
-    useEffect(() => {
-        getStorage({
-            key: TABLE_INFO,
-            success: (res) => {
-                setTableInfo(res.data)
-            },
-            fail: (err) => {
-                console.log('获取桌号失败', err)
-            }
-        })
-    }, [])
+    // useEffect(() => {
+    //     getStorage({
+    //         key: TABLE_INFO,
+    //         success: (res) => {
+    //             setTableInfo(res.data)
+    //         },
+    //         fail: (err) => {
+    //             console.log('获取桌号失败', err)
+    //         }
+    //     })
+    // }, [])
 
     // 是否收起商品列表
     const [isFoldGoodsList, setIsFoldGoodsList] = useState(checkoutOrder?.goodsList.length && checkoutOrder?.goodsList.length > 3)
@@ -158,7 +159,7 @@ export default function Payment() {
                                 }}
                             ></IconFont>
                             <Text>
-                                {tableInfo.tableId}号桌
+                                {tableInfo?.tableNum}号桌
                             </Text>
                         </View>
                         <View
@@ -172,7 +173,7 @@ export default function Payment() {
                                 }}
                             ></IconFont>
                             <Text>
-                                {tableInfo.peopleNum}人
+                                {tableInfo?.peopleNum}人
                             </Text>
                         </View>
                     </View>
@@ -201,7 +202,7 @@ export default function Payment() {
                                             className='left'
                                         >
                                             <Image
-                                                src={goodsItem.goodsImage}
+                                                src={goodsItem.mealImage}
                                                 width={pxTransform(windowHeight * 0.06)}
                                                 height={pxTransform(windowHeight * 0.06)}
                                             ></Image>
@@ -216,7 +217,7 @@ export default function Payment() {
                                                     style={{
                                                         fontWeight: 'bold'
                                                     }}
-                                                >{goodsItem.goodsName}</Text>
+                                                >{goodsItem.mealName}</Text>
                                                 <Text
                                                     style={{
                                                         fontSize: pxTransform(windowHeight * 0.012),

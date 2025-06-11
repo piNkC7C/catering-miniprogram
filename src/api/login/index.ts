@@ -1,6 +1,7 @@
 import { taroPost } from '@/service'
 import { loginByPhoneURL, loginURL } from '@/service/config'
 import type { IResponseApi } from '../type'
+import type { IUserInfo } from '@/redux/types/login'
 
 export const loginByPhoneAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
     taroPost({
@@ -21,7 +22,11 @@ export const loginByPhoneAPI = (data: any, callback: (res: IResponseApi<any>) =>
     })
 }
 
-export const loginAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+export const loginAPI = (data: {
+    type: number
+    code: string
+    state: string
+}, callback: (res: IResponseApi<IUserInfo>) => void) => {
     taroPost({
         url: loginURL,
         data,

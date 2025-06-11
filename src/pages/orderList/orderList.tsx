@@ -6,24 +6,43 @@ import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space
 import { ArrowRight, IconFont } from '@nutui/icons-react-taro'
 import { useState, useEffect } from 'react'
 import { noOrderList, logoSmall, userNologin } from '@/utils/constants'
-import { setCurrentOrderAction } from '@/redux/modules/order'
+import { setCurrentOrderAction, setOrderListAction, setRefundListAction } from '@/redux/modules/order'
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
+import { getOrderListAPI, getRefundListAPI } from '@/api/order'
+import { IResponseApi } from '@/api/type'
+import { IOrderItem, IRefundItem } from '@/redux/types/order'
 
 export default function OrderList() {
   // 获取登录状态和用户信息
   const {
     login: {
       loginStatus,
-      userInfo
     },
     order: {
       orderList,
-      currentOrder
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
+
+  const getOrderList = (res: IResponseApi<IOrderItem[]>) => {
+    if (res.success) {
+      console.log(res.data);
+      dispatch(setOrderListAction({
+        type: 'set',
+        data: res.data,
+      }))
+    } else {
+      console.log('获取订单列表失败', res);
+    }
+  }
+
+  useLoad(() => {
+    getOrderListAPI({
+      openId: '1111'
+    }, getOrderList)
+  })
 
   const filterOrderList = (tabValue: number) => {
     if (tabValue === 0) {
@@ -31,10 +50,6 @@ export default function OrderList() {
     }
     return orderList.filter((orderItem) => orderItem.orderType === tabValue)
   }
-
-  // useLoad(() => {
-  //   console.log('OrderList page loaded.')
-  // })
 
   // 底部弹层
   const [showBottomPopup, setShowBottomPopup] = useState<boolean>(false)
@@ -68,7 +83,23 @@ export default function OrderList() {
   ]
 
   // 当前选中的tab
-  const [tabvalue, setTabvalue] = useState<string | number>('all')
+  const [tabvalue, setTabvalue] = useState<string | number>(0)
+
+  // 获取退款记录并跳转
+  const getRefundList = (res: IResponseApi<IRefundItem[]>) => {
+    if (res.success) {
+      console.log(res.data);
+      dispatch(setRefundListAction({
+        type: 'set',
+        data: res.data,
+      }))
+      navigateTo({
+        url: (routes.find((route) => route.name === 'refundList')?.path) || ''
+      })
+    } else {
+      console.log('获取退款记录失败', res);
+    }
+  }
 
   return (
     <View className='orderlist-page'>
@@ -168,8 +199,8 @@ export default function OrderList() {
                                 }}
                               >
                                 {orderItem.orderStatus === 1 && '待支付'}
-                                {orderItem.orderStatus === 2 && '已完成'}
-                                {orderItem.orderStatus === 3 && '已取消'}
+                                {orderItem.orderStatus === 2 && '已取消'}
+                                {orderItem.orderStatus === 3 && '已完成'}
                                 {orderItem.orderStatus === 4 && '已关闭'}
                                 {/* {orderItem.orderStatus === 5 && '退款中'} */}
                               </View>
@@ -237,7 +268,7 @@ export default function OrderList() {
                                 >
                                   <Price
                                     color="gray"
-                                    price={orderItem.totalPrice}
+                                    price={orderItem.couponedPrice}
                                     size="normal"
                                     thousands
                                     style={{
@@ -308,7 +339,7 @@ export default function OrderList() {
                                 )
                               }
                               {
-                                orderItem.orderStatus === 3 && (
+                                orderItem.orderStatus === 2 && (
                                   <View
                                     className='order-status1'
                                   >
@@ -338,16 +369,16 @@ export default function OrderList() {
                                           type: 'set',
                                           data: orderItem
                                         }))
-                                        navigateTo({
-                                          url: (routes.find((route) => route.name === 'refundList')?.path + `?id=${orderItem.orderId}`) || ''
-                                        })
+                                        getRefundListAPI({
+                                          id: orderItem.orderId
+                                        }, getRefundList)
                                       }}
                                     >退款记录</Button>
                                   </View>
                                 )
                               }
                               {
-                                orderItem.orderStatus === 2 && (
+                                orderItem.orderStatus === 3 && (
                                   <View
                                     className='order-status0'
                                   >

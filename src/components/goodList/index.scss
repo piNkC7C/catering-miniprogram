@@ -1,5 +1,6 @@
 .good-list {
     width: 95%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -63,6 +64,7 @@
     }
 
     .good-list-coupon {
+        box-sizing: border-box;
         width: 100%;
         display: flex;
         flex-direction: row;
@@ -102,7 +104,10 @@
     }
 
     .good-list-total {
+        width: 100%;
         height: 50rpx;
+        box-sizing: border-box;
+        background-color: #fff;
         display: flex;
         flex-direction: row;
         align-items: center;

@@ -15,8 +15,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       '@nutui/nutui-react-taro':
-        specifier: ^3.0.11
-        version: 3.0.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^3.0.13
+        version: 3.0.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@reduxjs/toolkit':
         specifier: ^2.8.1
         version: 2.8.1(react-redux@9.2.0(@types/react@18.3.21)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
@@ -80,6 +80,9 @@ importers:
       axios:
         specifier: ^1.9.0
         version: 1.9.0
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       fast-deep-equal:
         specifier: ^3.1.3
         version: 3.1.3
@@ -1272,8 +1275,8 @@ packages:
   '@nutui/lottie-miniprogram@1.0.2':
     resolution: {integrity: sha512-6xV+uW8VK1hT8QfjqfNlURTiQijb/dEEl/AeOudMwOB55Fr2+TdxoOAks5d8vnYBTYDZyOUlcsGNgoAkXKz8Qg==}
 
-  '@nutui/nutui-react-taro@3.0.11':
-    resolution: {integrity: sha512-6zZOiVKh7DQtt6Oo2QwJN/RG+rknuJ3ricpdV4l9tXwuC2lhzOyW13uUMT+KeofdFcIwN+3+/f+oOM7Sco8c8g==}
+  '@nutui/nutui-react-taro@3.0.13':
+    resolution: {integrity: sha512-X8avqemSWdEIv/INLWVV0I1y7vL8sYM4Uue0Pe7ANy2P+gNtRd+qaO8TrGmX4yxm3XdbZ9OTcUOsGQQs23dSSg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
@@ -9497,7 +9500,7 @@ snapshots:
 
   '@nutui/lottie-miniprogram@1.0.2': {}
 
-  '@nutui/nutui-react-taro@3.0.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@nutui/nutui-react-taro@3.0.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.27.1
       '@nutui/icons-react-taro': 3.0.1

@@ -20,14 +20,12 @@ export default function Order() {
   const {
     login: {
       loginStatus,
-      userInfo,
-      isRetrieve,
+      tableInfo,
     },
     order: {
       cartList,
       groupGoodsList,
       orderTabsList,
-      orderList,
       goodsCouponList,
     },
     address: {
@@ -39,7 +37,7 @@ export default function Order() {
   const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
     if (res.success) {
       const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
-      console.log('11111', orderData);
+      // console.log('11111', orderData);
 
       dispatch(setOrderTabsListAction({
         type: 'set',
@@ -50,13 +48,15 @@ export default function Order() {
         data: orderData
       }))
     } else {
-      console.log('获取点单导航栏失败:', res)
+      console.log('获取商品列表失败:', res)
     }
   }
 
   // 页面加载，初始化获取商品列表
   useLoad(() => {
-    getGroupGoodsListAPI(getGroupGoodsList)
+    getGroupGoodsListAPI({
+      shopId: currentShop?.shopId || 2
+    }, getGroupGoodsList)
   })
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
@@ -86,28 +86,28 @@ export default function Order() {
   // console.log('viewHeight', viewHeight)
 
   // 桌号信息
-  const [tableInfo, setTableInfo] = useState<any>({
-    tableId: null,
-    peopleNum: null,
-  })
+  // const [tableInfo, setTableInfo] = useState<any>({
+  //   tableId: null,
+  //   peopleNum: null,
+  // })
 
   // 获取桌号
-  useEffect(() => {
-    if (isRetrieve || !tableInfo.tableId) {
-      getStorage(
-        {
-          key: TABLE_INFO,
-          fail: (err) => {
-            console.log('点单页获取桌号失败', err)
-          },
-          success: (res) => {
-            setTableInfo(res.data)
-          },
-        },
-      )
-      dispatch(setIsRetrieve(false))
-    }
-  }, [isRetrieve, tableInfo.tableId])
+  // useEffect(() => {
+  //   if (isRetrieve || !tableInfo.tableId) {
+  //     getStorage(
+  //       {
+  //         key: TABLE_INFO,
+  //         fail: (err) => {
+  //           console.log('点单页获取桌号失败', err)
+  //         },
+  //         success: (res) => {
+  //           setTableInfo(res.data)
+  //         },
+  //       },
+  //     )
+  //     dispatch(setIsRetrieve(false))
+  //   }
+  // }, [isRetrieve, tableInfo.tableId])
   // useLoad(() => {
   //   console.log('Order page loaded.')
   // })
@@ -232,21 +232,19 @@ export default function Order() {
             alignItems: 'center',
           }}
         >
-          <ConfigProvider
-            theme={{
-              nutuiSearchbarBackground: 'transparent',
-              nutuiSearchbarContentBackground: '#f5f5f5',
-              nutuiSearchbarInputTextAlign: 'left',
-              nutuiSearchbarWidth: '100%',
-              nutuiSearchbarHeight: `${heightMenuButton - 6}px`,
-              nutuiSearchbarPadding: '6px 0',
-            }}
-          >
-            <SearchBar
-              placeholder="搜索商品"
-              shape="round"
-            />
-          </ConfigProvider>
+          <SearchBar
+            placeholder="搜索商品"
+            shape="round"
+            style={{
+              '--nutui-searchbar-padding': '6px 0',
+              '--nutui-searchbar-width': '100%',
+              '--nutui-searchbar-input-height': `${heightMenuButton - 6}px`,
+              '--nutui-searchbar-input-text-align': 'left',
+              '--nutui-searchbar-background': 'transparent',
+              '--nutui-searchbar-content-background': '#f5f5f5',
+              '--nutui-searchbar-input-text-color': '#f5f5f5',
+            } as any}
+          />
         </View>
       </View>
       <View className='order-page'
@@ -308,13 +306,13 @@ export default function Order() {
               }}
             >
               {
-                tableInfo.tableId && tableInfo.peopleNum ? (
+                tableInfo?.tableNum && tableInfo?.peopleNum ? (
                   <>
                     <Text
                       style={{
                         fontWeight: 'bold',
                       }}
-                    >{tableInfo.tableId}</Text>号桌&nbsp;&nbsp;<Text
+                    >{tableInfo.tableNum}</Text>号桌&nbsp;&nbsp;<Text
                       style={{
                         fontWeight: 'bold',
                       }}
@@ -813,12 +811,12 @@ export default function Order() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: `${pxTransform(0)} ${pxTransform(30)} ${pxTransform(30)} ${pxTransform(0)}`,
-              background: cartList.length > 0 || !(tableInfo.tableId && tableInfo.peopleNum) ? '#D61518' : '',
-              color: cartList.length > 0 || !(tableInfo.tableId && tableInfo.peopleNum) ? '#fff' : '#999',
+              background: cartList.length > 0 || !(tableInfo?.tableNum && tableInfo?.peopleNum) ? '#D61518' : '',
+              color: cartList.length > 0 || !(tableInfo?.tableNum && tableInfo?.peopleNum) ? '#fff' : '#999',
               fontSize: pxTransform(viewHeight * 0.02),
             }}
             onClick={() => {
-              if (!(tableInfo.tableId && tableInfo.peopleNum)) {
+              if (!(tableInfo?.tableNum && tableInfo?.peopleNum)) {
                 // scanCode(
                 //   {
                 //     scanType: ['qrCode'],
@@ -832,10 +830,13 @@ export default function Order() {
                 // )
                 navigateTo(
                   {
-                    url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?id=5`,
+                    url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?id=5&shopId=8`,
                   }
                 )
               } else {
+                if (cartList.length == 0) {
+                  return
+                }
                 dispatch(setCheckoutOrderAction({
                   type: 'set', data: {
                     checkoutOrderId: 1,
@@ -843,8 +844,9 @@ export default function Order() {
                     checkoutOrderTotalPrice: cartList.reduce((acc, item) => acc + item.totalPrice, 0),
                     checkoutOrderTotalCount: cartList.reduce((acc, item) => acc + item.goodsCount, 0),
                     checkoutOrderType: 1,
-                    checkoutOrderTableNumber: tableInfo.tableId,
-                    checkoutOrderPersonNumber: tableInfo.peopleNum,
+                    checkoutOrderTableId: tableInfo?.tableId,
+                    checkoutOrderTableNumber: tableInfo?.tableNum,
+                    checkoutOrderPersonNumber: tableInfo?.peopleNum,
                     isUseCoupon: false,
                     couponList: [],
                     goodsList: cartList,
@@ -858,7 +860,7 @@ export default function Order() {
               }
             }}
           >
-            <Text>{tableInfo.tableId && tableInfo.peopleNum ? '去下单' : '扫桌码'}</Text>
+            <Text>{tableInfo?.tableNum && tableInfo?.peopleNum ? '去下单' : '扫桌码'}</Text>
           </View>
         </View>
         <LoginPopup

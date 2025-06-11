@@ -106,7 +106,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                         className='left'
                                     >
                                         <Image
-                                            src={goodsItem.goodsImage}
+                                            src={goodsItem.mealImage}
                                             width={pxTransform(windowHeight * 0.06)}
                                             height={pxTransform(windowHeight * 0.06)}
                                         ></Image>
@@ -121,12 +121,12 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                                 style={{
                                                     fontWeight: 'bold'
                                                 }}
-                                            >{goodsItem.goodsName}</Text>
+                                            >{goodsItem.mealName}</Text>
                                             <Text
                                                 style={{
                                                     fontSize: pxTransform(windowHeight * 0.012),
                                                 }}
-                                            >x{goodsItem.goodsCount}</Text>
+                                            >x{goodsItem.userOrderQuantity}</Text>
                                         </View>
                                     </View>
                                     <View
@@ -137,7 +137,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                     >
                                         <Price
                                             color='gray'
-                                            price={goodsItem.totalPrice}
+                                            price={Number(goodsItem.standardPrice * goodsItem.userOrderQuantity)}
                                             size="small"
                                             thousands
                                             style={{
@@ -186,6 +186,43 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                     )
                 }
             </View>
+            {/* {
+                currentOrder?.orderStatus !== 1 && (
+                    <Divider />
+                )
+            } */}
+            {
+                currentOrder?.orderStatus !== 4 && (
+                    <View
+                        className='good-list-total'
+                        style={{
+                            marginBottom: currentOrder?.orderStatus !== 1 && pxTransform(windowHeight * 0.01),
+                            padding: `0 ${pxTransform(windowWidth * 0.05)}`,
+                            // width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
+                        }}
+                    >
+                        <View
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                justifyContent: 'flex-end',
+                                marginBottom: pxTransform(windowWidth * 0.02),
+                                height: '100%',
+                                fontSize: pxTransform(windowHeight * 0.012),
+                            }}
+                        >
+                            共{currentOrder?.totalCount}件&nbsp;&nbsp;合计：
+                        </View>
+                        <Price
+                            color='gray'
+                            price={Number(currentOrder?.totalPrice)}
+                            size="normal"
+                            thousands
+                        />
+                    </View>
+                )
+            }
             {
                 currentOrder?.isUseCoupon && (
                     <>
@@ -193,8 +230,8 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                             className='good-list-coupon'
                             style={{
                                 padding: `0 ${pxTransform(windowWidth * 0.05)}`,
-                                width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
-                                borderRadius: `0 0 ${pxTransform(windowHeight * 0.015)} ${pxTransform(windowHeight * 0.015)}`
+                                // width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
+                                // borderRadius: `0 0 ${pxTransform(windowHeight * 0.015)} ${pxTransform(windowHeight * 0.015)}`
                             }}
                         >
                             <View
@@ -230,7 +267,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                 className='good-list-coupon-right'
                             >
                                 -<Price
-                                    price={currentOrder?.couponList?.reduce((acc, couponItem) => acc + couponItem.couponDiscount, 0)}
+                                    price={currentOrder?.totalPrice - currentOrder?.couponedPrice}
                                     size="normal"
                                     thousands
                                 />
@@ -274,42 +311,43 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                 </View>
                             )
                         }
+                        {
+                            currentOrder?.orderStatus !== 1 && (
+                                <Divider />
+                            )
+                        }
+                        <View
+                            className='good-list-total'
+                            style={{
+                                marginBottom: pxTransform(windowHeight * 0.01),
+                                padding: `0 ${pxTransform(windowWidth * 0.05)}`,
+                                backgroundColor: 'transparent'
+                                // width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'flex-end',
+                                    marginBottom: pxTransform(windowWidth * 0.02),
+                                    height: '100%',
+                                    fontSize: pxTransform(windowHeight * 0.012),
+                                }}
+                            >
+                                实付：
+                            </View>
+                            <Price
+                                color='gray'
+                                price={Number(currentOrder?.couponedPrice)}
+                                size="normal"
+                                thousands
+                            />
+                        </View>
                     </>
                 )
             }
-            {
-                currentOrder?.orderStatus !== 1 && (
-                    <Divider />
-                )
-            }
-            <View
-                className='good-list-total'
-                style={{
-                    marginBottom: pxTransform(windowHeight * 0.01),
-                    padding: `0 ${pxTransform(windowWidth * 0.05)}`,
-                    width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
-                }}
-            >
-                <View
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        justifyContent: 'flex-end',
-                        marginBottom: pxTransform(windowWidth * 0.02),
-                        height: '100%',
-                        fontSize: pxTransform(windowHeight * 0.012),
-                    }}
-                >
-                    共{currentOrder?.totalCount}件&nbsp;&nbsp;合计：
-                </View>
-                <Price
-                    color='gray'
-                    price={Number(currentOrder?.totalPrice)}
-                    size="normal"
-                    thousands
-                />
-            </View>
         </View>
     )
 }

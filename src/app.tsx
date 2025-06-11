@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect } from 'react'
-import { useLaunch, checkSession, login } from '@tarojs/taro'
+import { useLaunch, checkSession, login, setStorage, getStorage } from '@tarojs/taro'
 import './app.scss'
+import { OPEN_ID } from './utils/constants'
 
 // nut-ui默认主题
 import '@nutui/nutui-react-taro/dist/style.scss'
@@ -15,6 +16,34 @@ function App({ children }: PropsWithChildren<any>) {
     // useLaunch(() => {
     //     console.log('App launched.')
     // })
+
+
+    const quikLogin = () => {
+        login({
+            success: (res) => {
+                // console.log('login success', res)
+                loginAPI({
+                    type: 10,
+                    code: res.code,
+                    state: 'weixin'
+                }, (res) => {
+                    if (res.success && res.data && res.data.openId) {
+                        setStorage({
+                            key: OPEN_ID,
+                            data: res.data.openId
+                        })
+                    } else {
+                        console.log('获取openid失败', res);
+                    }
+                })
+            },
+            fail: (err) => {
+                console.log('login fail', err)
+            },
+            timeout: 10000,
+            force: true
+        })
+    }
 
     useEffect(() => {
         // 检查用户登录状态
@@ -38,22 +67,17 @@ function App({ children }: PropsWithChildren<any>) {
         //     }
         // })
         // 小程序游客登录
-        login({
+        getStorage({
+            key: OPEN_ID,
             success: (res) => {
-                console.log('login success', res)
-                loginAPI({
-                    type: 10,
-                    code: res.code,
-                    state: 'weixin'
-                }, (res) => {
-                    console.log('loginAPI success', res)
-                })
+                if (res.data && res.data !== 'undefined') {
+                } else {
+                    quikLogin()
+                }
             },
-            fail: (err) => {
-                console.log('login fail', err)
+            fail(err) {
+                quikLogin()
             },
-            timeout: 10000,
-            force: true
         })
     }, [])
 

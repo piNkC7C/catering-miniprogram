@@ -3,32 +3,18 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal } from '@tarojs/taro'
 import './orderDetail.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { pxTransform, Image, Button, Divider, Tabs } from '@nutui/nutui-react-taro'
+import { pxTransform, Image, Button, Divider, Tabs, Steps, Step, Price } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
 import GoodList from '@/components/goodList'
 import Card from '@/components/Card'
-
-export interface IOrderDetail {
-    id: number
-    orderStatus: number
-    tableNumber: number
-    personNumber: number
-    goodsList: any[]
-    isUseCoupon: number
-    couponList?: any[]
-    totalPrice: number
-    shopName?: string
-}
+import dayjs from 'dayjs'
 
 export default function OrderDetail() {
     // 获取登录状态和用户信息
     const {
-        login: {
-            loginStatus,
-            userInfo
-        },
         order: {
-            currentOrder
+            currentOrder,
+            currentRefund
         }
     } = useAppSelector((state) => state)
 
@@ -44,6 +30,7 @@ export default function OrderDetail() {
     // 总高度
     const navHeight = finalStatusBarHeight + navBarHeight + 5
     const viewHeight = windowHeight - navHeight
+
 
     return (
         <View
@@ -92,7 +79,7 @@ export default function OrderDetail() {
             <View
                 className='content'
                 style={{
-                    height: currentOrder?.orderStatus !== 3 && currentOrder?.orderStatus !== 4 ? `calc(${pxTransform(viewHeight - windowHeight * 0.1)} - 20rpx)` : `calc(${pxTransform(viewHeight)} - 20rpx)`,
+                    height: currentOrder?.orderStatus !== 2 && currentOrder?.orderStatus !== 4 ? `calc(${pxTransform(viewHeight - windowHeight * 0.1)} - 20rpx)` : `calc(${pxTransform(viewHeight)} - 20rpx)`,
                 }}
             >
                 {
@@ -107,8 +94,8 @@ export default function OrderDetail() {
                                 }}
                             >
                                 {currentOrder?.orderStatus === 1 && '待支付'}
-                                {currentOrder?.orderStatus === 2 && '已完成'}
-                                {currentOrder?.orderStatus === 3 && '已取消'}
+                                {currentOrder?.orderStatus === 2 && '已取消'}
+                                {currentOrder?.orderStatus === 3 && '已完成'}
                             </View>
                             <View
                                 style={{
@@ -118,6 +105,79 @@ export default function OrderDetail() {
                             >
                                 {currentOrder?.orderStatus === 1 ? '支付成功后，完成菜品下单' : '期待您的下次光临'}
                             </View>
+                        </View>
+                    )
+                }
+                {
+                    currentOrder?.orderStatus === 4 && (
+                        <View
+                            className='refund-step'
+                            style={{
+                                padding: pxTransform(windowHeight * 0.015),
+                                margin: `0 ${pxTransform(windowHeight * 0.015)}`,
+                                marginTop: pxTransform(windowHeight * 0.015),
+                                borderRadius: pxTransform(windowHeight * 0.015),
+                            }}
+                        >
+                            <View
+                                className='refund-status'
+                            >
+                                <View
+                                style={{
+                                    fontSize: pxTransform(windowHeight * 0.02),
+                                    marginBottom: pxTransform(windowHeight * 0.01),
+                                }}
+                                >
+                                    {
+                                        (currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? '已提交退款申请' :
+                                            (currentRefund?.refundStatus == 2) || (currentRefund?.refundStatus == 13) ? '商家已退款' : currentRefund?.refundStatus == 3 ? '部分退款失败' : '商家拒绝退款'
+                                    }
+                                </View>
+                                <View
+                                    className='refund-price'
+                                    style={{
+                                        fontSize: pxTransform(windowHeight * 0.015),
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            color: '#999'
+                                        }}
+                                    >退款总金额：</Text>
+                                    <Price
+                                        color='gray'
+                                        price={Number(currentRefund?.refundPrice)}
+                                        size="normal"
+                                        thousands
+                                    />
+                                </View>
+                            </View>
+                            <View
+                                className='refund-text'
+                            >
+                                <Text>退款进度</Text>
+                            </View>
+                            <Steps
+                                direction="vertical"
+                                type="dot"
+                                status="enhanced"
+                                value={(currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? 1 : 2}
+                            >
+                                <Step
+                                    value={1}
+                                    title="提交退款申请"
+                                    description="已经提交了商品退款请求，商家正在处理您的退款，按支付方式原路返回，如有疑问请联系我们"
+                                />
+                                <Step
+                                    value={2}
+                                    title={
+                                        (currentRefund?.refundStatus == 2) || (currentRefund?.refundStatus == 13) || (currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? '商家已退款' : currentRefund?.refundStatus == 3 ? '部分退款失败' : '商家拒绝退款'
+                                    }
+                                    description={
+                                        (currentRefund?.refundStatus == 2) || (currentRefund?.refundStatus == 13) || (currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? "商家已处理您的退款，按支付方式原路返回，将在1-7个工作日内到账，如有疑问请联系我们" : currentRefund?.refundStatus == 3 ? '部分退款失败' : "商家拒绝了您的退款，如有疑问请联系我们"
+                                    }
+                                />
+                            </Steps>
                         </View>
                     )
                 }
@@ -134,37 +194,37 @@ export default function OrderDetail() {
                             <Card title='门店信息' contentList={[{
                                 id: '1',
                                 label: '门店名称',
-                                value: '浙江某某某店'
+                                value: currentOrder?.shopName
                             }, {
                                 id: '2',
                                 label: '门店地址',
-                                value: '浙江某某某店'
+                                value: (currentOrder?.shopAddressProvince || '') + (currentOrder?.shopAddressCity || '') + (currentOrder?.shopAddressArea || '') + (currentOrder?.shopAddressStreet || '') + (currentOrder?.shopAddressDetail || '')
                             }]} />
                             <Card title='用餐信息' contentList={[{
                                 id: '1',
                                 label: '用餐方式',
-                                value: '堂食'
+                                value: currentOrder?.orderType == 2 ? '外卖' : '堂食'
                             }, {
                                 id: '2',
                                 label: '桌号',
-                                value: '4'
+                                value: currentOrder?.tableNumber
                             }, {
                                 id: '3',
                                 label: '用餐人数',
-                                value: '4人'
+                                value: currentOrder?.personNumber + '人'
                             }]} />
                             <Card title='订单信息' contentList={[{
                                 id: '1',
                                 label: '订单编号',
-                                value: '1234567890'
+                                value: currentOrder?.orderIdentifier
                             }, {
                                 id: '2',
                                 label: '下单时间',
-                                value: '2021-01-01 12:00:00'
+                                value: dayjs(currentOrder?.orderTime).format('YYYY-MM-DD HH:mm:ss')
                             }, {
                                 id: '3',
                                 label: '支付方式',
-                                value: '微信支付'
+                                value: currentOrder?.orderPayType == 1 ? '微信支付' : '支付宝支付'
                             }]} />
                         </View>
                     )
@@ -177,22 +237,22 @@ export default function OrderDetail() {
                             <Card title='退款详情' contentList={[{
                                 id: '1',
                                 label: '退款原因',
-                                value: '不想要了/临时有事'
+                                value: currentRefund?.refundReason
                             }, {
                                 id: '2',
                                 label: '退款编号',
-                                value: '1234567890'
+                                value: currentRefund?.refundNumber
                             }, {
                                 id: '3',
                                 label: '退款时间',
-                                value: '2021-01-01 12:00:00'
+                                value: dayjs(currentRefund?.refundTime).format('YYYY-MM-DD HH:mm:ss')
                             }]} />
                         </View>
                     )
                 }
             </View>
             {
-                currentOrder?.orderStatus !== 3 && currentOrder?.orderStatus !== 4 && (
+                currentOrder?.orderStatus !== 2 && currentOrder?.orderStatus !== 4 && (
                     <View
                         className='bottom'
                         style={{
@@ -239,7 +299,7 @@ export default function OrderDetail() {
                             )
                         }
                         {
-                            currentOrder?.orderStatus === 2 && (
+                            currentOrder?.orderStatus === 3 && (
                                 <Button
                                     style={{
                                         borderRadius: pxTransform(windowHeight * 0.05),

@@ -9,10 +9,6 @@ import { ArrowLeft, Search } from '@nutui/icons-react-taro'
 export default function PointsRules() {
     // 获取登录状态和用户信息
     const {
-        login: {
-            loginStatus,
-            userInfo
-        },
         points: {
             pointsDetailList
         }

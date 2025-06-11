@@ -13,10 +13,6 @@ import { routes } from '@/utils/constants'
 export default function Points() {
     // 获取登录状态和用户信息
     const {
-        login: {
-            loginStatus,
-            userInfo
-        },
         points: {
             pointsList
         }

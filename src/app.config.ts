@@ -126,6 +126,7 @@ export default defineAppConfig({
   requiredPrivateInfos: [
     'getLocation',
     'chooseLocation',
+    'choosePoi',
   ],
   permission: {
     'scope.userLocation': {

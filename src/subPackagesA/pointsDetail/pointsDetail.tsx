@@ -10,10 +10,6 @@ import { pointsListAction, pointsDetailListAction } from '@/redux/modules/points
 export default function PointsDetail() {
     // 获取登录状态和用户信息
     const {
-        login: {
-            loginStatus,
-            userInfo
-        },
         points: {
             pointsDetailList
         }

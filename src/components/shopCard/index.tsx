@@ -14,10 +14,6 @@ import { setCurrentShopAction, setAddSuggestChooseShopAction } from '@/redux/mod
 function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
     // 获取登录状态和用户信息
     const {
-        login: {
-            loginStatus,
-            userInfo
-        },
         address: {
             addSuggestChooseShop
         }

@@ -44,6 +44,7 @@ export interface ICartItem extends IGoodsItem {
   classificationId: number // 分类id
   goodsCount: number // 商品数量
   totalPrice: number // 总价格
+  userOrderQuantity: number //商品数量
   // packageList?: IGoodsItem[] // 套餐商品列表
 }
 
@@ -52,18 +53,39 @@ export interface IGroupGoodsList extends IGroupItem {
 }
 
 export interface IOrderItem {
-  orderId: number
-  orderStatus: 1 | 2 | 3 | 4 | 5 // 1: 待支付, 2: 已完成, 3: 已取消, 4: 已关闭，5: 退款中
-  tableNumber: number
-  personNumber: number
-  goodsList: ICartItem[]
-  isUseCoupon: boolean
-  couponList?: ICouponItem[]
-  totalCount: number
-  totalPrice: number
-  orderTag?: string
-  shopName: string
+  orderId: number // 订单id
+  orderIdentifier: string //订单编号
+  orderStatus: 1 | 2 | 3 | 4 | 5 // 1: 待支付, 2: 已取消, 3: 已完成, 4: 已关闭，5: 退款中
+  tableNumber: number // 桌号
+  personNumber: number // 人数
+  goodsList: ICartItem[] //商品列表
+  isUseCoupon: boolean // 是否用券
+  couponList?: ICouponItem[] //券列表
+  totalCount: number //总数
+  totalPrice: number //优惠前金额
+  couponedPrice: number //优惠的金额
+  orderTag?: string // 订单标签
+  shopName: string // 店铺名称
   orderType: 1 | 2 | 3 // 1: 门店, 2: 外卖, 3: 商城
+  shopAddressProvince: string
+  shopAddressCity: string
+  shopAddressArea: string
+  shopAddressStreet: string
+  shopAddressDetail: string
+  orderPayTime: number // 支付时间
+  orderPayType: number // 支付方式
+  orderTime: number // 下单时间
+}
+
+export interface IRefundItem {
+  id: number //退款id
+  orderId: number // 订单id
+  refundNumber: string //退款编号
+  refundStatus: number //退款状态
+  refundTime: number // 退款时间戳
+  refundReason: string // 退款原因
+  refundPrice: number // 退款金额
+  goodsList: ICartItem[] //商品列表
 }
 
 export interface ICheckoutOrderItem {
@@ -72,7 +94,8 @@ export interface ICheckoutOrderItem {
   checkoutOrderTotalPrice: number // 总价格
   checkoutOrderTotalCount: number
   checkoutOrderType: 1 | 2 | 3 // 1: 门店, 2: 外卖, 3: 商城
-  checkoutOrderTableNumber: number
+  checkoutOrderTableId: number
+  checkoutOrderTableNumber: string
   checkoutOrderPersonNumber: number
   isUseCoupon: boolean
   couponList?: ICouponItem[]
@@ -81,11 +104,13 @@ export interface ICheckoutOrderItem {
 
 export interface IOrderState {
   cartList: ICartItem[]
-  orderList: IOrderItem[]
-  currentOrder: IOrderItem | null
   orderTabsList: IGroupItem[]
   groupGoodsList: IGroupGoodsList[]
   goodsCouponList: IGoodsCouponItem[]
   couponList: ICouponItem[]
   checkoutOrder: ICheckoutOrderItem | null
+  orderList: IOrderItem[]
+  refundList: IRefundItem[]
+  currentOrder: IOrderItem | null
+  currentRefund: IRefundItem | null
 }

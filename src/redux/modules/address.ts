@@ -1,13 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { IAddressState } from '../types/address'
 
-const initialState: IAddressState = {
+const initialState: IAddressState = { 
   addressList: [],
   suggestList: [],
   currentAddress: null,
   shopList: [
     {
-      shopId: 1,
+      shopId: 2,
       shopName: '浙江杭州拱墅信义坊总店',
       shopProvince: '浙江省',
       shopCity: '杭州市',
@@ -42,7 +42,7 @@ const addressSlice = createSlice({
           state.addressList = state.addressList.map((item) => item.id == data.id ? data : item)
           break
         case 'delete':
-          console.log('delete', data)
+          // console.log('delete', data)
           state.addressList = state.addressList.filter((item) => item.id != data.id)
           break
         default:
