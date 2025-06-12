@@ -1,5 +1,7 @@
 export interface IUserInfo {
-  openId: string
+  openid: string
+  userInfo: any
+  userId?: number
   nickname?: string
   avatar?: string
 }

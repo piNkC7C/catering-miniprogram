@@ -7,13 +7,6 @@ import { pxTransform, Image, Button, Divider, Tabs } from '@nutui/nutui-react-ta
 import { ArrowLeft, Search } from '@nutui/icons-react-taro'
 
 export default function Example() {
-    // 获取登录状态和用户信息
-    const {
-        login: {
-            loginStatus,
-            userInfo
-        },
-    } = useAppSelector((state) => state)
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0

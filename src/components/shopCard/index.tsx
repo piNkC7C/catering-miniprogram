@@ -101,13 +101,19 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
                         size={30}
                         style={{ width: 30, height: 30, marginRight: '25rpx' }}
                         name={callmeIcon}
-                        onClick={() => setIsVisible(true)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                            setIsVisible(true)
+                        }}
                     />
                     <IconFont
                         size={30}
                         style={{ width: 30, height: 30 }}
                         name={getLocationIcon}
-                        onClick={() => {
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
                             openLocation({
                                 latitude: shopItem.shopLatitude,
                                 longitude: shopItem.shopLongitude,
@@ -126,7 +132,7 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
                 cancelText="取消"
                 options={[
                     {
-                        name: '010-2558965',
+                        name: shopItem.shopPhone,
                     }
                 ]}
                 onSelect={handleSelect}

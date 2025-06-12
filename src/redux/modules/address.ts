@@ -1,29 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { IAddressState } from '../types/address'
 
-const initialState: IAddressState = { 
+const initialState: IAddressState = {
   addressList: [],
   suggestList: [],
   currentAddress: null,
-  shopList: [
-    {
-      shopId: 2,
-      shopName: '浙江杭州拱墅信义坊总店',
-      shopProvince: '浙江省',
-      shopCity: '杭州市',
-      shopArea: '拱墅区',
-      shopStreet: '湖墅南路',
-      shopDetail: '信义坊商街1号1楼',
-      shopPhone: '13800138000',
-      shopLongitude: 120.21201,
-      shopLatitude: 30.2084,
-      shopDistance: 10000,
-      businessStartTime: '09:00',
-      businessEndTime: '22:00',
-    }
-  ],
+  shopList: [],
   currentShop: null,
   addSuggestChooseShop: null,
+  nowAddress: null
 }
 
 const addressSlice = createSlice({
@@ -91,8 +76,29 @@ const addressSlice = createSlice({
           break
       }
     },
+    setShopListAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.shopList = [...data]
+          break
+        case 'add':
+          state.shopList = [...state.shopList, ...data]
+          break
+        default:
+          break
+      }
+    },
+    setNowAddressAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.nowAddress = data
+          break
+        default:
+          break
+      }
+    },
   }
 })
 
-export const { setAddressListAction, setSuggestListAction, setCurrentAddressAction, setCurrentShopAction, setAddSuggestChooseShopAction } = addressSlice.actions
+export const { setAddressListAction, setSuggestListAction, setCurrentAddressAction, setCurrentShopAction, setAddSuggestChooseShopAction, setShopListAction, setNowAddressAction } = addressSlice.actions
 export default addressSlice.reducer

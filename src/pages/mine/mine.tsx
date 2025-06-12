@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, showToast } from '@tarojs/taro'
 import './mine.scss'
 import { useAppSelector } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button } from '@nutui/nutui-react-taro'
@@ -9,6 +9,7 @@ import { userNologin, mineNavBgi, mineJifen, mineYouhui, mineYuE, mineLiPai, min
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes } from '@/utils/constants'
+import VipCode from '@/components/vipCode'
 
 export default function Mine() {
   // 获取登录状态和用户信息
@@ -86,6 +87,8 @@ export default function Mine() {
 
   // 登录组件
   const [loginPopupVisible, setLoginPopupVisible] = useState<boolean>(false)
+  // 会员码组件
+  const [vipCodeVisible, setVipCodeVisible] = useState<boolean>(false)
 
   return (
     <View
@@ -145,15 +148,20 @@ export default function Mine() {
                   size="small"
                   style={{
                     marginTop: pxTransform(windowHeight * 0.005),
-                    height: pxTransform(windowHeight * 0.02),
+                    height: pxTransform(windowHeight * 0.025),
                     fontSize: pxTransform(windowHeight * 0.015),
                     borderRadius: pxTransform(windowHeight * 0.05),
                   }}
                   rightIcon={<ArrowRight />}
                   onClick={() => {
-                    navigateTo({
-                      url: routes.find((route) => route.name === 'vip')?.path || '',
+                    showToast({
+                      title: '暂未开放',
+                      icon: 'none',
+                      duration: 1000,
                     })
+                    // navigateTo({
+                    //   url: routes.find((route) => route.name === 'vip')?.path || '',
+                    // })
                   }}
                 >
                   查看我的会员权益
@@ -206,9 +214,14 @@ export default function Mine() {
                 <View
                   className='mine-content-middle-bottom-item'
                   onClick={() => {
-                    navigateTo({
-                      url: item.path
+                    showToast({
+                      title: '暂未开放',
+                      icon: 'none',
+                      duration: 1000,
                     })
+                    // navigateTo({
+                    //   url: item.path
+                    // })
                   }}
                 >
                   <View
@@ -272,6 +285,14 @@ export default function Mine() {
                       navigateTo({
                         url: item.path
                       })
+                    } else if (item.title === '会员码') {
+                      setVipCodeVisible(true)
+                    } else if (item.title === '联系客服') {
+                      showToast({
+                        title: '暂未配置',
+                        icon: 'none',
+                        duration: 1000,
+                      })
                     }
                   }}
                 >
@@ -305,6 +326,10 @@ export default function Mine() {
         visible={loginPopupVisible}
         onClose={() => setLoginPopupVisible(false)}
         viewHeight={windowHeight}
+      />
+      <VipCode
+        vipCodeVisible={vipCodeVisible}
+        onClose={() => setVipCodeVisible(false)}
       />
     </View>
   )

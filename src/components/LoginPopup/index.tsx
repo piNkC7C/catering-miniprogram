@@ -10,6 +10,7 @@ import type { IResponseApi } from '@/api/type'
 import { useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
 import { on } from 'events'
+import { IUserInfo } from '@/redux/types/login'
 
 interface LoginPopupProps {
   visible: boolean
@@ -26,14 +27,21 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
   const [checkAgree, setCheckAgree] = useState<boolean>(false)
   const [agreeToastShow, setAgreeToastShow] = useState<boolean>(false)
 
-  const setLoginInfo = (apiResponse: IResponseApi<any>) => {
+  const setLoginInfo = (apiResponse: IResponseApi<IUserInfo>) => {
     if (apiResponse.success) {
-      console.log(apiResponse.data)
+      // console.log(apiResponse.data)
       setOverlayVisible(false)
-
-      // const { userInfo } = apiResponse.data
-      // dispatch(setLoginStatus(true))
-      // dispatch(userInfoAction(userInfo))
+      dispatch(userInfoAction({
+        type: 'set',
+        data: {
+          openid: apiResponse.data.openid,
+          userId: apiResponse.data.userId,
+          userInfo: apiResponse.data.userInfo,
+          nickname: apiResponse.data.userInfo.nickname,
+          avatar: apiResponse.data.userInfo.avatar,
+        }
+      }))
+      dispatch(setLoginStatus(1))
       onClose()
     } else {
       setOverlayVisible(false)

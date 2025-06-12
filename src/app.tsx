@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect } from 'react'
-import { useLaunch, checkSession, login, setStorage, getStorage } from '@tarojs/taro'
+import { useLaunch, checkSession, login, setStorage, getStorage, showLoading, hideLoading } from '@tarojs/taro'
 import './app.scss'
 import { OPEN_ID } from './utils/constants'
 
@@ -9,13 +9,44 @@ import '@nutui/nutui-react-taro/dist/style.scss'
 import { Provider } from 'react-redux'
 import store from './redux'
 
-import { loginAPI } from './api/login'
+import { loginAPI, getUserInfoAPI } from './api/login'
+import { userInfoAction, setLoginStatus } from './redux/modules/login'
+import { IResponseApi } from './api/type'
+import { IUserInfo } from './redux/types/login'
 
 function App({ children }: PropsWithChildren<any>) {
 
     // useLaunch(() => {
     //     console.log('App launched.')
     // })
+
+    const setLogin = (res: IResponseApi<IUserInfo>) => {
+        if (res.success) {
+            // setStorage({
+            //     key: OPEN_ID,
+            //     data: res.data.openid
+            // })
+            // console.log('login success', res);
+            store.dispatch(userInfoAction({
+                type: 'set',
+                data: {
+                    openid: res.data.openid,
+                    userInfo: res.data.userInfo,
+                    nickname: res.data.userInfo.nickname,
+                    avatar: res.data.userInfo.avatar,
+                }
+            }))
+            if (res.data.userInfo.isLogin) {
+                store.dispatch(setLoginStatus(1))
+            } else {
+                store.dispatch(setLoginStatus(0))
+            }
+            hideLoading()
+        } else {
+            console.log('获取openid失败', res);
+            hideLoading()
+        }
+    }
 
 
     const quikLogin = () => {
@@ -26,19 +57,11 @@ function App({ children }: PropsWithChildren<any>) {
                     type: 10,
                     code: res.code,
                     state: 'weixin'
-                }, (res) => {
-                    if (res.success && res.data && res.data.openId) {
-                        setStorage({
-                            key: OPEN_ID,
-                            data: res.data.openId
-                        })
-                    } else {
-                        console.log('获取openid失败', res);
-                    }
-                })
+                }, setLogin)
             },
             fail: (err) => {
                 console.log('login fail', err)
+                hideLoading()
             },
             timeout: 10000,
             force: true
@@ -66,11 +89,44 @@ function App({ children }: PropsWithChildren<any>) {
         //         })
         //     }
         // })
+        showLoading({
+            title: '登录中...',
+            mask: true,
+        })
         // 小程序游客登录
         getStorage({
             key: OPEN_ID,
-            success: (res) => {
-                if (res.data && res.data !== 'undefined') {
+            success: (storgeRes) => {
+                if (storgeRes.data && storgeRes.data !== 'undefined') {
+                    getUserInfoAPI({
+                        openid: storgeRes.data
+                    }, (res: IResponseApi<any>) => {
+                        if (res.success) {
+                            // setStorage({
+                            //     key: OPEN_ID,
+                            //     data: res.data.openid
+                            // })
+                            // console.log('login success', res);
+                            store.dispatch(userInfoAction({
+                                type: 'set',
+                                data: {
+                                    openid: storgeRes.data,
+                                    userInfo: res.data,
+                                    nickname: res.data.nickname,
+                                    avatar: res.data.avatar,
+                                }
+                            }))
+                            if (res.data.isLogin) {
+                                store.dispatch(setLoginStatus(1))
+                            } else {
+                                store.dispatch(setLoginStatus(1))
+                            }
+                            hideLoading()
+                        } else {
+                            console.log('获取openid失败', res);
+                            hideLoading()
+                        }
+                    })
                 } else {
                     quikLogin()
                 }

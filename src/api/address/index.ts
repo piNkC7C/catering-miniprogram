@@ -1,8 +1,9 @@
 import { taroGet, taroPost, taroPut } from '@/service'
-import { addAddressURL, getAddressListURL, editAddressURL, getAreaDataURL } from '@/service/config'
+import { addAddressURL, getAddressListURL, editAddressURL, getAreaDataURL, getShopListURL, getShopDetailURL } from '@/service/config'
 import type { IResponseApi } from '../type'
+import type { IAddressItem, IShopItem } from '@/redux/types/address'
 
-export const getAddressListAPI = (callback: (res: IResponseApi<any>) => void) => {
+export const getAddressListAPI = (callback: (res: IResponseApi<IAddressItem[]>) => void) => {
     taroGet({
         url: getAddressListURL,
         success: (res) => {
@@ -63,6 +64,60 @@ export const getAreaDataAPI = (data: {
 }, callback: (res: IResponseApi<any>) => void) => {
     taroGet({
         url: getAreaDataURL + '?id=' + data.id,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
+export const getShopListAPI = (data: {
+    cityId: number
+    shopLongitude: number
+    shopLatitude: number
+    locationName: string
+    pageSize?: number
+    cursorDistance?: any
+}, callback: (res: IResponseApi<{
+    shops: IShopItem[]
+    hasMore: boolean
+    nextCursor: number
+    init: boolean
+}>) => void) => {
+    taroPost({
+        url: getShopListURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: {
+                    ...res.data,
+                    init: !data.cursorDistance
+                }
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
+export const getShopDetailAPI = (data: {
+    shopId: number
+}, callback: (res: IResponseApi<IShopItem>) => void) => {
+    taroGet({
+        url: getShopDetailURL + '?shopId=' + data.shopId,
         success: (res) => {
             callback({
                 success: true,

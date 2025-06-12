@@ -33,8 +33,12 @@ export const getSetGoodURL = '/mini-app/commodity/set/detail'
 export const getOrderListURL = '/trade/order/list'
 export const getRefundListURL = '/trade/order/getRefundRecord'
 export const getAreaDataURL = '/mini-app/area-data/get'
+export const getShopListURL = '/mini-app/shop/list'
+export const getShopDetailURL = '/mini-app/shop/get'
 
 export const loginByPhoneURL = '/member/auth/weixin-mini-app-login'
 export const loginURL = '/member/auth/auth-session'
+export const getUserInfoURL = '/member/user/get-userinfo'
+export const getVipCodeURL = '/member/user/get-member-code'
 
 export const uploadURL = '/admin-api/infra/file/upload'

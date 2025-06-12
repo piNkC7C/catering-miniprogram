@@ -1,5 +1,5 @@
-import { taroPost } from '@/service'
-import { loginByPhoneURL, loginURL } from '@/service/config'
+import { taroPost, taroGet, taroPut } from '@/service'
+import { getUserInfoURL, loginByPhoneURL, loginURL, getVipCodeURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IUserInfo } from '@/redux/types/login'
 
@@ -30,6 +30,44 @@ export const loginAPI = (data: {
     taroPost({
         url: loginURL,
         data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
+export const getUserInfoAPI = (data: {
+    openid: string
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroGet({
+        url: getUserInfoURL + '?openid=' + data.openid,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
+export const getVipCodeAPI = (callback: (res: IResponseApi<any>) => void) => {
+    taroPut({
+        url: getVipCodeURL,
         success: (res) => {
             callback({
                 success: true,

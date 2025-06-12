@@ -8,6 +8,9 @@ import { pxTransform, Button, Image, Grid, Popup, Checkbox, Space, Toast, Radio,
 import { ArrowRight, Close, Home } from '@nutui/icons-react-taro'
 import { TABLE_INFO, selectTableBg, selectTableNumber, userNologin } from '@/utils/constants'
 import { setCurrentShopAction } from '@/redux/modules/address'
+import { getShopDetailAPI } from '@/api/address'
+import { IResponseApi } from '@/api/type'
+import { IShopItem } from '@/redux/types/address'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
@@ -35,16 +38,16 @@ export default function SelectTable() {
             const { id, shopId, desNum } = decodeURIComponent(scene).split('&').reduce((acc: any, pair: any) => {
                 const [key, value] = pair.split('=');
                 if (key && value) {
-                  // 尝试转换为数字
-                  acc[key] = isNaN(Number(value)) ? value : Number(value);
+                    // 尝试转换为数字
+                    acc[key] = isNaN(Number(value)) ? value : Number(value);
                 }
                 return acc;
-              }, {});
+            }, {});
 
 
-            console.log('id', id);
-            console.log('shopId', shopId);
-            console.log('desNum', desNum);
+            // console.log('id', id);
+            // console.log('shopId', shopId);
+            // console.log('desNum', desNum);
 
             if (id) {
                 setTableId(id)
@@ -53,24 +56,18 @@ export default function SelectTable() {
                 setTableNum(desNum)
             }
             if (shopId) {
-                dispatch(setCurrentShopAction({
-                    type: 'set',
-                    data: {
-                        shopId: 8,
-                        shopName: '浙江杭州拱墅信义坊总店',
-                        shopProvince: '浙江省',
-                        shopCity: '杭州市',
-                        shopArea: '拱墅区',
-                        shopStreet: '湖墅南路',
-                        shopDetail: '信义坊商街1号1楼',
-                        shopPhone: '13800138000',
-                        shopLongitude: 120.21201,
-                        shopLatitude: 30.2084,
-                        shopDistance: 10000,
-                        businessStartTime: '09:00',
-                        businessEndTime: '22:00',
+                getShopDetailAPI({
+                    shopId
+                }, (res: IResponseApi<IShopItem>) => {
+                    if (res.success) {
+                        dispatch(setCurrentShopAction({
+                            type: 'set',
+                            data: res.data
+                        }))
+                    } else {
+                        console.log('获取门店失败', res);
                     }
-                }))
+                })
             }
         }
     }, [])

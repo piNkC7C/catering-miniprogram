@@ -353,8 +353,8 @@ function PureGoodList<IGoodListProps>({ orderId }) {
 }
 
 export default memo(PureGoodList, (prevProps, nextProps) => {
-    if (prevProps.orderId === nextProps.orderId) {
-        return true
+    if (prevProps.orderId !== nextProps.orderId) {
+        return false
     }
-    return false
+    return true
 })

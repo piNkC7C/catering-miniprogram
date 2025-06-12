@@ -44,4 +44,5 @@ export interface IAddressState {
   shopList: IShopItem[]
   currentShop: IShopItem | null
   addSuggestChooseShop: IShopItem | null
+  nowAddress: any
 }

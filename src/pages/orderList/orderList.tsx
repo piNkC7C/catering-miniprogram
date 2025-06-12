@@ -28,7 +28,7 @@ export default function OrderList() {
 
   const getOrderList = (res: IResponseApi<IOrderItem[]>) => {
     if (res.success) {
-      console.log(res.data);
+      // console.log(res.data);
       dispatch(setOrderListAction({
         type: 'set',
         data: res.data,
@@ -61,7 +61,14 @@ export default function OrderList() {
   //   }
   // }, [])
 
-  const { windowWidth, windowHeight } = getSystemInfoSync()
+  const [windowHeight, setRealWindowHeight] = useState(0)
+  const [windowWidth, setRealWindowWidth] = useState(0)
+
+  useLoad(() => {
+    const { windowHeight: realWindowHeight, windowWidth: realWindowWidth } = getSystemInfoSync()
+    setRealWindowHeight(realWindowHeight)
+    setRealWindowWidth(realWindowWidth)
+  })
 
   const tabsList = [
     {
@@ -88,7 +95,7 @@ export default function OrderList() {
   // 获取退款记录并跳转
   const getRefundList = (res: IResponseApi<IRefundItem[]>) => {
     if (res.success) {
-      console.log(res.data);
+      // console.log(res.data);
       dispatch(setRefundListAction({
         type: 'set',
         data: res.data,

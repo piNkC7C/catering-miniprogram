@@ -14,6 +14,7 @@ import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
 import { getGroupGoodsListAPI } from '@/api/order'
 import type { IGroupGoodsList } from '@/redux/types/order'
+import ShopInfo from '@/components/shopInfo'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -54,9 +55,11 @@ export default function Order() {
 
   // 页面加载，初始化获取商品列表
   useLoad(() => {
-    getGroupGoodsListAPI({
-      shopId: currentShop?.shopId || 2
-    }, getGroupGoodsList)
+    if (currentShop?.shopId) {
+      getGroupGoodsListAPI({
+        shopId: currentShop?.shopId
+      }, getGroupGoodsList)
+    }
   })
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
@@ -117,6 +120,8 @@ export default function Order() {
 
   // 登录组件
   const [loginPopupVisible, setLoginPopupVisible] = useState<boolean>(false)
+  // 门店信息弹窗
+  const [showShopInfoPopup, setShowShopInfoPopup] = useState<boolean>(false)
 
   // 购物车弹窗
   const [showCartPopup, setShowCartPopup] = useState<boolean>(false)
@@ -340,6 +345,10 @@ export default function Order() {
                 display: 'flex',
                 alignItems: 'center',
                 flexDirection: 'row',
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowShopInfoPopup(true)
               }}
             >
               <Text>点此查看</Text>
@@ -867,6 +876,10 @@ export default function Order() {
           visible={loginPopupVisible}
           onClose={() => setLoginPopupVisible(false)}
           viewHeight={realWindowHeight}
+        />
+        <ShopInfo
+          shopInfoVisible={showShopInfoPopup}
+          onClose={() => setShowShopInfoPopup(false)}
         />
         <Popup
           visible={showCartPopup}

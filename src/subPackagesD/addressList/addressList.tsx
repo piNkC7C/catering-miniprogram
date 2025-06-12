@@ -10,6 +10,7 @@ import { routes, noAddress } from '@/utils/constants'
 import { setAddressListAction } from '@/redux/modules/address'
 import { getAddressListAPI } from '@/api/address'
 import type { IResponseApi } from '@/api/type'
+import { IAddressItem } from '@/redux/types/address'
 
 export default function AddressList() {
     // 获取登录状态和用户信息
@@ -25,7 +26,7 @@ export default function AddressList() {
 
     const dispatch = useAppDispatch()
 
-    const getAddressList = (apiRes: IResponseApi<any>) => {
+    const getAddressList = (apiRes: IResponseApi<IAddressItem[]>) => {
         if (apiRes.success) {
             dispatch(setAddressListAction({
                 type: 'set',

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Span } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, navigateTo, switchTab } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, switchTab, showToast } from '@tarojs/taro'
 import './index.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
@@ -10,6 +10,7 @@ import { ArrowRight, Close } from '@nutui/icons-react-taro'
 import { routes } from '@/utils/constants'
 import { userNologin, iconOrder, iconJifen, vipFrame, bgIndex } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
+import VipCode from '@/components/vipCode'
 
 export default function Index() {
   // 获取登录状态和用户信息
@@ -27,6 +28,9 @@ export default function Index() {
   // 底部弹层
   const [showBottomPopup, setShowBottomPopup] = useState<boolean>(false)
 
+  // 会员码弹层
+  const [vipCodeVisible, setVipCodeVisible] = useState<boolean>(false)
+
   // 登录状态为0时，初始化显示底部弹层
   // useEffect(() => {
   //   if (loginStatus === 0) {
@@ -35,8 +39,14 @@ export default function Index() {
   // }, [])
 
   // 视图高度
+  const [viewHeight, setRealViewHeight] = useState(0)
+  const [windowWidth, setRealWindowWidth] = useState(0)
 
-  const { windowHeight: viewHeight, windowWidth } = getSystemInfoSync()
+  useLoad(() => {
+    const { windowHeight: realViewHeight, windowWidth: realWindowWidth } = getSystemInfoSync()
+    setRealViewHeight(realViewHeight)
+    setRealWindowWidth(realWindowWidth)
+  })
 
   // useEffect(() => {
   //   console.log(getSystemInfoSync())
@@ -88,15 +98,20 @@ export default function Index() {
                   size="small"
                   style={{
                     marginTop: pxTransform(viewHeight * 0.005),
-                    height: pxTransform(viewHeight * 0.02),
+                    height: pxTransform(viewHeight * 0.025),
                     fontSize: pxTransform(viewHeight * 0.015),
                     borderRadius: pxTransform(viewHeight * 0.05),
                   }}
                   rightIcon={<ArrowRight />}
                   onClick={() => {
-                    navigateTo({
-                      url: routes.find((route) => route.name === 'vip')?.path || '',
+                    showToast({
+                      title: '暂未开放',
+                      icon: 'none',
+                      duration: 1000,
                     })
+                    // navigateTo({
+                    //   url: routes.find((route) => route.name === 'vip')?.path || '',
+                    // })
                   }}
                 >
                   查看我的会员权益
@@ -137,11 +152,16 @@ export default function Index() {
                   登录/注册
                 </Button>
               ) : (
-                <View style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}>
+                <View
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setVipCodeVisible(true)
+                  }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}>
                   <Image
                     src={vipFrame}
                     mode="scaleToFill"
@@ -297,6 +317,10 @@ export default function Index() {
         visible={showBottomPopup}
         onClose={() => setShowBottomPopup(false)}
         viewHeight={viewHeight}
+      />
+      <VipCode
+        vipCodeVisible={vipCodeVisible}
+        onClose={() => setVipCodeVisible(false)}
       />
     </View>
   )

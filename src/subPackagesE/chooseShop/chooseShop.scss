@@ -72,6 +72,15 @@
                 width: 100%;
                 flex: 1;
                 overflow-y: auto;
+
+                .load-more-tip {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 80rpx;
+                    color: #999;
+                    font-size: 28rpx;
+                }
             }
         }
     }
