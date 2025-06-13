@@ -7,9 +7,9 @@ export interface IGroupItem {
 export interface IGoodsItem {
   id: number // 商品id
   mealName: string // 商品名称
-  standardPrice: number // 商品价格
   mealImage: string // 商品图片
   isSet: boolean // 是否是套餐
+  standardPrice: number // 商品价格
   // packageId?: number // 套餐id
   // packageName?: string // 套餐名称
   // packagePrice?: number // 套餐价格
@@ -103,7 +103,7 @@ export interface ICheckoutOrderItem {
 }
 
 export interface IOrderState {
-  cartList: ICartItem[]
+  cartList: any[]
   orderTabsList: IGroupItem[]
   groupGoodsList: IGroupGoodsList[]
   goodsCouponList: IGoodsCouponItem[]

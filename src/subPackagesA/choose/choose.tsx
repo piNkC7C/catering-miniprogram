@@ -1,37 +1,55 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getCurrentPages, showToast } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getCurrentPages, showToast, useRouter } from '@tarojs/taro'
 import './choose.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction } from '@/redux/modules/order'
 import { pxTransform, Divider, Grid, Image, Badge, ConfigProvider, Price, InputNumber, Button } from '@nutui/nutui-react-taro'
 import { Check } from '@nutui/icons-react-taro'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IGoodItem } from './type'
 import { chooseBack } from '@/utils/constants'
+import { getSetGoodDetailAPI, addCartGoodAPI, getCartListAPI } from '@/api/order'
+import { IResponseApi } from '@/api/type'
 
 export default function Choose() {
   // 获取登录状态和用户信息
   const {
     order: {
-      cartList
+      cartList,
+    },
+    address: {
+      currentShop,
+    },
+    login: {
+      tableInfo
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
+  const { id } = useRouter().params
+
+  useEffect(() => {
+    if (id) {
+      getSetGoodDetailAPI({ id }, (res) => {
+        console.log('res', res)
+        setAllSelectedAddOneGood(res.data.mealSetOptionalGroupInfoList)
+        setSelectedIncludeGood(res.data.mealSpecificationInfoList)
+        setSetGoodDetail(res.data)
+      })
+    }
+  }, [])
   // useLoad(() => {
   //   console.log('OrderList page loaded.')
   // })
 
+  // 套餐详情
+  const [setGoodDetail, setSetGoodDetail] = useState<any>(null)
+
   // 已包含商品
-  const [selectedIncludeGood, setSelectedIncludeGood] = useState<IGoodItem | null>({
-    id: 1,
-    title: '原切前胸牛肉',
-    image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-    price: 39,
-    count: 1,
-  })
+  const [selectedIncludeGood, setSelectedIncludeGood] = useState<any[]>([])
 
   // 选择的加一商品
-  const [selectedAddOneGood, setSelectedAddOneGood] = useState<IGoodItem | null>(null)
+  const [allSelectedAddOneGood, setAllSelectedAddOneGood] = useState<any[]>([])
+  const [selectedAddOneGood, setSelectedAddOneGood] = useState<any[]>([])
 
   // 商品价格
   const [goodPrice, setGoodPrice] = useState<number>(39)
@@ -39,34 +57,74 @@ export default function Choose() {
   const [goodCount, setGoodCount] = useState<number>(1)
 
   // 商品列表
-  const gridItem = (listItem: any, index: number) => {
+  const gridItem = (listItem: any, index: number, max: number | null, total: number) => {
     return (
       <Grid.Item
-        key={index}
-        text={<Text>{listItem.title}&nbsp;&nbsp;x1</Text>
+        key={listItem.id}
+        text={
+          (<>
+            <View
+              style={{
+                textAlign: 'center',
+                marginBottom: '5px'
+              }}
+            >
+              {listItem.mealName}
+              {/* &nbsp;&nbsp;x{listItem.specificationQuantity} */}
+            </View>
+            <InputNumber
+              defaultValue={0}
+              disabled={total - selectedAddOneGood.reduce((acc, item) => acc + item.goodsCount, 0) == 0 && selectedAddOneGood.every((item) => {
+                return item.id !== listItem.id
+              })}
+              value={selectedAddOneGood.find((item: any) => item.id === listItem.id)?.goodsCount || 0}
+              max={max || total - selectedAddOneGood.reduce((acc, item) => acc + item.goodsCount, 0)}
+              min={0}
+              allowEmpty
+              onChange={(value) => {
+                const count = Number(value)
+                if (count === 0) {
+                  setSelectedAddOneGood(selectedAddOneGood.filter((item: any) => item.id !== listItem.id))
+                } else {
+                  if (selectedAddOneGood.some((item: any) => item.id === listItem.id)) {
+                    setSelectedAddOneGood(selectedAddOneGood.map((item: any) => item.id === listItem.id ? { ...item, goodsCount: count } : item))
+                  } else {
+                    const cartData = {
+                      id: listItem.id,
+                      mealName: listItem.mealName,
+                      mealImage: listItem.mealImage,
+                      goodsCount: count,
+                    }
+                    setSelectedAddOneGood([...selectedAddOneGood, { ...cartData }])
+                  }
+                  // console.log(selectedAddOneGood, 'selectedAddOneGood');
+                }
+              }}
+            />
+          </>)
         }
         style={{
           position: 'relative',
           boxShadow: '0px 0px 7px 0px rgba(0,0,0,0.15)',
           borderRadius: pxTransform(viewHeight * 0.01),
-          border: selectedAddOneGood?.id === listItem.id ? '1px solid #D61518' : 'none',
+          border: 'none',
         }}
-        onClick={() => {
-          setSelectedAddOneGood(listItem)
-        }}
+      // onClick={() => {
+      //   setSelectedAddOneGood(listItem)
+      // }}
       >
-        <Badge
+        {/* <Badge
           value={<Check color="#fff" />}
           size="large"
           style={{
-            display: selectedAddOneGood?.id === listItem.id ? 'block' : 'none',
+            display: selectedAddOneGood.some((item: any) => item.id === listItem.id) ? 'block' : 'none',
             position: 'absolute',
             top: 8,
             right: 8,
           }}
-        />
+        /> */}
         <Image
-          src={listItem.image}
+          src={listItem.mealImage}
         />
       </Grid.Item>
     )
@@ -153,7 +211,7 @@ export default function Choose() {
         }}
       >
         <Image
-          src={selectedIncludeGood?.image}
+          src={selectedIncludeGood?.[0]?.mealImage}
           mode='widthFix'
           style={{
             width: windowWidth,
@@ -188,7 +246,7 @@ export default function Choose() {
               fontSize: pxTransform(viewHeight * 0.025),
             }}
           >
-            加1送1（原切前胸牛肉）
+            {setGoodDetail?.mealSetName}
           </View>
           <Divider />
         </View>
@@ -209,92 +267,46 @@ export default function Choose() {
               <Text>已包含</Text>
             </View>
             <Grid columns={3} gap={7}>
-              <Grid.Item
-                text={selectedIncludeGood?.title}
-                style={{
-                  position: 'relative',
-                  boxShadow: '0px 0px 7px 0px rgba(0,0,0,0.15)',
-                  borderRadius: pxTransform(viewHeight * 0.01),
-                  border: 'none',
-                }}
-              >
-                <Image
-                  src={selectedIncludeGood?.image}
-                />
-              </Grid.Item>
+              {
+                selectedIncludeGood.map((item: any) => (
+                  <Grid.Item
+                    key={item.id}
+                    text={item.mealName}
+                    style={{
+                      position: 'relative',
+                      boxShadow: '0px 0px 7px 0px rgba(0,0,0,0.15)',
+                      borderRadius: pxTransform(viewHeight * 0.01),
+                      border: 'none',
+                    }}
+                  >
+                    <Image
+                      src={item.mealImage}
+                    />
+                  </Grid.Item>
+                ))
+              }
             </Grid>
             <Divider />
           </View>
-          <View className='body-content-item'>
-            <View
-              className='body-content-item-title'
-              style={{
-                marginBottom: pxTransform(viewHeight * 0.02),
-              }}
-            >
-              <Text>选择你加1，我送1商品</Text>
-            </View>
-            <Grid columns={3} gap={7}>
-              {[
-                {
-                  id: 1,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 2,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 3,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 4,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 5,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 6,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 7,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 8,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-                {
-                  id: 9,
-                  title: '原切前胸牛肉',
-                  image: 'https://img10.360buyimg.com/n2/s240x240_jfs/t1/210890/22/4728/163829/6163a590Eb7c6f4b5/6390526d49791cb9.jpg!q70.jpg',
-                  price: 39
-                },
-              ].map((listItem, index) => (
-                gridItem(listItem, index)
-              ))}
-            </Grid>
-          </View>
+          {
+            allSelectedAddOneGood.map((groupItem) => (
+              <View className='body-content-item'>
+                <View
+                  className='body-content-item-title'
+                  style={{
+                    marginBottom: pxTransform(viewHeight * 0.02),
+                  }}
+                >
+                  <Text>{groupItem?.mealQuantity}选{groupItem?.mealOptionalQuantity}</Text>
+                </View>
+                <Grid columns={3} gap={7}>
+                  {groupItem?.mealSpecificationInfoList.map((listItem, index) => (
+                    gridItem(listItem, index, groupItem.canRepeated == 0 ? 1 : null, groupItem.mealOptionalQuantity)
+                  ))}
+                </Grid>
+              </View>
+            ))
+          }
         </View>
         <View
           style={{
@@ -377,7 +389,7 @@ export default function Choose() {
               } else {
                 smoothScrollTo(0, 200)
               }
-              setSelectedAddOneGood(null)
+              setSelectedAddOneGood([])
             }}
           >恢复默认</Button>
           <Button
@@ -391,15 +403,74 @@ export default function Choose() {
               '--nutui-button-default-height': pxTransform(viewHeight * 0.05),
             } as any}
             onClick={() => {
-              if (selectedAddOneGood) {
-                console.log('selectedAddOneGood', selectedAddOneGood)
-                navigateBack()
-              } else {
-                showToast({
-                  title: '请选择一款你加一我送一的商品',
-                  icon: 'none',
-                })
+              // console.log(selectedIncludeGood, '999');
+              // console.log(selectedAddOneGood, '888');
+              // if (!currentShop) {
+              //   showToast({
+              //     title: '请先选择门店',
+              //     icon: 'none',
+              //   })
+              //   return
+              // }
+              // if (!tableInfo) {
+              //   showToast({
+              //     title: '请先扫桌码',
+              //     icon: 'none',
+              //   })
+              //   return
+              // }
+              const queryData = {
+                "commodityId": setGoodDetail?.id,
+                "count": goodCount,
+                "isSet": true,
+                "isAdd": true,
+                "shopId": currentShop?.shopId || 0,
+                "deskId": tableInfo?.tableId || 0,
+                "cartModifyReqVOList": selectedAddOneGood.map((item) => ({
+                  "commodityId": item.id,
+                  "count": item.goodsCount,
+                  "shopId": currentShop?.shopId,
+                  "deskId": tableInfo?.tableId,
+                  "isSet": true,
+                  "isAdd": true,
+                })).concat(selectedIncludeGood.map((item) => ({
+                  "commodityId": item.id,
+                  "count": 1,
+                  "shopId": currentShop?.shopId,
+                  "deskId": tableInfo?.tableId,
+                  "isSet": true,
+                  "isAdd": true,
+                })))
               }
+              addCartGoodAPI(queryData, (res) => {
+                if (res.success && res.data) {
+                  showToast({
+                    title: '添加成功',
+                    icon: 'success',
+                  })
+                  getCartListAPI({
+                    "shopId": currentShop?.shopId || 0,
+                    "deskId": tableInfo?.tableId || 0,
+                  }, (res: IResponseApi<any>) => {
+                    if (res.success) {
+                      dispatch(setCartListAction({
+                        type: 'set',
+                        data: res.data
+                      }))
+                      navigateBack()
+                    }
+                  })
+                }
+              })
+              // if (selectedAddOneGood.length > 0) {
+              //   console.log('selectedAddOneGood', selectedAddOneGood)
+              //   navigateBack()
+              // } else {
+              //   showToast({
+              //     title: '请至少选择一款商品',
+              //     icon: 'none',
+              //   })
+              // }
             }}
           >加入购物袋</Button>
         </View>

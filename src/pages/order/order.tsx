@@ -12,7 +12,7 @@ import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
-import { getGroupGoodsListAPI } from '@/api/order'
+import { getGroupGoodsListAPI, getCartListAPI } from '@/api/order'
 import type { IGroupGoodsList } from '@/redux/types/order'
 import ShopInfo from '@/components/shopInfo'
 
@@ -54,13 +54,46 @@ export default function Order() {
   }
 
   // 页面加载，初始化获取商品列表
-  useLoad(() => {
+  useEffect(() => {
     if (currentShop?.shopId) {
       getGroupGoodsListAPI({
         shopId: currentShop?.shopId
       }, getGroupGoodsList)
     }
-  })
+  }, [currentShop?.shopId])
+
+  // useEffect(() => {
+  //   if (currentShop?.shopId && tableInfo?.tableId) {
+  //     getCartListAPI({
+  //       shopId: currentShop.shopId,
+  //       deskId: tableInfo.tableId,
+  //     }, (res: IResponseApi<any>) => {
+  //       if (res.success) {
+  //         dispatch(setCartListAction({
+  //           type: 'set',
+  //           data: res.data
+  //         }))
+  //       }
+  //     })
+  //   }
+  // }, [currentShop?.shopId, tableInfo?.tableId])
+
+  useEffect(() => {
+    console.log('cartList');
+
+    getCartListAPI({
+      shopId: 2,
+      deskId: 0,
+    }, (res: IResponseApi<any>) => {
+      console.log('res', res);
+      if (res.success) {
+        dispatch(setCartListAction({
+          type: 'set',
+          data: res.data
+        }))
+      }
+    })
+  }, [])
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
   // 每次进入页面都检查是否选择了门店
@@ -541,7 +574,7 @@ export default function Order() {
                                         }}
                                         onClick={() => {
                                           navigateTo({
-                                            url: routes.find((route) => route.name === 'choose')?.path || '',
+                                            url: (routes.find((route) => route.name === 'choose')?.path || '') + `?id=${goodsItem.id}`,
                                           })
                                         }}
                                       >选规格</Button>
@@ -759,7 +792,7 @@ export default function Order() {
                 }
               }}
             >
-              <Badge value={cartList.length}>
+              <Badge value={cartCheckboxGroupValue.length}>
                 <Cart
                   size={pxTransform(windowWidth * 0.1)}
                 />
@@ -787,7 +820,7 @@ export default function Order() {
               }}
             >
               {
-                cartList.length === 0 ? (
+                cartCheckboxGroupValue.length === 0 ? (
                   <Text
                     style={{
                       fontSize: pxTransform(viewHeight * 0.015),
@@ -802,7 +835,7 @@ export default function Order() {
                   >
                     <Price
                       color='gray'
-                      price={cartList.reduce((acc, item) => acc + Number(item.standardPrice) * item.goodsCount, 0)}
+                      price={cartList.filter((mapItem) => cartCheckboxGroupValue.includes(mapItem.commodityId)).reduce((acc, item) => acc + Number(item.price) * item.count, 0)}
                       size="xlarge"
                       thousands
                     />
@@ -920,7 +953,7 @@ export default function Order() {
                   indeterminate={cartCheckboxGroupValue.length > 0 && cartCheckboxGroupValue.length < cartList.length}
                   onChange={(state) => {
                     if (state) {
-                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.id))
+                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.commodityId))
                     } else {
                       setCartCheckboxGroupValue([])
                     }
@@ -968,18 +1001,18 @@ export default function Order() {
                           }}
                         >
                           <Checkbox
-                            value={cartItem.id}
-                            checked={cartCheckboxGroupValue.includes(cartItem.id)}
+                            value={cartItem.commodityId}
+                            checked={cartCheckboxGroupValue.includes(cartItem.commodityId)}
                             onChange={(state) => {
                               if (state) {
                                 setCartCheckboxGroupValue((prev) => {
                                   if (prev.length < cartList.length - 1) {
 
                                   }
-                                  return [...prev, cartItem.id]
+                                  return [...prev, cartItem.commodityId]
                                 })
                               } else {
-                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== cartItem.id))
+                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== cartItem.commodityId))
                               }
                             }}
                             style={{
@@ -989,7 +1022,7 @@ export default function Order() {
                           />
                         </View>
                         <Image
-                          src={cartItem.mealImage}
+                          src={cartItem.image}
                           width={pxTransform(windowWidth * 0.1)}
                           height={pxTransform(windowWidth * 0.1)}
                         />
@@ -1004,50 +1037,49 @@ export default function Order() {
                       >
                         {
                           cartItem.isSet ? (
-                            <></>
                             // 套餐类商品样式备用
-                            // <Collapse
-                            //   defaultActiveName={['1', '2']} expandIcon={<ArrowDown />}
-                            //   style={{
-                            //     width: '100%',
-                            //     '--nutui-collapse-item-padding': 0,
-                            //     '--nutui-collapse-item-header-border-bottom': 'none'
-                            //   } as any}
-                            // >
-                            //   <Collapse.Item title={cartItem.goodsName} name="1">
-                            //     {
-                            //       cartItem.goodsList.map((goodsItem) => (
-                            //         <View
-                            //           className='item-detail'
-                            //         >
-                            //           <View
-                            //             style={{
-                            //               display: 'flex',
-                            //               flexDirection: 'row',
-                            //               alignItems: 'center',
-                            //             }}
-                            //           >
-                            //             <Image
-                            //               src={goodsItem.goodsImage}
-                            //               width={pxTransform(windowWidth * 0.1)}
-                            //               height={pxTransform(windowWidth * 0.1)}
-                            //             />
-                            //             <Text
-                            //               style={{
-                            //                 marginLeft: pxTransform(windowWidth * 0.02),
-                            //               }}
-                            //             >{goodsItem.goodsName}</Text>
-                            //           </View>
-                            //           <Text
-                            //             style={{
-                            //               color: '#939393',
-                            //             }}
-                            //           >x{goodsItem.goodsCount}</Text>
-                            //         </View>
-                            //       ))
-                            //     }
-                            //   </Collapse.Item>
-                            // </Collapse>
+                            <Collapse
+                              defaultActiveName={['1', '2']} expandIcon={<ArrowDown />}
+                              style={{
+                                width: '100%',
+                                '--nutui-collapse-item-padding': 0,
+                                '--nutui-collapse-item-header-border-bottom': 'none'
+                              } as any}
+                            >
+                              <Collapse.Item title={cartItem.name} name="1">
+                                {
+                                  cartItem.cartDOS.map((goodsItem) => (
+                                    <View
+                                      className='item-detail'
+                                    >
+                                      <View
+                                        style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                        }}
+                                      >
+                                        <Image
+                                          src={goodsItem.image}
+                                          width={pxTransform(windowWidth * 0.1)}
+                                          height={pxTransform(windowWidth * 0.1)}
+                                        />
+                                        <Text
+                                          style={{
+                                            marginLeft: pxTransform(windowWidth * 0.02),
+                                          }}
+                                        >{goodsItem.name}</Text>
+                                      </View>
+                                      <Text
+                                        style={{
+                                          color: '#939393',
+                                        }}
+                                      >x{goodsItem.count}</Text>
+                                    </View>
+                                  ))
+                                }
+                              </Collapse.Item>
+                            </Collapse>
                           ) : (
                             <View
                               style={{
@@ -1056,7 +1088,7 @@ export default function Order() {
                                 alignItems: 'center',
                               }}
                             >
-                              <Text>{cartItem.mealName}</Text>
+                              <Text>{cartItem.name}</Text>
                             </View>
                           )
                         }
@@ -1071,7 +1103,7 @@ export default function Order() {
                           >
                             <Price
                               color='gray'
-                              price={Number(cartItem.standardPrice)}
+                              price={Number(cartItem.price)}
                               size="small"
                               thousands
                             />
@@ -1092,17 +1124,17 @@ export default function Order() {
                                 height: pxTransform(viewHeight * 0.036),
                               }}
                               onClick={() => {
-                                if (cartItem.goodsCount === 1) {
-                                  const newCartList = cartList.filter((mapItem) => mapItem.id !== cartItem.id)
+                                if (cartItem.count === 1) {
+                                  const newCartList = cartList.filter((mapItem) => mapItem.commodityId !== cartItem.commodityId)
                                   dispatch(setCartListAction({ type: 'set', data: newCartList }))
                                 } else {
                                   dispatch(setCartListAction({
                                     type: 'set', data: [
                                       ...cartList.map((mapItem) => {
-                                        if (mapItem.id === cartItem.id) {
+                                        if (mapItem.commodityId === cartItem.commodityId) {
                                           return {
                                             ...mapItem,
-                                            goodsCount: mapItem.goodsCount - 1,
+                                            count: mapItem.count - 1,
                                           }
                                         }
                                         return mapItem
@@ -1118,7 +1150,7 @@ export default function Order() {
                                 width: pxTransform(windowWidth * 0.0848),
                                 fontSize: pxTransform(viewHeight * 0.02),
                               }}
-                            >{cartItem.goodsCount}</View>
+                            >{cartItem.count}</View>
                             <View
                               className="custom-btn plus"
                               style={{
@@ -1128,10 +1160,10 @@ export default function Order() {
                               onClick={() => dispatch(setCartListAction({
                                 type: 'set', data: [
                                   ...cartList.map((mapItem) => {
-                                    if (mapItem.id === cartItem.id) {
+                                    if (mapItem.commodityId === cartItem.commodityId) {
                                       return {
                                         ...mapItem,
-                                        goodsCount: mapItem.goodsCount + 1,
+                                        count: mapItem.count + 1,
                                       }
                                     }
                                     return mapItem
