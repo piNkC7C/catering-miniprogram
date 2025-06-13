@@ -91,6 +91,7 @@ export default function Choose() {
                   } else {
                     const cartData = {
                       id: listItem.id,
+                      mealId: listItem.mealId,
                       mealName: listItem.mealName,
                       mealImage: listItem.mealImage,
                       goodsCount: count,
@@ -427,14 +428,14 @@ export default function Choose() {
                 "shopId": currentShop?.shopId || 0,
                 "deskId": tableInfo?.tableId || 0,
                 "cartModifyReqVOList": selectedAddOneGood.map((item) => ({
-                  "commodityId": item.id,
+                  "commodityId": item.mealId,
                   "count": item.goodsCount,
                   "shopId": currentShop?.shopId,
                   "deskId": tableInfo?.tableId,
                   "isSet": true,
                   "isAdd": true,
                 })).concat(selectedIncludeGood.map((item) => ({
-                  "commodityId": item.id,
+                  "commodityId": item.mealId,
                   "count": 1,
                   "shopId": currentShop?.shopId,
                   "deskId": tableInfo?.tableId,
