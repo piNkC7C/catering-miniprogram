@@ -1,5 +1,5 @@
-import { taroGet, taroPost } from '@/service'
-import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL } from '@/service/config'
+import { taroGet, taroPost, taroDelete } from '@/service'
+import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -122,12 +122,81 @@ export const addCartGoodAPI = (data: any, callback: (res: IResponseApi<any>) => 
     })
 }
 
+export const deleteCartGoodAPI = (data: {
+    commodityId: number
+    isSet?: boolean
+    deskId: number | null
+    shopId: number
+    openId: string
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroDelete({
+        url: deleteCartGoodURL + `?commodityId=${data.commodityId}&isSet=${data.isSet}&deskId=${data.deskId}&shopId=${data.shopId}&openId=${data.openId}`,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
+export const clearCartAPI = (data: {
+    isSet?: boolean
+    deskId: number | null
+    shopId: number
+    openId: string
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroDelete({
+        url: clearCartURL + `?openId=${data.openId}&deskId=${data.deskId}&shopId=${data.shopId}`,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
 export const getCartListAPI = (data: {
     shopId: number
-    deskId: number
+    deskId: number | null
+    openId: string
 }, callback: (res: IResponseApi<any>) => void) => {
     taroGet({
-        url: getCartListURL + `?shopId=${data.shopId}&deskId=${data.deskId}`,
+        url: getCartListURL + `?shopId=${data.shopId}&deskId=${data.deskId}&openId=${data.openId}`,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            callback({
+                success: false,
+                data: err
+            })
+        }
+    })
+}
+
+export const selectedCartAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+    taroPost({
+        url: selectedCartURL,
+        data,
         success: (res) => {
             callback({
                 success: true,

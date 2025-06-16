@@ -15,7 +15,8 @@ export const taroRequest = new TaroRequest({
     },
     requestFailureFn: (error) => {
       console.log('Taro请求失败', error)
-      return Promise.reject(error)
+      return error
+      // return Promise.reject(error)
     },
     responseSuccessFn: (res) => {
       // 统一处理响应数据
@@ -31,7 +32,8 @@ export const taroRequest = new TaroRequest({
     },
     responseFailureFn: (error) => {
       console.log('Taro响应失败', error)
-      return Promise.reject(error)
+      return error
+      // return Promise.reject(error)
     }
   }
 })

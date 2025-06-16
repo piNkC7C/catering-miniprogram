@@ -21,7 +21,8 @@ export default function Choose() {
       currentShop,
     },
     login: {
-      tableInfo
+      tableInfo,
+      userInfo
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
@@ -420,28 +421,54 @@ export default function Choose() {
               //   })
               //   return
               // }
+              if (selectedAddOneGood.length == 0) {
+                showToast({
+                  title: '请至少选择一款商品',
+                  icon: 'none',
+                })
+                return
+              }
+              if (goodCount < setGoodDetail?.minimumPurchaseQuantity) {
+                showToast({
+                  title: `套餐起购量为${setGoodDetail?.minimumPurchaseQuantity}`,
+                  icon: 'none',
+                })
+                return
+              }
+              if (goodCount == setGoodDetail?.purchaseQuantityLimit) {
+                showToast({
+                  title: `套餐最大购买量为${setGoodDetail?.purchaseQuantityLimit}`,
+                  icon: 'none',
+                })
+                return
+              }
               const queryData = {
                 "commodityId": setGoodDetail?.id,
                 "count": goodCount,
                 "isSet": true,
                 "isAdd": true,
-                "shopId": currentShop?.shopId || 0,
-                "deskId": tableInfo?.tableId || 0,
+                "deskId": tableInfo?.tableId || null,
+                "shopId": currentShop?.shopId!,
+                "openId": userInfo?.openid!,
                 "cartModifyReqVOList": selectedAddOneGood.map((item) => ({
                   "commodityId": item.mealId,
                   "count": item.goodsCount,
-                  "shopId": currentShop?.shopId,
-                  "deskId": tableInfo?.tableId,
+                  "deskId": tableInfo?.tableId || null,
+                  "shopId": currentShop?.shopId!,
+                  "openId": userInfo?.openid!,
                   "isSet": true,
                   "isAdd": true,
                 })).concat(selectedIncludeGood.map((item) => ({
                   "commodityId": item.mealId,
                   "count": 1,
-                  "shopId": currentShop?.shopId,
-                  "deskId": tableInfo?.tableId,
+                  "deskId": tableInfo?.tableId || null,
+                  "shopId": currentShop?.shopId!,
+                  "openId": userInfo?.openid!,
                   "isSet": true,
                   "isAdd": true,
-                })))
+                }))),
+                "minimumPurchaseQuantity": setGoodDetail?.minimumPurchaseQuantity,
+                "purchaseQuantityLimit": setGoodDetail?.purchaseQuantityLimit,
               }
               addCartGoodAPI(queryData, (res) => {
                 if (res.success && res.data) {
@@ -450,8 +477,9 @@ export default function Choose() {
                     icon: 'success',
                   })
                   getCartListAPI({
-                    "shopId": currentShop?.shopId || 0,
-                    "deskId": tableInfo?.tableId || 0,
+                    "deskId": tableInfo?.tableId || null,
+                    "shopId": currentShop?.shopId!,
+                    "openId": userInfo?.openid!,
                   }, (res: IResponseApi<any>) => {
                     if (res.success) {
                       dispatch(setCartListAction({

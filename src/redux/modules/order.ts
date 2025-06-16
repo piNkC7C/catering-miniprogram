@@ -27,7 +27,7 @@ const orderSlice = createSlice({
           state.cartList.push(data)
           break
         case 'remove':
-          state.cartList = state.cartList.filter(item => item.id !== data.goodsId)
+          state.cartList = state.cartList.filter(item => item.commodityId !== data.commodityId)
           break
         case 'clear':
           state.cartList = []

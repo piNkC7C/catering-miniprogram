@@ -10,6 +10,8 @@ export interface IGoodsItem {
   mealImage: string // 商品图片
   isSet: boolean // 是否是套餐
   standardPrice: number // 商品价格
+  minimumPurchaseQuantity: number // 最小购买数量
+  purchaseQuantityLimit: number // 最大购买量
   // packageId?: number // 套餐id
   // packageName?: string // 套餐名称
   // packagePrice?: number // 套餐价格
@@ -40,16 +42,29 @@ export interface ICouponItem {
   couponStatus: 1 | 2 | 3 // 1: 未使用, 2: 已使用, 3: 已过期
 }
 
-export interface ICartItem extends IGoodsItem {
+export interface ICartItem {
+  commodityId: number // 商品/套餐id
+  count: number // 数量
   classificationId: number // 分类id
-  goodsCount: number // 商品数量
-  totalPrice: number // 总价格
-  userOrderQuantity: number //商品数量
-  // packageList?: IGoodsItem[] // 套餐商品列表
+  image: string // 图片
+  name: string // 名称
+  price: number // 价格
+  isSet: boolean // 是否是套餐
+  selected: boolean // 是否选中
+  minimumPurchaseQuantity: number // 最小购买数量
+  purchaseQuantityLimit: number // 最大购买量
+  cartDOS?: ICartItem[] // 套餐商品列表
 }
 
 export interface IGroupGoodsList extends IGroupItem {
   goodsList: IGoodsItem[]
+}
+
+export interface IOrderGoodsItem extends IGoodsItem {
+  goodsCount: number // 商品数量
+  totalPrice: number // 总价格
+  userOrderQuantity: number //商品数量
+  // packageList?: IGoodsItem[] // 套餐商品列表
 }
 
 export interface IOrderItem {
@@ -58,7 +73,7 @@ export interface IOrderItem {
   orderStatus: 1 | 2 | 3 | 4 | 5 // 1: 待支付, 2: 已取消, 3: 已完成, 4: 已关闭，5: 退款中
   tableNumber: number // 桌号
   personNumber: number // 人数
-  goodsList: ICartItem[] //商品列表
+  goodsList: IOrderGoodsItem[] //商品列表
   isUseCoupon: boolean // 是否用券
   couponList?: ICouponItem[] //券列表
   totalCount: number //总数
@@ -85,7 +100,7 @@ export interface IRefundItem {
   refundTime: number // 退款时间戳
   refundReason: string // 退款原因
   refundPrice: number // 退款金额
-  goodsList: ICartItem[] //商品列表
+  goodsList: IOrderGoodsItem[] //商品列表
 }
 
 export interface ICheckoutOrderItem {
@@ -99,11 +114,11 @@ export interface ICheckoutOrderItem {
   checkoutOrderPersonNumber: number
   isUseCoupon: boolean
   couponList?: ICouponItem[]
-  goodsList: ICartItem[]
+  goodsList: IOrderGoodsItem[]
 }
 
 export interface IOrderState {
-  cartList: any[]
+  cartList: ICartItem[]
   orderTabsList: IGroupItem[]
   groupGoodsList: IGroupGoodsList[]
   goodsCouponList: IGoodsCouponItem[]

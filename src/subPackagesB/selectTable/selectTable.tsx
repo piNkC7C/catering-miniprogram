@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Span } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, switchTab, showToast, setStorage, getStorage, useRouter } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateTo, switchTab, showToast, setStorage, getStorage, useRouter, showModal } from '@tarojs/taro'
 import './selectTable.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setTableInfo } from '@/redux/modules/login'
@@ -11,6 +11,8 @@ import { setCurrentShopAction } from '@/redux/modules/address'
 import { getShopDetailAPI } from '@/api/address'
 import { IResponseApi } from '@/api/type'
 import { IShopItem } from '@/redux/types/address'
+import { getCartListAPI } from '@/api/order'
+import { setCartListAction } from '@/redux/modules/order'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
@@ -30,6 +32,7 @@ export default function SelectTable() {
 
     const [tableId, setTableId] = useState<any>(null)
     const [tableNum, setTableNum] = useState<any>(null)
+    const [shopId, setShopId] = useState<any>(null)
 
     const router = useRouter()
     const { scene } = router.params
@@ -56,6 +59,7 @@ export default function SelectTable() {
                 setTableNum(desNum)
             }
             if (shopId) {
+                setShopId(shopId)
                 getShopDetailAPI({
                     shopId
                 }, (res: IResponseApi<IShopItem>) => {
@@ -246,6 +250,30 @@ export default function SelectTable() {
                                         tableNum: tableNum,
                                         peopleNum: selectedNum,
                                     }))
+                                    getCartListAPI({
+                                        shopId: shopId,
+                                        deskId: null,
+                                        openId: userInfo?.openid!,
+                                    }, (res: IResponseApi<any>) => {
+                                        if (res.success && res.data.length > 0) {
+                                            showModal({
+                                                content: '检测到您有已选购商品，是否加入购物车？',
+                                                success: (res) => {
+                                                    if (res.confirm) {
+                                                        console.log('将已选购商品加入共享购物车');
+                                                        switchTab({
+                                                            url: '/pages/order/order',
+                                                        })
+                                                    } else if (res.cancel) {
+                                                        console.log('清空单人购物车', userInfo?.openid);
+                                                        switchTab({
+                                                            url: '/pages/order/order',
+                                                        })
+                                                    }
+                                                }
+                                            })
+                                        }
+                                    })
                                     // switchTab({
                                     //     url: '/pages/order/order',
                                     // })

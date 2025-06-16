@@ -1,7 +1,7 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useMemo } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
-import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode } from '@tarojs/taro'
+import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode, showToast } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction, setCheckoutOrderAction, setOrderTabsListAction, setGroupGoodsListAction } from '@/redux/modules/order'
@@ -12,14 +12,16 @@ import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
-import { getGroupGoodsListAPI, getCartListAPI } from '@/api/order'
+import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI } from '@/api/order'
 import type { IGroupGoodsList } from '@/redux/types/order'
 import ShopInfo from '@/components/shopInfo'
+import shopInfo from '@/components/shopInfo'
 
 export default function Order() {
   // 获取登录状态和用户信息
   const {
     login: {
+      userInfo,
       loginStatus,
       tableInfo,
     },
@@ -78,22 +80,29 @@ export default function Order() {
   //   }
   // }, [currentShop?.shopId, tableInfo?.tableId])
 
-  useEffect(() => {
-    console.log('cartList');
+  // 获取购物车列表
+  const getCartList = (res: IResponseApi<any>) => {
+    if (res.success) {
+      console.log(res);
 
-    getCartListAPI({
-      shopId: 2,
-      deskId: 0,
-    }, (res: IResponseApi<any>) => {
-      console.log('res', res);
-      if (res.success) {
-        dispatch(setCartListAction({
-          type: 'set',
-          data: res.data
-        }))
-      }
-    })
-  }, [])
+      dispatch(setCartListAction({
+        type: 'set',
+        data: res.data
+      }))
+    }
+  }
+
+  useEffect(() => {
+    // console.log('cartList', userInfo);
+
+    if (currentShop?.shopId) {
+      getCartListAPI({
+        shopId: currentShop?.shopId,
+        deskId: tableInfo?.tableId || 0,
+        openId: userInfo?.openid!,
+      }, getCartList)
+    }
+  }, [currentShop?.shopId])
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
   // 每次进入页面都检查是否选择了门店
@@ -118,6 +127,19 @@ export default function Order() {
   const navHeight = finalStatusBarHeight + navBarHeight + 5
   // 获取可视区域高度
   const viewHeight = realWindowHeight - navHeight
+
+
+  // 购物车
+  // 获取购物车选中的列表
+  const cartSelectedList = useMemo(() => {
+    return cartList.filter((cartItem) => cartItem.selected)
+  }, [cartList])
+  // 获取购物车中的某个商品
+  const getCartGood = (commodityId: number) => {
+    return cartList.find((findItem) => {
+      return findItem.commodityId === commodityId
+    })
+  }
 
   // console.log('viewHeight', viewHeight)
 
@@ -158,8 +180,6 @@ export default function Order() {
 
   // 购物车弹窗
   const [showCartPopup, setShowCartPopup] = useState<boolean>(false)
-  // 购物车全选
-  const [cartCheckboxGroupValue, setCartCheckboxGroupValue] = useState<any[]>([])
 
   // 商品券弹窗
   const [showGoodsCouponPopup, setShowGoodsCouponPopup] = useState<boolean>(false)
@@ -564,8 +584,8 @@ export default function Order() {
                                         marginRight: pxTransform(windowWidth * 0.02),
                                       }}
                                       value={cartList.find((findItem) => {
-                                        return findItem.id === goodsItem.id
-                                      })?.goodsCount}>
+                                        return findItem.commodityId === goodsItem.id
+                                      })?.count}>
                                       <Button
                                         type="primary"
                                         size="mini"
@@ -591,7 +611,7 @@ export default function Order() {
                                     >
                                       {
                                         cartList.find((findItem) => {
-                                          return findItem.id === goodsItem.id
+                                          return findItem.commodityId === goodsItem.id
                                         }) && (
                                           <View
                                             style={{
@@ -612,24 +632,48 @@ export default function Order() {
                                               icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
                                               onClick={() => {
                                                 if (cartList.find((findItem) => {
-                                                  return findItem.id === goodsItem.id
-                                                })?.goodsCount === 1) {
-                                                  dispatch(setCartListAction({
-                                                    type: 'remove', data: {
-                                                      goodsId: goodsItem.id,
+                                                  return findItem.commodityId === goodsItem.id
+                                                })?.count === goodsItem.minimumPurchaseQuantity) {
+                                                  console.log('删除购物车项', goodsItem.mealName);
+                                                  deleteCartGoodAPI({
+                                                    "commodityId": goodsItem.id,
+                                                    "isSet": false,
+                                                    "deskId": tableInfo?.tableId || 0,
+                                                    "shopId": currentShop?.shopId!,
+                                                    "openId": userInfo?.openid!,
+                                                  }, (res) => {
+                                                    if (res.success && res.data) {
+                                                      getCartListAPI({
+                                                        "deskId": tableInfo?.tableId || 0,
+                                                        "shopId": currentShop?.shopId!,
+                                                        "openId": userInfo?.openid!,
+                                                      }, getCartList)
                                                     }
-                                                  }))
+                                                  })
                                                 } else {
-                                                  dispatch(setCartListAction({
-                                                    type: 'set', data: [
-                                                      ...cartList.map((mapItem) => {
-                                                        if (mapItem.id === goodsItem.id) {
-                                                          return { ...mapItem, goodsCount: mapItem.goodsCount - 1 }
-                                                        }
-                                                        return mapItem
-                                                      })
-                                                    ]
-                                                  }))
+                                                  console.log('购物车商品数量减一', goodsItem.mealName);
+                                                  const queryData = {
+                                                    "commodityId": goodsItem.id,
+                                                    "count": 1,
+                                                    "isSet": false,
+                                                    "isAdd": false,
+                                                    "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
+                                                    "deskId": tableInfo?.tableId || 0,
+                                                    "shopId": currentShop?.shopId!,
+                                                    "openId": userInfo?.openid!,
+                                                    "cartModifyReqVOList": [],
+                                                    "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
+                                                    "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
+                                                  }
+                                                  addCartGoodAPI(queryData, (res) => {
+                                                    if (res.success && res.data) {
+                                                      getCartListAPI({
+                                                        "deskId": tableInfo?.tableId || 0,
+                                                        "shopId": currentShop?.shopId!,
+                                                        "openId": userInfo?.openid!,
+                                                      }, getCartList)
+                                                    }
+                                                  })
                                                 }
                                               }}
                                             >
@@ -639,8 +683,8 @@ export default function Order() {
                                                 margin: `0 ${pxTransform(windowWidth * 0.02)}`,
                                               }}
                                             >{cartList.find((findItem) => {
-                                              return findItem.id === goodsItem.id
-                                            })?.goodsCount}</Text>
+                                              return findItem.commodityId === goodsItem.id
+                                            })?.count}</Text>
                                           </View>
                                         )
                                       }
@@ -652,33 +696,35 @@ export default function Order() {
                                           height: pxTransform(windowWidth * 0.05),
                                           borderRadius: pxTransform(windowWidth * 0.05),
                                         }}
+                                        disabled={cartList.find((findItem) => {
+                                          return findItem.commodityId === goodsItem.id
+                                        })?.count === goodsItem.purchaseQuantityLimit}
                                         icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                         onClick={() => {
-                                          if (cartList.find((findItem) => {
-                                            return findItem.id === goodsItem.id
-                                          })) {
-                                            dispatch(setCartListAction({
-                                              type: 'set', data: [
-                                                ...cartList.map((mapItem) => {
-                                                  if (mapItem.id === goodsItem.id) {
-                                                    return { ...mapItem, goodsCount: mapItem.goodsCount + 1 }
-                                                  }
-                                                  return mapItem
-                                                })
-                                              ]
-                                            }))
-                                          } else {
-                                            dispatch(setCartListAction({
-                                              type: 'add', data: {
-                                                id: goodsItem.id,
-                                                mealName: goodsItem.mealName,
-                                                standardPrice: goodsItem.standardPrice,
-                                                mealImage: goodsItem.mealImage,
-                                                goodsCount: 1,
-                                                isSet: goodsItem.isSet,
-                                              }
-                                            }))
+                                          const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
+                                          console.log('购物车商品数量加一', goodsItem.mealName);
+                                          const queryData = {
+                                            "commodityId": goodsItem.id,
+                                            "count": count,
+                                            "isSet": false,
+                                            "isAdd": true,
+                                            "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
+                                            "deskId": tableInfo?.tableId || 0,
+                                            "shopId": currentShop?.shopId!,
+                                            "openId": userInfo?.openid!,
+                                            "cartModifyReqVOList": [],
+                                            "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
+                                            "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
                                           }
+                                          addCartGoodAPI(queryData, (res) => {
+                                            if (res.success && res.data) {
+                                              getCartListAPI({
+                                                "deskId": tableInfo?.tableId || 0,
+                                                "shopId": currentShop?.shopId!,
+                                                "openId": userInfo?.openid!,
+                                              }, getCartList)
+                                            }
+                                          })
                                         }}
                                       >
                                       </Button>
@@ -792,7 +838,7 @@ export default function Order() {
                 }
               }}
             >
-              <Badge value={cartCheckboxGroupValue.length}>
+              <Badge value={cartSelectedList.length}>
                 <Cart
                   size={pxTransform(windowWidth * 0.1)}
                 />
@@ -820,7 +866,7 @@ export default function Order() {
               }}
             >
               {
-                cartCheckboxGroupValue.length === 0 ? (
+                cartSelectedList.length === 0 ? (
                   <Text
                     style={{
                       fontSize: pxTransform(viewHeight * 0.015),
@@ -835,7 +881,7 @@ export default function Order() {
                   >
                     <Price
                       color='gray'
-                      price={cartList.filter((mapItem) => cartCheckboxGroupValue.includes(mapItem.commodityId)).reduce((acc, item) => acc + Number(item.price) * item.count, 0)}
+                      price={cartSelectedList.reduce((acc, item) => acc + Number(item.price) * item.count, 0)}
                       size="xlarge"
                       thousands
                     />
@@ -853,8 +899,8 @@ export default function Order() {
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: `${pxTransform(0)} ${pxTransform(30)} ${pxTransform(30)} ${pxTransform(0)}`,
-              background: cartList.length > 0 || !(tableInfo?.tableNum && tableInfo?.peopleNum) ? '#D61518' : '',
-              color: cartList.length > 0 || !(tableInfo?.tableNum && tableInfo?.peopleNum) ? '#fff' : '#999',
+              background: cartSelectedList.length > 0 || !(tableInfo?.tableNum && tableInfo?.peopleNum) ? '#D61518' : '',
+              color: cartSelectedList.length > 0 || !(tableInfo?.tableNum && tableInfo?.peopleNum) ? '#fff' : '#999',
               fontSize: pxTransform(viewHeight * 0.02),
             }}
             onClick={() => {
@@ -876,15 +922,15 @@ export default function Order() {
                   }
                 )
               } else {
-                if (cartList.length == 0) {
+                if (cartSelectedList.length == 0) {
                   return
                 }
                 dispatch(setCheckoutOrderAction({
                   type: 'set', data: {
                     checkoutOrderId: 1,
-                    checkoutOrderCouponedPrice: cartList.reduce((acc, item) => acc + item.totalPrice, 0),
-                    checkoutOrderTotalPrice: cartList.reduce((acc, item) => acc + item.totalPrice, 0),
-                    checkoutOrderTotalCount: cartList.reduce((acc, item) => acc + item.goodsCount, 0),
+                    checkoutOrderCouponedPrice: cartList.reduce((acc, item) => acc + Number(item.price) * item.count, 0),
+                    checkoutOrderTotalPrice: cartList.reduce((acc, item) => acc + Number(item.price) * item.count, 0),
+                    checkoutOrderTotalCount: cartList.reduce((acc, item) => acc + item.count, 0),
                     checkoutOrderType: 1,
                     checkoutOrderTableId: tableInfo?.tableId,
                     checkoutOrderTableNumber: tableInfo?.tableNum,
@@ -949,21 +995,44 @@ export default function Order() {
                   } as any}
                   className="test"
                   label="全选"
-                  checked={cartCheckboxGroupValue.length > 0}
-                  indeterminate={cartCheckboxGroupValue.length > 0 && cartCheckboxGroupValue.length < cartList.length}
+                  checked={cartSelectedList.length > 0}
+                  indeterminate={cartSelectedList.length > 0 && cartSelectedList.length < cartList.length}
                   onChange={(state) => {
-                    if (state) {
-                      setCartCheckboxGroupValue(cartList.map((mapItem) => mapItem.commodityId))
-                    } else {
-                      setCartCheckboxGroupValue([])
-                    }
+                    // if (cartSelectedList.length == 0) {
+                    //   return
+                    // }
+                    console.log('购物车全选状态改变', state);
+                    const queryDataList = cartList.map((item) => ({
+                      ...item,
+                      selected: state,
+                      shopId: currentShop?.shopId!,
+                      deskId: tableInfo?.tableId || 0,
+                      openId: userInfo?.openid!,
+                    }))
+                    selectedCartAPI(queryDataList, (res: IResponseApi<any>) => {
+                      if (res.success && res.data) {
+                        getCartListAPI({
+                          "deskId": tableInfo?.tableId || 0,
+                          "shopId": currentShop?.shopId!,
+                          "openId": userInfo?.openid!,
+                        }, getCartList)
+                      }
+                    })
                   }}
                 />
               </View>
               <View
                 className='title-right title-item'
                 onClick={() => {
-                  dispatch(setCartListAction({ type: 'clear' }))
+                  clearCartAPI({
+                    "deskId": tableInfo?.tableId || 0,
+                    "shopId": currentShop?.shopId!,
+                    "openId": userInfo?.openid!,
+                  }, (res: IResponseApi<any>) => {
+                    if (res.success && res.data) {
+                      dispatch(setCartListAction({ type: 'clear' }))
+                    }
+                  })
                 }}
               >
                 <Del
@@ -1002,18 +1071,25 @@ export default function Order() {
                         >
                           <Checkbox
                             value={cartItem.commodityId}
-                            checked={cartCheckboxGroupValue.includes(cartItem.commodityId)}
+                            checked={cartSelectedList.some((mapItem) => mapItem.commodityId === cartItem.commodityId)}
                             onChange={(state) => {
-                              if (state) {
-                                setCartCheckboxGroupValue((prev) => {
-                                  if (prev.length < cartList.length - 1) {
-
-                                  }
-                                  return [...prev, cartItem.commodityId]
-                                })
-                              } else {
-                                setCartCheckboxGroupValue(cartCheckboxGroupValue.filter((mapItem) => mapItem !== cartItem.commodityId))
-                              }
+                              console.log('购物车选中状态改变', state);
+                              const queryDataList = cartList.filter((item) => item.commodityId === cartItem.commodityId).map((item) => ({
+                                ...item,
+                                selected: state,
+                                shopId: currentShop?.shopId!,
+                                deskId: tableInfo?.tableId || 0,
+                                openId: userInfo?.openid!,
+                              }))
+                              selectedCartAPI(queryDataList, (res: IResponseApi<any>) => {
+                                if (res.success && res.data) {
+                                  getCartListAPI({
+                                    "deskId": tableInfo?.tableId || 0,
+                                    "shopId": currentShop?.shopId!,
+                                    "openId": userInfo?.openid!,
+                                  }, getCartList)
+                                }
+                              })
                             }}
                             style={{
                               '--nut-icon-width': pxTransform(windowWidth * 0.04),
@@ -1048,7 +1124,7 @@ export default function Order() {
                             >
                               <Collapse.Item title={cartItem.name} name="1">
                                 {
-                                  cartItem.cartDOS.map((goodsItem) => (
+                                  cartItem.cartDOS?.map((goodsItem) => (
                                     <View
                                       className='item-detail'
                                     >
@@ -1124,23 +1200,47 @@ export default function Order() {
                                 height: pxTransform(viewHeight * 0.036),
                               }}
                               onClick={() => {
-                                if (cartItem.count === 1) {
-                                  const newCartList = cartList.filter((mapItem) => mapItem.commodityId !== cartItem.commodityId)
-                                  dispatch(setCartListAction({ type: 'set', data: newCartList }))
+                                if (cartItem.count === cartItem.minimumPurchaseQuantity) {
+                                  console.log('删除购物车项', cartItem.name);
+                                  deleteCartGoodAPI({
+                                    "commodityId": cartItem.commodityId,
+                                    "isSet": false,
+                                    "deskId": tableInfo?.tableId || 0,
+                                    "shopId": currentShop?.shopId!,
+                                    "openId": userInfo?.openid!,
+                                  }, (res) => {
+                                    if (res.success && res.data) {
+                                      getCartListAPI({
+                                        "deskId": tableInfo?.tableId || 0,
+                                        "shopId": currentShop?.shopId!,
+                                        "openId": userInfo?.openid!,
+                                      }, getCartList)
+                                    }
+                                  })
                                 } else {
-                                  dispatch(setCartListAction({
-                                    type: 'set', data: [
-                                      ...cartList.map((mapItem) => {
-                                        if (mapItem.commodityId === cartItem.commodityId) {
-                                          return {
-                                            ...mapItem,
-                                            count: mapItem.count - 1,
-                                          }
-                                        }
-                                        return mapItem
-                                      })
-                                    ]
-                                  }))
+                                  console.log('购物车商品数量减一', cartItem.name);
+                                  const queryData = {
+                                    "commodityId": cartItem.commodityId,
+                                    "count": 1,
+                                    "isSet": false,
+                                    "isAdd": false,
+                                    "selected": cartItem.selected,
+                                    "deskId": tableInfo?.tableId || 0,
+                                    "shopId": currentShop?.shopId!,
+                                    "openId": userInfo?.openid!,
+                                    "cartModifyReqVOList": [],
+                                    "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
+                                    "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
+                                  }
+                                  addCartGoodAPI(queryData, (res) => {
+                                    if (res.success && res.data) {
+                                      getCartListAPI({
+                                        "deskId": tableInfo?.tableId || 0,
+                                        "shopId": currentShop?.shopId!,
+                                        "openId": userInfo?.openid!,
+                                      }, getCartList)
+                                    }
+                                  })
                                 }
                               }}
                             >-</View>
@@ -1156,21 +1256,52 @@ export default function Order() {
                               style={{
                                 width: pxTransform(windowWidth * 0.0848),
                                 height: pxTransform(viewHeight * 0.036),
+                                color: cartList.find((findItem) => {
+                                  return findItem.commodityId === cartItem.commodityId
+                                })?.count === cartItem.purchaseQuantityLimit ? '#999' : '#D61518',
                               }}
-                              onClick={() => dispatch(setCartListAction({
-                                type: 'set', data: [
-                                  ...cartList.map((mapItem) => {
-                                    if (mapItem.commodityId === cartItem.commodityId) {
-                                      return {
-                                        ...mapItem,
-                                        count: mapItem.count + 1,
-                                      }
-                                    }
-                                    return mapItem
+                              onClick={() => {
+                                if (cartList.find((findItem) => {
+                                  return findItem.commodityId === cartItem.commodityId
+                                })?.count === cartItem.purchaseQuantityLimit) {
+                                  showToast({
+                                    title: '可选商品数量已达上限',
+                                    icon: 'none',
                                   })
-                                ]
-                              }))
-                              }
+                                  return
+                                }
+                                const count = cartList.filter(cartItem => cartItem.commodityId == cartItem.commodityId).length == 0 ? cartItem.minimumPurchaseQuantity : 1
+                                console.log('购物车商品数量加一', cartItem.name);
+                                const queryData = {
+                                  "commodityId": cartItem.commodityId,
+                                  "count": count,
+                                  "isSet": false,
+                                  "isAdd": true,
+                                  "selected": cartItem.selected,
+                                  "deskId": tableInfo?.tableId || 0,
+                                  "shopId": currentShop?.shopId!,
+                                  "openId": userInfo?.openid!,
+                                  "cartModifyReqVOList": [],
+                                  "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
+                                  "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
+                                }
+                                addCartGoodAPI(queryData, (res) => {
+                                  if (res.success) {
+                                    getCartListAPI({
+                                      "deskId": tableInfo?.tableId || 0,
+                                      "shopId": currentShop?.shopId!,
+                                      "openId": userInfo?.openid!,
+                                    }, getCartList)
+                                  } else {
+                                    res.data.catch((err) => {
+                                      showToast({
+                                        title: err.msg,
+                                        icon: 'none',
+                                      })
+                                    })
+                                  }
+                                })
+                              }}
                             >+</View>
                           </View>
                         </View>
