@@ -13,11 +13,21 @@ export const getAddressListAPI = (callback: (res: IResponseApi<IAddressItem[]>) 
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -32,11 +42,21 @@ export const addAddressAPI = (data: any, callback: (res: IResponseApi<any>) => v
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -51,11 +71,21 @@ export const editAddressAPI = (data: any, callback: (res: IResponseApi<any>) => 
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -71,11 +101,21 @@ export const getAreaDataAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -105,11 +145,21 @@ export const getShopListAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -125,10 +175,20 @@ export const getShopDetailAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }

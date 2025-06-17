@@ -65,6 +65,7 @@ function App({ children }: PropsWithChildren<any>) {
             },
             timeout: 10000,
             force: true
+        }).catch(() => {
         })
     }
 

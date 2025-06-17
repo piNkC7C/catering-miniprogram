@@ -41,6 +41,7 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
             fail: () => {
                 console.log('拨打电话失败')
             }
+        }).catch(() => {
         })
         setIsVisible(false)
     }

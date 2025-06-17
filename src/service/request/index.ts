@@ -95,6 +95,8 @@ class TaroRequest {
       const errMsg = error.errMsg
       if (errMsg.includes('timeout')) {
         showMessage('请求超时', 'error')
+      } else if (errMsg.includes('CONNECTION_REFUSED')) {
+        showMessage('服务器连接失败，请稍后重试', 'error')
       } else if (errMsg.includes('fail')) {
         showMessage('网络错误，请检查网络连接', 'error')
       } else {

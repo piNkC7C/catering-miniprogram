@@ -12,10 +12,20 @@ export const getSuggestListAPI = (callback: (res: IResponseApi<any>) => void) =>
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }

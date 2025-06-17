@@ -41,6 +41,7 @@ export const deleteCartGoodURL = '/trade/cart/remove'
 export const clearCartURL = '/trade/cart/clear'
 export const getCartListURL  = '/trade/cart/list'
 export const selectedCartURL = '/trade/cart/selected'
+export const addSharedCartGoodsURL = '/trade/cart/single-share'
 
 export const loginByPhoneURL = '/member/auth/weixin-mini-app-login'
 export const loginURL = '/member/auth/auth-session'

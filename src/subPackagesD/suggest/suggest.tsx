@@ -239,7 +239,13 @@ export default function Suggest() {
                                             })
                                         },
                                         fail: (err) => {
-                                            console.log('err', err);
+                                            if (err instanceof Promise) {
+                                                err.catch((errMsg) => {
+                                                    console.log('上传接口失败err', errMsg);
+                                                })
+                                            } else {
+                                                console.log('上传接口失败err', err);
+                                            }
                                             reject({
                                                 status: 'error' as UploaderFileStatus,
                                                 message: '上传失败',

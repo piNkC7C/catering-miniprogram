@@ -75,6 +75,7 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
           duration: 1000,
         })
       }
+    }).catch(() => {
     })
   }
 

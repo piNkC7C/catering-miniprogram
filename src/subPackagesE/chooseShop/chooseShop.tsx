@@ -229,6 +229,7 @@ export default function ChooseShop() {
                 console.log(err)
                 setIsInitialLoad(false)
             },
+        }).catch(() => {
         })
     })
 

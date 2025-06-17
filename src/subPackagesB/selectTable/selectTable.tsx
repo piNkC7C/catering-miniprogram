@@ -257,10 +257,12 @@ export default function SelectTable() {
                                     }, (res: IResponseApi<any>) => {
                                         if (res.success && res.data.length > 0) {
                                             showModal({
-                                                content: '检测到您有已选购商品，是否加入购物车？',
+                                                content: '系统识别到您有预点的商品，是否加入购物车？',
+                                                confirmText: '立即加入',
+                                                confirmColor: '#606E8B',
                                                 success: (res) => {
                                                     if (res.confirm) {
-                                                        console.log('将已选购商品加入共享购物车');
+                                                        console.log('将预点商品加入共享购物车');
                                                         switchTab({
                                                             url: '/pages/order/order',
                                                         })

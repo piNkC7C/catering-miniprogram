@@ -1293,11 +1293,9 @@ export default function Order() {
                                       "openId": userInfo?.openid!,
                                     }, getCartList)
                                   } else {
-                                    res.data.catch((err) => {
-                                      showToast({
-                                        title: err.msg,
-                                        icon: 'none',
-                                      })
+                                    showToast({
+                                      title: res.data.msg,
+                                      icon: 'none',
                                     })
                                   }
                                 })

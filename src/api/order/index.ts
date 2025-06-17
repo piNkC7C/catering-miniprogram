@@ -1,5 +1,5 @@
 import { taroGet, taroPost, taroDelete } from '@/service'
-import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL } from '@/service/config'
+import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -15,11 +15,21 @@ export const getGroupGoodsListAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -33,11 +43,21 @@ export const getSetGoodAPI = (callback: (res: IResponseApi<IGroupGoodsList[]>) =
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -55,11 +75,21 @@ export const getOrderListAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -75,11 +105,21 @@ export const getRefundListAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -95,11 +135,21 @@ export const getSetGoodDetailAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -114,11 +164,21 @@ export const addCartGoodAPI = (data: any, callback: (res: IResponseApi<any>) => 
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -139,11 +199,21 @@ export const deleteCartGoodAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
+            if (err instanceof Promise) {
+            err.catch((errMsg) => {
+                callback({
+                    success: false,
+                    data: errMsg
+                })
             })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -163,11 +233,21 @@ export const clearCartAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -185,11 +265,14 @@ export const getCartListAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
+            err.catch((errMsg) => {
+                callback({
+                    success: false,
+                    data: errMsg
+                })
             })
         }
+    }).catch(() => {
     })
 }
 
@@ -204,10 +287,48 @@ export const selectedCartAPI = (data: any, callback: (res: IResponseApi<any>) =>
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    })
+}
+
+export const addSharedCartGoodsAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+    taroPost({
+        url: addSharedCartGoodsURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                    data: errMsg
+                })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
     })
 }

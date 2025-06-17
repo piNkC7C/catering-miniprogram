@@ -14,11 +14,21 @@ export const loginByPhoneAPI = (data: any, callback: (res: IResponseApi<any>) =>
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+            err.catch((errMsg) => {
+                callback({
+                    success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -37,11 +47,21 @@ export const loginAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -57,11 +77,21 @@ export const getUserInfoAPI = (data: {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
 
@@ -75,10 +105,20 @@ export const getVipCodeAPI = (callback: (res: IResponseApi<any>) => void) => {
             })
         },
         fail: (err) => {
-            callback({
-                success: false,
-                data: err
-            })
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
         }
+    }).catch(() => {
     })
 }
