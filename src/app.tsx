@@ -17,6 +17,9 @@ import { IUserInfo } from './redux/types/login'
 import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
 import { getShopListAPI } from './api/address'
 import dayjs from 'dayjs'
+import { IGroupGoodsList } from './redux/types/order'
+import { setOrderTabsListAction, setGroupGoodsListAction } from './redux/modules/order'
+import { getGroupGoodsListAPI } from './api/order'
 
 function App({ children }: PropsWithChildren<any>) {
 
@@ -73,6 +76,24 @@ function App({ children }: PropsWithChildren<any>) {
         })
     }
 
+    const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
+        if (res.success) {
+          const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
+          // console.log('11111', orderData);
+    
+          store.dispatch(setOrderTabsListAction({
+            type: 'set',
+            data: orderData,
+          }))
+          store.dispatch(setGroupGoodsListAction({
+            type: 'set',
+            data: orderData
+          }))
+        } else {
+          console.log('获取商品列表失败:', res)
+        }
+      }
+
     let qqmapsdk: any
     const getAddressByLocation = (latitude, longitude) => {
         qqmapsdk = new QQMapWX({
@@ -100,6 +121,9 @@ function App({ children }: PropsWithChildren<any>) {
                             type: 'set',
                             data: res.data.shops[0]
                         }))
+                        getGroupGoodsListAPI({
+                            shopId: res.data.shops[0].shopId
+                          }, getGroupGoodsList)
                     }
                 })
             },
@@ -110,6 +134,8 @@ function App({ children }: PropsWithChildren<any>) {
     };
 
     useEffect(() => {
+        // console.log('prepay_id=wx17142701774247d677935f80dc3fbf0001'.substring(10, 'prepay_id=wx17142701774247d677935f80dc3fbf0001'.length - 1));
+        
         // 检查用户登录状态
         // checkSession({
         //     success: (res) => {

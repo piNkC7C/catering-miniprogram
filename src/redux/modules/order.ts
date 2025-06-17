@@ -12,6 +12,7 @@ const initialState: IOrderState = {
   refundList: [],
   currentOrder: null,
   currentRefund: null,
+  payOrderInfo: null,
 }
 
 const orderSlice = createSlice({
@@ -113,8 +114,15 @@ const orderSlice = createSlice({
           break
       }
     },
+    setPayOrderInfoAction: (state, { payload: { type, data } }) => {
+      switch (type) {
+        case 'set':
+          state.payOrderInfo = data
+          break
+      }
+    }
   }
 })
 
-export const { setCartListAction, setCurrentOrderAction, setCheckoutOrderAction, setCheckoutOrderCouponAction, setOrderTabsListAction, setGroupGoodsListAction, setOrderListAction, setRefundListAction,setCurrentRefundAction } = orderSlice.actions
+export const { setCartListAction, setCurrentOrderAction, setCheckoutOrderAction, setCheckoutOrderCouponAction, setOrderTabsListAction, setGroupGoodsListAction, setOrderListAction, setRefundListAction, setCurrentRefundAction, setPayOrderInfoAction } = orderSlice.actions
 export default orderSlice.reducer

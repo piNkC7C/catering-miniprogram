@@ -269,6 +269,8 @@ export default function SelectTable() {
                                                         addSharedCartGoodsAPI({
                                                             singleShare: true,
                                                             appCartModifyReqVOs: cartList.map((cartItem) => {
+                                                                console.log('cartItem', cartItem);
+                                                                
                                                                 return {
                                                                     "commodityId": cartItem.commodityId,
                                                                     "count": cartItem.count,

@@ -12,7 +12,7 @@ import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
-import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI } from '@/api/order'
+import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI, confirmPaymentAPI } from '@/api/order'
 import type { IGroupGoodsList } from '@/redux/types/order'
 import ShopInfo from '@/components/shopInfo'
 import shopInfo from '@/components/shopInfo'
@@ -37,33 +37,6 @@ export default function Order() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
-  const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
-    if (res.success) {
-      const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
-      // console.log('11111', orderData);
-
-      dispatch(setOrderTabsListAction({
-        type: 'set',
-        data: orderData,
-      }))
-      dispatch(setGroupGoodsListAction({
-        type: 'set',
-        data: orderData
-      }))
-    } else {
-      console.log('获取商品列表失败:', res)
-    }
-  }
-
-  // 页面加载，初始化获取商品列表
-  useEffect(() => {
-    if (currentShop?.shopId) {
-      getGroupGoodsListAPI({
-        shopId: currentShop?.shopId
-      }, getGroupGoodsList)
-    }
-  }, [currentShop?.shopId])
-
   // useEffect(() => {
   //   if (currentShop?.shopId && tableInfo?.tableId) {
   //     getCartListAPI({
@@ -83,7 +56,7 @@ export default function Order() {
   // 获取购物车列表
   const getCartList = (res: IResponseApi<any>) => {
     if (res.success) {
-      console.log(res);
+      console.log('111111112222222',res);
 
       dispatch(setCartListAction({
         type: 'set',
@@ -93,8 +66,6 @@ export default function Order() {
   }
 
   useEffect(() => {
-    // console.log('cartList', userInfo);
-
     if (currentShop?.shopId) {
       getCartListAPI({
         shopId: currentShop?.shopId,
@@ -104,9 +75,31 @@ export default function Order() {
     }
   }, [currentShop?.shopId])
 
+  // 侧边栏选中值
+  const [sideBarValue, setSideBarValue] = useState<number | string>(0)
+  const stickyPositions = useRef<{ id: string; top: number }[]>([])
+
   const [realWindowHeight, setRealWindowHeight] = useState(0)
   // 每次进入页面都检查是否选择了门店
   useDidShow(() => {
+    // 初始化获取所有吸顶元素的位置
+    const query = createSelectorQuery()
+    query.selectAll('.sticky-header').boundingClientRect()
+    query.exec((res) => {
+      if (res && res[0]) {
+        // console.log('stickyPositions');
+        stickyPositions.current = res[0].map((rect, index) => ({
+          id: `sticky-${index}`,
+          top: rect.top
+        }))
+      }
+    })
+    // 重新设置侧边栏
+    if (orderTabsList.length > 0) {
+      // console.log('111111');
+      setSideBarValue(orderTabsList[0].classificationId)
+    }
+    // 如果未选择门店，则跳转到选择门店页面
     if (!currentShop) {
       navigateTo({
         url: (routes.find((route) => route.name === 'chooseShop')?.path || '') + '?type=init',
@@ -190,15 +183,6 @@ export default function Order() {
   // 创建一个手动滚动事件来检测元素可见性
   // const [visibleItems, setVisibleItems] = useState<string[]>([]);
 
-  // 侧边栏选中值
-  const [sideBarValue, setSideBarValue] = useState<number | string>(0)
-
-  useEffect(() => {
-    if (orderTabsList.length > 0) {
-      setSideBarValue(orderTabsList[0].classificationId)
-    }
-  }, [orderTabsList])
-
   // 购物车左侧显示
   const [cartLeftWidth, setCartLeftWidth] = useState<string>('30%')
   const [cartLeftBackground, setCartLeftBackground] = useState<string>('#D61518')
@@ -207,31 +191,20 @@ export default function Order() {
 
   // const [activeStickyIndex, setActiveStickyIndex] = useState<number>(0)
   // const [activeStickyId, setActiveStickyId] = useState<string>('sticky-0')
-  const stickyPositions = useRef<{ id: string; top: number }[]>([])
-
-  // 初始化获取所有吸顶元素的位置
-  useEffect(() => {
-    const query = createSelectorQuery()
-    query.selectAll('.sticky-header').boundingClientRect()
-    query.exec((res) => {
-      if (res && res[0]) {
-        stickyPositions.current = res[0].map((rect, index) => ({
-          id: `sticky-${index}`,
-          top: rect.top
-        }))
-      }
-    })
-  }, [groupGoodsList])
 
   // 滚动事件处理
-  const handleScroll = (e: any) => {
+  const handleScrollEvent = (e: any) => {
     const scrollTop = e.detail.scrollTop
 
     // 找出当前应该吸顶的元素
     for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
       const position = stickyPositions.current[i]
 
-      if (scrollTop >= position.top) {
+      if (scrollTop >= (position.top - viewHeight * 0.02)) {
+        // console.log('scrollTop', scrollTop);
+        // console.log('position.top', position.top);
+        // console.log('orderTabsList[i + 1]', orderTabsList[i + 1]);
+
         if (orderTabsList[i + 1]) {
           setSideBarValue(orderTabsList[i + 1].classificationId)
         } else {
@@ -241,6 +214,11 @@ export default function Order() {
       }
     }
   }
+
+  const { run: handleScroll } = useThrottleFn(
+    handleScrollEvent,
+    { wait: 50 }
+  )
 
   // const { run: handleScroll } = useThrottleFn(
   //   (e: any) => {
@@ -491,6 +469,7 @@ export default function Order() {
                         top: 0,
                         zIndex: index + 1,
                         width: '100%',
+                        // height: pxTransform(viewHeight * 0.02),
                         marginBottom: pxTransform(viewHeight * 0.02),
                         backgroundColor: '#fff',
                         color: '#6A6A6A',
@@ -925,27 +904,60 @@ export default function Order() {
                 if (cartSelectedList.length == 0) {
                   return
                 }
-                
-                dispatch(setCheckoutOrderAction({
-                  type: 'set', data: {
-                    checkoutOrderId: 1,
-                    checkoutOrderCouponedPrice: cartList.reduce((acc, item) => acc + Number(item.price) * item.count, 0),
-                    checkoutOrderTotalPrice: cartList.reduce((acc, item) => acc + Number(item.price) * item.count, 0),
-                    checkoutOrderTotalCount: cartList.reduce((acc, item) => acc + item.count, 0),
-                    checkoutOrderType: 1,
-                    checkoutOrderTableId: tableInfo?.tableId,
-                    checkoutOrderTableNumber: tableInfo?.tableNum,
-                    checkoutOrderPersonNumber: tableInfo?.peopleNum,
-                    isUseCoupon: false,
-                    couponList: [],
-                    goodsList: cartList,
+                confirmPaymentAPI({
+                  "shopId": currentShop?.shopId!,
+                  "deskId": tableInfo?.tableId!,
+                  "remark": "",
+                  "commodityReq": cartSelectedList.map((cartItem) => (
+                    {
+                      "commodityId": cartItem.commodityId,
+                      "isSet": cartItem.isSet,
+                      "count": cartItem.count,
+                      "setItems": cartItem.cartDOS?.map((goodsItem) => (
+                        {
+                          "commodityId": goodsItem.commodityId,
+                          "count": goodsItem.count,
+                          "isSet": goodsItem.isSet,
+                          "isAdd": goodsItem.isAdd,
+                          "selected": goodsItem.selected,
+                          "image": goodsItem.image,
+                          "name": goodsItem.name,
+                          "standardPrice": goodsItem.price,
+                          "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
+                          "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
+                          "shopId": currentShop?.shopId!,
+                          "deskId": tableInfo?.tableId!,
+                          "openId": userInfo?.openid!,
+                          "cartModifyReqVOList": []
+                        }
+                      ))
+                    }
+                  ))
+                }, (res: IResponseApi<any>) => {
+                  console.log('confirmPaymentAPI res', res)
+                  if (res.success) {
+                    dispatch(setCheckoutOrderAction({
+                      type: 'set', data: {
+                        // checkoutOrderId: 1,
+                        checkoutOrderCouponedPrice: res.data.totalPrice,
+                        checkoutOrderTotalPrice: res.data.totalPrice,
+                        checkoutOrderTotalCount: res.data.totalCount,
+                        checkoutOrderType: 1,
+                        checkoutOrderTableId: tableInfo?.tableId,
+                        checkoutOrderTableNumber: tableInfo?.tableNum,
+                        checkoutOrderPersonNumber: tableInfo?.peopleNum,
+                        isUseCoupon: false,
+                        couponList: [],
+                        goodsList: cartSelectedList,
+                      }
+                    }))
+                    navigateTo(
+                      {
+                        url: routes.find((route) => route.name === 'payment')?.path || '',
+                      }
+                    )
                   }
-                }))
-                navigateTo(
-                  {
-                    url: routes.find((route) => route.name === 'payment')?.path || '',
-                  }
-                )
+                })
               }
             }}
           >

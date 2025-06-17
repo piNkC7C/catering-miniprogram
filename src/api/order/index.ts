@@ -1,5 +1,5 @@
 import { taroGet, taroPost, taroDelete } from '@/service'
-import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL } from '@/service/config'
+import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -109,7 +109,7 @@ export const getRefundListAPI = (data: {
                 err.catch((errMsg) => {
                     callback({
                         success: false,
-                    data: errMsg
+                        data: errMsg
                     })
                 })
             } else {
@@ -139,7 +139,7 @@ export const getSetGoodDetailAPI = (data: {
                 err.catch((errMsg) => {
                     callback({
                         success: false,
-                    data: errMsg
+                        data: errMsg
                     })
                 })
             } else {
@@ -200,12 +200,12 @@ export const deleteCartGoodAPI = (data: {
         },
         fail: (err) => {
             if (err instanceof Promise) {
-            err.catch((errMsg) => {
-                callback({
-                    success: false,
-                    data: errMsg
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
                 })
-            })
             } else {
                 callback({
                     success: false,
@@ -237,8 +237,8 @@ export const clearCartAPI = (data: {
                 err.catch((errMsg) => {
                     callback({
                         success: false,
-                    data: errMsg
-                })
+                        data: errMsg
+                    })
                 })
             } else {
                 callback({
@@ -291,8 +291,8 @@ export const selectedCartAPI = (data: any, callback: (res: IResponseApi<any>) =>
                 err.catch((errMsg) => {
                     callback({
                         success: false,
-                    data: errMsg
-                })
+                        data: errMsg
+                    })
                 })
             } else {
                 callback({
@@ -319,8 +319,124 @@ export const addSharedCartGoodsAPI = (data: any, callback: (res: IResponseApi<an
                 err.catch((errMsg) => {
                     callback({
                         success: false,
-                    data: errMsg
+                        data: errMsg
+                    })
                 })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
+    })
+}
+
+export const confirmPaymentAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+    taroPost({
+        url: confirmPaymentURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
+    })
+}
+
+export const clearSelectedCartAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+    taroDelete({
+        url: clearSelectedCartURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
+    })
+}
+
+export const payOrderAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+    taroPost({
+        url: payOrderURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
+    })
+}
+
+export const cancelOrderAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+    taroDelete({
+        url: cancelOrderURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
                 })
             } else {
                 callback({

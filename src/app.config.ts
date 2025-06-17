@@ -21,6 +21,8 @@ export default defineAppConfig({
     // // 选择店铺
     // 'subPackagesE/chooseShop/chooseShop',
     // 'subPackagesE/refundList/refundList',
+
+    // 'subPackagesE/confirmPayment/confirmPayment',
   ],
   subPackages: [
     {
@@ -82,6 +84,8 @@ export default defineAppConfig({
         'chooseShop/chooseShop',
         // 退款记录
         'refundList/refundList',
+        // 确认支付
+        'confirmPayment/confirmPayment',
       ]
     },
   ],

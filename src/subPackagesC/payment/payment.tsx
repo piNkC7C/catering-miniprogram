@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getStorage } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getStorage, navigateTo } from '@tarojs/taro'
 import './payment.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setCheckoutOrderCouponAction } from '@/redux/modules/order'
+import { setCheckoutOrderCouponAction, setPayOrderInfoAction } from '@/redux/modules/order'
 import { pxTransform, Image, Button, Divider, Tabs, Price, Tag, Popup, Dialog, Cell, TextArea, Ellipsis } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, IconFont, ArrowUp, ArrowDown, ArrowRight } from '@nutui/icons-react-taro'
 import { billTop, billBottom, tableIcon, peopleIcon } from '@/utils/constants'
 import { TABLE_INFO } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
 import CouponCard from '@/components/couponCard'
+import { clearSelectedCartAPI, payOrderAPI } from '@/api/order'
+import { IResponseApi } from '@/api/type'
+import { routes } from '@/utils/constants'
 
 export default function Payment() {
     // 获取登录状态和用户信息
@@ -18,6 +21,9 @@ export default function Payment() {
             loginStatus,
             userInfo,
             tableInfo
+        },
+        address: {
+            currentShop
         },
         order: {
             checkoutOrder,
@@ -202,7 +208,7 @@ export default function Payment() {
                                             className='left'
                                         >
                                             <Image
-                                                src={goodsItem.mealImage}
+                                                src={goodsItem.image}
                                                 width={pxTransform(windowHeight * 0.06)}
                                                 height={pxTransform(windowHeight * 0.06)}
                                             ></Image>
@@ -217,12 +223,12 @@ export default function Payment() {
                                                     style={{
                                                         fontWeight: 'bold'
                                                     }}
-                                                >{goodsItem.mealName}</Text>
+                                                >{goodsItem.name}</Text>
                                                 <Text
                                                     style={{
                                                         fontSize: pxTransform(windowHeight * 0.012),
                                                     }}
-                                                >x{goodsItem.goodsCount}</Text>
+                                                >x{goodsItem.count}</Text>
                                             </View>
                                         </View>
                                         <View
@@ -233,7 +239,7 @@ export default function Payment() {
                                         >
                                             <Price
                                                 color='gray'
-                                                price={goodsItem.totalPrice}
+                                                price={goodsItem.price * goodsItem.count}
                                                 size="small"
                                                 thousands
                                                 style={{
@@ -484,6 +490,120 @@ export default function Payment() {
                     size='normal'
                     style={{
                         borderRadius: pxTransform(windowHeight * 0.03)
+                    }}
+                    onClick={() => {
+                        console.log('checkoutOrder')
+
+                        clearSelectedCartAPI(
+                            checkoutOrder?.goodsList.map((good) => {
+                                return {
+                                    "commodityId": good.commodityId,
+                                    "isSet": good.isSet,
+                                    "deskId": tableInfo?.tableId!,
+                                    "shopId": currentShop?.shopId!,
+                                    "openId": userInfo?.openid!,
+                                    "cartModifyReqVOList": good.cartDOS?.map((cartItem) => {
+                                        return {
+                                            "commodityId": cartItem.commodityId,
+                                            "count": cartItem.count,
+                                            "isSet": cartItem.isSet,
+                                            "isAdd": cartItem.isAdd,
+                                            "selected": cartItem.selected,
+                                            "image": cartItem.image,
+                                            "name": cartItem.name,
+                                            "standardPrice": cartItem.price,
+                                            "shopId": currentShop?.shopId!,
+                                            "deskId": tableInfo?.tableId!,
+                                            "openId": userInfo?.openid!,
+                                            "cartModifyReqVOList": []
+                                        }
+                                    })
+                                }
+                            }), (res: IResponseApi<any>) => {
+                                console.log('clearSelectedCartAPI res', res)
+                                if (res.success) {
+                                    payOrderAPI({
+                                        // "outTradeNo": "",
+                                        // "orderNo": "D8117465022766946619",
+                                        // "terminal": 1,
+                                        "userId": userInfo?.userId || null,
+                                        "openId": userInfo?.openid!,
+                                        "shopId": currentShop?.shopId!,
+                                        "deskId": tableInfo?.tableId!,
+                                        "peopleNum": tableInfo?.peopleNum!,
+                                        "merchantRemark": "",
+                                        "dineRemark": "",
+                                        // "payOpenId": "",
+                                        // "status": 0,
+                                        // "payStatus": 1,
+                                        "orderType": 1,
+                                        // "totalGoods": 0,
+                                        // "originalPrice": 0,
+                                        "isInvoicing": 0,
+                                        "remark": notesContent,
+                                        "coupons": [
+                                        //   {
+                                        //     "id": 0,
+                                        //     "orderId": 0,
+                                        //     "couponUserId": "",
+                                        //     "discountPrice": 0,
+                                        //     "tenantId": 0,
+                                        //     "createTime": ""
+                                        //   }
+                                        ],
+                                        "carts": checkoutOrder?.goodsList.map((good) => {
+                                            return {
+                                                "commodityId": good.commodityId,
+                                                "count": good.count,
+                                                "classificationId": good.classificationId,
+                                                "selected": good.selected,
+                                                "image": good.image,
+                                                "name": good.name,
+                                                "price": good.price,
+                                                "isSet": good.isSet,
+                                                "minimumPurchaseQuantity": good.minimumPurchaseQuantity,
+                                                "purchaseQuantityLimit": good.purchaseQuantityLimit,
+                                                "cartDOS": good.cartDOS?.map((cartItem) => {
+                                                    return {
+                                                        "commodityId": cartItem.commodityId,
+                                                        "count": cartItem.count,
+                                                        "isSet": cartItem.isSet,
+                                                        "isAdd": cartItem.isAdd,
+                                                        "selected": cartItem.selected,
+                                                        "image": cartItem.image,
+                                                        "name": cartItem.name,
+                                                        "standardPrice": cartItem.price,
+                                                        "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
+                                                        "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
+                                                        "shopId": currentShop?.shopId!,
+                                                        "deskId": tableInfo?.tableId!,
+                                                        "openId": userInfo?.openid!,
+                                                        "cartModifyReqVOList": []
+                                                      }
+                                                })
+                                            }
+                                        })
+                                      }, (res: IResponseApi<any>) => {
+                                        console.log('payOrderAPI res', res)
+                                        if (res.success) {
+                                            dispatch(setPayOrderInfoAction({
+                                                type: 'set',
+                                                data: {
+                                                    timeStamp: res.data.timeStamp,
+                                                    nonceStr: res.data.nonceStr,
+                                                    packageValue: res.data.packageValue,
+                                                    signType: res.data.signType,
+                                                    paySign: res.data.paySign,
+                                                    prepayId: res.data.packageValue.substring(10, res.data.packageValue.length - 1),
+                                                }
+                                            }))
+                                            navigateTo({
+                                                url: routes.find(route => route.name == 'confirmPayment')?.path!
+                                            })
+                                        }
+                                    })
+                                }
+                            })
                     }}
                 >支付下单</Button>
             </View>

@@ -10,6 +10,10 @@ import { formatDistance } from '@/utils/formatUtils'
 import { IShopItem } from '@/redux/types/address'
 import equal from 'fast-deep-equal'
 import { setCurrentShopAction, setAddSuggestChooseShopAction } from '@/redux/modules/address'
+import { IGroupGoodsList } from '@/redux/types/order'
+import { setOrderTabsListAction, setGroupGoodsListAction } from '@/redux/modules/order'
+import { getGroupGoodsListAPI } from '@/api/order'
+import { IResponseApi } from '@/api/type'
 
 function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
     // 获取登录状态和用户信息
@@ -49,6 +53,25 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
     // 是否点击了门店
     const [isClickShop, setIsClickShop] = useState(false)
 
+    const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
+        if (res.success) {
+            const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
+            dispatch(setOrderTabsListAction({
+                type: 'set',
+                data: orderData,
+            }))
+            dispatch(setGroupGoodsListAction({
+                type: 'set',
+                data: orderData
+            }))
+            switchTab({
+                url: (routes.find((route) => route.name === 'order')?.path || ''),
+            })
+        } else {
+            console.log('获取商品列表失败:', res)
+        }
+    }
+
     return (
         <View
             className='shop-card'
@@ -73,11 +96,14 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
                     type: 'set',
                     data: shopItem
                 }))
-                setTimeout(() => {
-                    switchTab({
-                        url: (routes.find((route) => route.name === 'order')?.path || ''),
-                    })
-                }, 300)
+                getGroupGoodsListAPI({
+                    shopId: shopItem.shopId
+                }, getGroupGoodsList)
+                // setTimeout(() => {
+                //     switchTab({
+                //         url: (routes.find((route) => route.name === 'order')?.path || ''),
+                //     })
+                // }, 300)
             }}
         >
             <View className='shop-card-left'>

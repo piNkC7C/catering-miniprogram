@@ -81,6 +81,10 @@ export const routes = [
     {
         name: 'order',
         path: '/pages/order/order'
+    },
+    {
+        name: 'confirmPayment',
+        path: '/subPackagesE/confirmPayment/confirmPayment'
     }
 ]
 

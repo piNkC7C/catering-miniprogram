@@ -50,6 +50,7 @@ export interface ICartItem {
   name: string // 名称
   price: number // 价格
   isSet: boolean // 是否是套餐
+  isAdd: boolean // 是否是新增
   selected: boolean // 是否选中
   minimumPurchaseQuantity: number // 最小购买数量
   purchaseQuantityLimit: number // 最大购买量
@@ -114,7 +115,16 @@ export interface ICheckoutOrderItem {
   checkoutOrderPersonNumber: number
   isUseCoupon: boolean
   couponList?: ICouponItem[]
-  goodsList: IOrderGoodsItem[]
+  goodsList: ICartItem[]
+}
+
+export interface IPayOrderInfoItem {
+  timeStamp: string
+  nonceStr: string
+  packageValue: string
+  signType: 'MD5' | 'HMAC-SHA256' | 'RSA'
+  paySign: string
+  prepayId: string
 }
 
 export interface IOrderState {
@@ -128,4 +138,5 @@ export interface IOrderState {
   refundList: IRefundItem[]
   currentOrder: IOrderItem | null
   currentRefund: IRefundItem | null
+  payOrderInfo: IPayOrderInfoItem | null
 }

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, switchTab, useDidShow, navigateTo } from '@tarojs/taro'
 import './orderDetail.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Steps, Step, Price } from '@nutui/nutui-react-taro'
-import { ArrowLeft, Search } from '@nutui/icons-react-taro'
+import { ArrowLeft, Home, Search } from '@nutui/icons-react-taro'
 import GoodList from '@/components/goodList'
 import Card from '@/components/Card'
 import dayjs from 'dayjs'
+import { routes } from '@/utils/constants'
 
 export default function OrderDetail() {
     // 获取登录状态和用户信息
@@ -18,8 +19,12 @@ export default function OrderDetail() {
         }
     } = useAppSelector((state) => state)
 
-    // const router = useRouter()
-    // const { id } = router.params
+    useDidShow(() => {
+        console.log('useDidShow', currentOrder);
+    })
+
+    const router = useRouter()
+    const { type } = router.params
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -58,12 +63,25 @@ export default function OrderDetail() {
                             width: `calc(${pxTransform(widthMenuButton / 2)} - ${pxTransform(windowWidth * 0.04)})`,
                         }}
                     >
-                        <ArrowLeft
-                            size={pxTransform(windowWidth * 0.05)}
-                            onClick={() => {
-                                navigateBack()
-                            }}
-                        />
+                        {
+                            type && type == '1' ? (
+                                <Home
+                                    size={pxTransform(windowWidth * 0.05)}
+                                    onClick={() => {
+                                        switchTab({
+                                            url: routes.find(route => route.name == 'index')?.path!
+                                        })
+                                    }}
+                                />
+                            ) : (
+                                <ArrowLeft
+                                    size={pxTransform(windowWidth * 0.05)}
+                                    onClick={() => {
+                                        navigateBack()
+                                    }}
+                                />
+                            )
+                        }
                     </View>
                     {
                         currentOrder?.orderStatus === 4 && (
@@ -123,10 +141,10 @@ export default function OrderDetail() {
                                 className='refund-status'
                             >
                                 <View
-                                style={{
-                                    fontSize: pxTransform(windowHeight * 0.02),
-                                    marginBottom: pxTransform(windowHeight * 0.01),
-                                }}
+                                    style={{
+                                        fontSize: pxTransform(windowHeight * 0.02),
+                                        marginBottom: pxTransform(windowHeight * 0.01),
+                                    }}
                                 >
                                     {
                                         (currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? '已提交退款申请' :
@@ -291,6 +309,15 @@ export default function OrderDetail() {
                                         type='primary'
                                         style={{
                                             borderRadius: pxTransform(windowHeight * 0.05),
+                                        }}
+                                        onClick={() => {
+                                            if (type && type == '1') {
+                                                navigateBack()
+                                            } else {
+                                                navigateTo({
+                                                    url: routes.find(route => route.name == 'confirmPayment')?.path!
+                                                })
+                                            }
                                         }}
                                     >
                                         去支付
