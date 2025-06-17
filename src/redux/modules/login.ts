@@ -34,9 +34,6 @@ const loginSlice = createSlice({
     },
     setTableInfo: (state, { payload }) => {
       state.tableInfo = payload
-      switchTab({
-        url: '/pages/order/order',
-    })
       return state
     }
   }

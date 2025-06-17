@@ -223,6 +223,16 @@ export default function ChooseShop() {
             success: (res) => {
                 if (!nowAddress) {
                     getAddressByLocation(res.latitude, res.longitude, true)
+                } else {
+                    setValue([Number(nowAddress.ad_info.adcode.substring(0, 2)), Number(nowAddress.ad_info.adcode.substring(0, 4))])
+                    // }
+                    setIsValueInit(true)
+                    getShopListAPI({
+                        cityId: Number(nowAddress.ad_info.adcode.substring(0, 4)),
+                        shopLongitude: nowAddress.ad_info.location.lng,
+                        shopLatitude: nowAddress.ad_info.location.lat,
+                        locationName: shopName
+                    }, getShopList)
                 }
             },
             fail: (err) => {

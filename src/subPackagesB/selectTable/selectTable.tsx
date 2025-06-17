@@ -11,7 +11,7 @@ import { setCurrentShopAction } from '@/redux/modules/address'
 import { getShopDetailAPI } from '@/api/address'
 import { IResponseApi } from '@/api/type'
 import { IShopItem } from '@/redux/types/address'
-import { getCartListAPI } from '@/api/order'
+import { addSharedCartGoodsAPI, getCartListAPI } from '@/api/order'
 import { setCartListAction } from '@/redux/modules/order'
 
 export default function SelectTable() {
@@ -20,6 +20,9 @@ export default function SelectTable() {
         login: {
             loginStatus,
             userInfo,
+        },
+        order: {
+            cartList,
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
@@ -30,9 +33,9 @@ export default function SelectTable() {
     // const [numberKeyboardVisible, setNumberKeyboardVisible] = useState<boolean>(false)
     // const [inputValue, setInputValue] = useState<string>('')
 
-    const [tableId, setTableId] = useState<any>(null)
-    const [tableNum, setTableNum] = useState<any>(null)
-    const [shopId, setShopId] = useState<any>(null)
+    const [tableId, setTableId] = useState<any>(2)
+    const [tableNum, setTableNum] = useState<any>('A-11')
+    const [shopId, setShopId] = useState<any>(2)
 
     const router = useRouter()
     const { scene } = router.params
@@ -252,7 +255,7 @@ export default function SelectTable() {
                                     }))
                                     getCartListAPI({
                                         shopId: shopId,
-                                        deskId: null,
+                                        deskId: 0,
                                         openId: userInfo?.openid!,
                                     }, (res: IResponseApi<any>) => {
                                         if (res.success && res.data.length > 0) {
@@ -263,14 +266,72 @@ export default function SelectTable() {
                                                 success: (res) => {
                                                     if (res.confirm) {
                                                         console.log('将预点商品加入共享购物车');
-                                                        switchTab({
-                                                            url: '/pages/order/order',
+                                                        addSharedCartGoodsAPI({
+                                                            singleShare: true,
+                                                            appCartModifyReqVOs: cartList.map((cartItem) => {
+                                                                return {
+                                                                    "commodityId": cartItem.commodityId,
+                                                                    "count": cartItem.count,
+                                                                    "isSet": cartItem.isSet,
+                                                                    "isAdd": true,
+                                                                    "selected": cartItem.selected,
+                                                                    "image": cartItem.image,
+                                                                    "name": cartItem.name,
+                                                                    "standardPrice": cartItem.price,
+                                                                    "shopId": shopId,
+                                                                    "deskId": tableId,
+                                                                    "openId": userInfo?.openid!,
+                                                                    "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
+                                                                    "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
+                                                                    "cartModifyReqVOList": cartItem.cartDOS?.map((cartDO) => {
+                                                                        return {
+                                                                            "commodityId": cartDO.commodityId,
+                                                                            "count": cartDO.count,
+                                                                            "isSet": cartDO.isSet,
+                                                                            "isAdd": true,
+                                                                            "selected": cartDO.selected,
+                                                                            "image": cartDO.image,
+                                                                            "name": cartDO.name,
+                                                                            "standardPrice": cartDO.price,
+                                                                            "shopId": shopId,
+                                                                            "deskId": tableId,
+                                                                            "openId": userInfo?.openid!,
+                                                                        }
+                                                                    })
+                                                                }
+                                                            })
+                                                        }, (res: IResponseApi<any>) => {
+                                                            console.log('addSharedCartGoodsAPI res', res);
+                                                            if (!res.success || res.data != true) {
+                                                                showToast({
+                                                                    title: '添加失败',
+                                                                    icon: 'none',
+                                                                    duration: 2000,
+                                                                })
+                                                            } else {
+                                                                getCartListAPI({
+                                                                    shopId: shopId,
+                                                                    deskId: tableId,
+                                                                    openId: userInfo?.openid!,
+                                                                }, (res: IResponseApi<any>) => {
+                                                                    console.log('getCartListAPI res', res);
+                                                                    if (res.success && res.data.length > 0) {
+                                                                        dispatch(setCartListAction({
+                                                                            type: 'set',
+                                                                            data: res.data
+                                                                        }))
+                                                                        switchTab({
+                                                                            url: '/pages/order/order',
+                                                                        })
+                                                                    }
+                                                                })
+                                                            }
                                                         })
                                                     } else if (res.cancel) {
                                                         console.log('清空单人购物车', userInfo?.openid);
-                                                        switchTab({
-                                                            url: '/pages/order/order',
-                                                        })
+                                                        // switchTab({
+                                                        //     url: '/pages/order/order',
+                                                        // })
                                                     }
                                                 }
                                             })

@@ -925,6 +925,7 @@ export default function Order() {
                 if (cartSelectedList.length == 0) {
                   return
                 }
+                
                 dispatch(setCheckoutOrderAction({
                   type: 'set', data: {
                     checkoutOrderId: 1,
