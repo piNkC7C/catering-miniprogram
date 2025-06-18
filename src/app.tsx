@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect } from 'react'
-import { useLaunch,requestPayment, checkSession, login, setStorage, getStorage, showLoading, hideLoading, useLoad, getLocation } from '@tarojs/taro'
+import { useLaunch, requestPayment, checkSession, login, setStorage, getStorage, showLoading, hideLoading, useLoad, getLocation } from '@tarojs/taro'
 import './app.scss'
 import { OPEN_ID, qqmapsdkKey } from './utils/constants'
 
@@ -78,21 +78,52 @@ function App({ children }: PropsWithChildren<any>) {
 
     const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
         if (res.success) {
-          const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
-          // console.log('11111', orderData);
-    
-          store.dispatch(setOrderTabsListAction({
-            type: 'set',
-            data: orderData,
-          }))
-          store.dispatch(setGroupGoodsListAction({
-            type: 'set',
-            data: orderData
-          }))
+            const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
+                // .map((item, index) => {
+                //     if (index == res.data.length - 1) {
+                //         return {
+                //             ...item,
+                //             title: item.classificationName,
+                //             list: item.goodsList.map((goods) => {
+                //                 return {
+                //                     ...goods,
+                //                     id: goods.id,
+                //                     name: goods.mealName
+                //                 }
+                //             }).concat([
+                //                 {
+                //                     id: 'test',
+                //                     name: '测试',
+                //                 } as any
+                //             ])
+                //         }
+                //     }
+                //     return {
+                //         ...item,
+                //         title: item.classificationName,
+                //         list: item.goodsList.map((goods) => {
+                //             return {
+                //                 ...goods,
+                //                 id: goods.id,
+                //                 name: goods.mealName
+                //             }
+                //         })
+                //     }
+                // })
+            // console.log('11111', orderData);
+
+            store.dispatch(setOrderTabsListAction({
+                type: 'set',
+                data: orderData,
+            }))
+            store.dispatch(setGroupGoodsListAction({
+                type: 'set',
+                data: orderData
+            }))
         } else {
-          console.log('获取商品列表失败:', res)
+            console.log('获取商品列表失败:', res)
         }
-      }
+    }
 
     let qqmapsdk: any
     const getAddressByLocation = (latitude, longitude) => {
@@ -123,7 +154,7 @@ function App({ children }: PropsWithChildren<any>) {
                         }))
                         getGroupGoodsListAPI({
                             shopId: res.data.shops[0].shopId
-                          }, getGroupGoodsList)
+                        }, getGroupGoodsList)
                     }
                 })
             },
@@ -135,7 +166,7 @@ function App({ children }: PropsWithChildren<any>) {
 
     useEffect(() => {
         // console.log('prepay_id=wx17142701774247d677935f80dc3fbf0001'.substring(10, 'prepay_id=wx17142701774247d677935f80dc3fbf0001'.length - 1));
-        
+
         // 检查用户登录状态
         // checkSession({
         //     success: (res) => {

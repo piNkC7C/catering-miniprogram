@@ -77,23 +77,23 @@ export default function Order() {
 
   // 侧边栏选中值
   const [sideBarValue, setSideBarValue] = useState<number | string>(0)
-  const stickyPositions = useRef<{ id: string; top: number }[]>([])
+  // const stickyPositions = useRef<{ id: string; top: number }[]>([])
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
   // 每次进入页面都检查是否选择了门店
   useDidShow(() => {
     // 初始化获取所有吸顶元素的位置
-    const query = createSelectorQuery()
-    query.selectAll('.sticky-header').boundingClientRect()
-    query.exec((res) => {
-      if (res && res[0]) {
-        // console.log('stickyPositions');
-        stickyPositions.current = res[0].map((rect, index) => ({
-          id: `sticky-${index}`,
-          top: rect.top
-        }))
-      }
-    })
+    // const query = createSelectorQuery()
+    // query.selectAll('.sticky-header').boundingClientRect()
+    // query.exec((res) => {
+    //   if (res && res[0]) {
+    //     // console.log('stickyPositions');
+    //     stickyPositions.current = res[0].map((rect, index) => ({
+    //       id: `sticky-${index}`,
+    //       top: rect.top
+    //     }))
+    //   }
+    // })
     // 重新设置侧边栏
     if (orderTabsList.length > 0) {
       // console.log('111111');
@@ -193,32 +193,32 @@ export default function Order() {
   // const [activeStickyId, setActiveStickyId] = useState<string>('sticky-0')
 
   // 滚动事件处理
-  const handleScrollEvent = (e: any) => {
-    const scrollTop = e.detail.scrollTop
+  // const handleScrollEvent = (e: any) => {
+  //   const scrollTop = e.detail.scrollTop
 
-    // 找出当前应该吸顶的元素
-    for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
-      const position = stickyPositions.current[i]
+  //   // 找出当前应该吸顶的元素
+  //   for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
+  //     const position = stickyPositions.current[i]
 
-      if (scrollTop >= (position.top - viewHeight * 0.02)) {
-        // console.log('scrollTop', scrollTop);
-        // console.log('position.top', position.top);
-        // console.log('orderTabsList[i + 1]', orderTabsList[i + 1]);
+  //     if (scrollTop >= (position.top - viewHeight * 0.02)) {
+  //       // console.log('scrollTop', scrollTop);
+  //       // console.log('position.top', position.top);
+  //       // console.log('orderTabsList[i + 1]', orderTabsList[i + 1]);
 
-        if (orderTabsList[i + 1]) {
-          setSideBarValue(orderTabsList[i + 1].classificationId)
-        } else {
-          setSideBarValue(orderTabsList[orderTabsList.length - 1].classificationId)
-        }
-        break
-      }
-    }
-  }
+  //       if (orderTabsList[i + 1]) {
+  //         setSideBarValue(orderTabsList[i + 1].classificationId)
+  //       } else {
+  //         setSideBarValue(orderTabsList[orderTabsList.length - 1].classificationId)
+  //       }
+  //       break
+  //     }
+  //   }
+  // }
 
-  const { run: handleScroll } = useThrottleFn(
-    handleScrollEvent,
-    { wait: 50 }
-  )
+  // const { run: handleScroll } = useThrottleFn(
+  //   handleScrollEvent,
+  //   { wait: 50 }
+  // )
 
   // const { run: handleScroll } = useThrottleFn(
   //   (e: any) => {
@@ -442,7 +442,7 @@ export default function Order() {
             id='parentScroll'
             scrollY
             scrollIntoView={`sticky-${sideBarValue}`}
-            onScroll={handleScroll}
+            // onScroll={handleScroll}
             style={{
               flex: 1,
               padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(windowWidth * 0.05)}`,

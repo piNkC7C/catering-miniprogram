@@ -564,11 +564,11 @@ export default function Payment() {
                                         packageValue: res.data.packageValue,
                                         signType: res.data.signType,
                                         paySign: res.data.paySign,
-                                        prepayId: res.data.packageValue.substring(10, res.data.packageValue.length - 1),
+                                        prepayId: res.data.packageValue.substring(10, res.data.packageValue.length),
                                     }
                                 }))
                                 getOrderDetailOrPrePayAPI({
-                                    id: res.data.packageValue.substring(10, res.data.packageValue.length - 1)
+                                    id: res.data.packageValue.substring(10, res.data.packageValue.length)
                                 }, (res: IResponseApi<any>) => {
                                     console.log('getOrderDetailOrPrePayAPI res', res)
                                     if (res.success) {
