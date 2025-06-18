@@ -31,7 +31,7 @@ export default function Choose() {
   useEffect(() => {
     if (id) {
       getSetGoodDetailAPI({ id }, (res) => {
-        console.log('res', res)
+        // console.log('res', res)
         setAllSelectedAddOneGood(res.data.mealSetOptionalGroupInfoList)
         setSelectedIncludeGood(res.data.mealSpecificationInfoList)
         setSetGoodDetail(res.data)

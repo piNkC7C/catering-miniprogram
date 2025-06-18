@@ -60,7 +60,7 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
     setOverlayVisible(true)
     login({
       success: (res) => {
-        console.log('loginByPhone success', res)
+        // console.log('loginByPhone success', res)
         loginByPhoneAPI({
           phoneCode,
           loginCode: res.code,
@@ -156,7 +156,7 @@ const PureLoginPopup: React.FC<LoginPopupProps> = ({
             {...(checkAgree ? {
               openType: 'getPhoneNumber|agreePrivacyAuthorization',
               onGetPhoneNumber: (PhoneNumber) => {
-                console.log('onGetPhoneNumber', PhoneNumber.detail)
+                // console.log('onGetPhoneNumber', PhoneNumber.detail)
 
                 if (PhoneNumber.detail.code) {
                   loginByPhone(PhoneNumber.detail.code)

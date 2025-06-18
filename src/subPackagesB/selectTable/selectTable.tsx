@@ -265,11 +265,11 @@ export default function SelectTable() {
                                                 confirmColor: '#606E8B',
                                                 success: (res) => {
                                                     if (res.confirm) {
-                                                        console.log('将预点商品加入共享购物车');
+                                                        // console.log('将预点商品加入共享购物车');
                                                         addSharedCartGoodsAPI({
                                                             singleShare: true,
                                                             appCartModifyReqVOs: cartList.map((cartItem) => {
-                                                                console.log('cartItem', cartItem);
+                                                                // console.log('cartItem', cartItem);
                                                                 
                                                                 return {
                                                                     "commodityId": cartItem.commodityId,
@@ -303,7 +303,7 @@ export default function SelectTable() {
                                                                 }
                                                             })
                                                         }, (res: IResponseApi<any>) => {
-                                                            console.log('addSharedCartGoodsAPI res', res);
+                                                            // console.log('addSharedCartGoodsAPI res', res);
                                                             if (!res.success || res.data != true) {
                                                                 showToast({
                                                                     title: '添加失败',
@@ -316,7 +316,7 @@ export default function SelectTable() {
                                                                     deskId: tableId,
                                                                     openId: userInfo?.openid!,
                                                                 }, (res: IResponseApi<any>) => {
-                                                                    console.log('getCartListAPI res', res);
+                                                                    // console.log('getCartListAPI res', res);
                                                                     if (res.success && res.data.length > 0) {
                                                                         dispatch(setCartListAction({
                                                                             type: 'set',
@@ -330,10 +330,10 @@ export default function SelectTable() {
                                                             }
                                                         })
                                                     } else if (res.cancel) {
-                                                        console.log('清空单人购物车', userInfo?.openid);
-                                                        // switchTab({
-                                                        //     url: '/pages/order/order',
-                                                        // })
+                                                        // console.log('清空单人购物车', userInfo?.openid);
+                                                        switchTab({
+                                                            url: '/pages/order/order',
+                                                        })
                                                     }
                                                 }
                                             })

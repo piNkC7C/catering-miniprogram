@@ -554,7 +554,7 @@ export default function Payment() {
                                 }
                             })
                         }, (res: IResponseApi<any>) => {
-                            console.log('payOrderAPI res', res)
+                            // console.log('payOrderAPI res', res)
                             if (res.success) {
                                 dispatch(setPayOrderInfoAction({
                                     type: 'set',
@@ -602,7 +602,7 @@ export default function Payment() {
                                                     })
                                                 }
                                             }), (res: IResponseApi<any>) => {
-                                                console.log('clearSelectedCartAPI res', res)
+                                                // console.log('clearSelectedCartAPI res', res)
                                                 if (res.success) {
                                                     navigateTo({
                                                         url: routes.find(route => route.name == 'confirmPayment')?.path!

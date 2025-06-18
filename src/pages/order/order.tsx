@@ -56,7 +56,7 @@ export default function Order() {
   // 获取购物车列表
   const getCartList = (res: IResponseApi<any>) => {
     if (res.success) {
-      console.log('111111112222222',res);
+      // console.log('111111112222222',res);
 
       dispatch(setCartListAction({
         type: 'set',
@@ -77,27 +77,20 @@ export default function Order() {
 
   // 侧边栏选中值
   const [sideBarValue, setSideBarValue] = useState<number | string>(0)
-  // const stickyPositions = useRef<{ id: string; top: number }[]>([])
+  // 控制是否响应侧边栏点击事件
+  const [isUserClick, setIsUserClick] = useState<boolean>(false)
+  // 滚动容器引用
+  const scrollViewRef = useRef<any>(null)
+  // 存储各个分类的位置信息
+  const sectionPositions = useRef<{ id: string | number; top: number }[]>([])
 
   const [realWindowHeight, setRealWindowHeight] = useState(0)
   // 每次进入页面都检查是否选择了门店
   useDidShow(() => {
-    // 初始化获取所有吸顶元素的位置
-    // const query = createSelectorQuery()
-    // query.selectAll('.sticky-header').boundingClientRect()
-    // query.exec((res) => {
-    //   if (res && res[0]) {
-    //     // console.log('stickyPositions');
-    //     stickyPositions.current = res[0].map((rect, index) => ({
-    //       id: `sticky-${index}`,
-    //       top: rect.top
-    //     }))
-    //   }
-    // })
-    // 重新设置侧边栏
+    // 重新设置侧边栏，但不触发自动滚动
     if (orderTabsList.length > 0) {
-      // console.log('111111');
       setSideBarValue(orderTabsList[0].classificationId)
+      setIsUserClick(false) // 确保页面进入时不会自动滚动
     }
     // 如果未选择门店，则跳转到选择门店页面
     if (!currentShop) {
@@ -108,7 +101,27 @@ export default function Order() {
     // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
     const { windowHeight } = getSystemInfoSync()
     setRealWindowHeight(windowHeight)
+    
+    // 延迟初始化分类位置信息
+    setTimeout(() => {
+      initSectionPositions()
+    }, 300)
   })
+
+  // 初始化各分类位置信息
+  const initSectionPositions = () => {
+    const query = createSelectorQuery()
+    query.selectAll('.sticky-header').boundingClientRect()
+    query.exec((res) => {
+      if (res && res[0]) {
+        sectionPositions.current = res[0].map((rect, index) => ({
+          id: orderTabsList[index]?.classificationId,
+          top: rect.top - res[0][0].top
+        }))
+        console.log('分类位置信息:', sectionPositions.current)
+      }
+    })
+  }
 
   const { statusBarHeight, windowWidth } = getSystemInfoSync()
   const finalStatusBarHeight = statusBarHeight || 0
@@ -193,60 +206,60 @@ export default function Order() {
   // const [activeStickyId, setActiveStickyId] = useState<string>('sticky-0')
 
   // 滚动事件处理
-  // const handleScrollEvent = (e: any) => {
-  //   const scrollTop = e.detail.scrollTop
+  const handleScrollEvent = (e: any) => {
+    // 如果是用户点击侧边栏触发的滚动，则不处理
+    if (isUserClick) {
+      return
+    }
+    
+    const scrollTop = e.detail.scrollTop
+    // console.log('当前滚动位置:', scrollTop)
 
-  //   // 找出当前应该吸顶的元素
-  //   for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
-  //     const position = stickyPositions.current[i]
+    // 如果位置信息还没有初始化，直接返回
+    if (sectionPositions.current.length === 0) {
+      return
+    }
 
-  //     if (scrollTop >= (position.top - viewHeight * 0.02)) {
-  //       // console.log('scrollTop', scrollTop);
-  //       // console.log('position.top', position.top);
-  //       // console.log('orderTabsList[i + 1]', orderTabsList[i + 1]);
+    // 找出当前应该激活的分类
+    let activeSection = sectionPositions.current[0]?.id
+    
+    for (let i = sectionPositions.current.length - 1; i >= 0; i--) {
+      const position = sectionPositions.current[i]
+      
+      if (scrollTop >= position.top) {
+        // console.log('position', position)
+        activeSection = position.id
+        break
+      }
+    }
 
-  //       if (orderTabsList[i + 1]) {
-  //         setSideBarValue(orderTabsList[i + 1].classificationId)
-  //       } else {
-  //         setSideBarValue(orderTabsList[orderTabsList.length - 1].classificationId)
-  //       }
-  //       break
-  //     }
-  //   }
-  // }
+    // 只有在当前激活分类与侧边栏选中值不同时才更新
+    if (activeSection !== sideBarValue) {
+      // console.log('更新侧边栏选中:', activeSection)
+      setSideBarValue(activeSection)
+    }
+  }
 
-  // const { run: handleScroll } = useThrottleFn(
-  //   handleScrollEvent,
-  //   { wait: 50 }
-  // )
+  const { run: handleScroll } = useThrottleFn(
+    handleScrollEvent,
+    { wait: 100 }
+  )
 
-  // const { run: handleScroll } = useThrottleFn(
-  //   (e: any) => {
-  //     const scrollTop = e.detail.scrollTop
-  //     // console.log('scrollTop', scrollTop);
-
-
-  //     // 找出当前应该吸顶的元素
-  //     for (let i = stickyPositions.current.length - 1; i >= 0; i--) {
-  //       const position = stickyPositions.current[i]
-  //       // console.log('position', position);
-
-  //       if (scrollTop >= position.top) {
-  //         // console.log('position.top', position);
-  //         // setActiveStickyIndex(i)
-  //         // setActiveStickyId(position.id)
-  //         // console.log('orderTabsList[i].groupId', orderTabsList[i].groupId);
-  //         if (orderTabsList[i]) {
-  //           setSideBarValue(orderTabsList[i].groupId)
-  //         } else {
-  //           setSideBarValue(orderTabsList[orderTabsList.length - 1].groupId)
-  //         }
-  //         break
-  //       }
-  //     }
-  //   },
-  //   { wait: 100 }
-  // );
+  // 处理侧边栏点击事件
+  const handleSideBarChange = (key: string | number) => {
+    // console.log('侧边栏点击:', key)
+    setIsUserClick(true)
+    setSideBarValue(key)
+    
+    // 延迟重置用户点击状态，给自动滚动留出时间
+    setTimeout(() => {
+      setIsUserClick(false)
+      // 重新初始化位置信息，因为可能有布局变化
+      // setTimeout(() => {
+      //   initSectionPositions()
+      // }, 100)
+    }, 500)
+  }
 
   return (
     <>
@@ -419,9 +432,7 @@ export default function Order() {
               height: '100%',
             }}
             value={sideBarValue}
-            onChange={(key) => {
-              setSideBarValue(key)
-            }}
+            onChange={handleSideBarChange}
           >
             {
               orderTabsList.map((item) => (
@@ -439,10 +450,11 @@ export default function Order() {
             }
           </SideBar>
           <ScrollView
+            ref={scrollViewRef}
             id='parentScroll'
             scrollY
-            scrollIntoView={`sticky-${sideBarValue}`}
-            // onScroll={handleScroll}
+            scrollIntoView={isUserClick ? `sticky-${sideBarValue}` : ''}
+            onScroll={handleScroll}
             style={{
               flex: 1,
               padding: `${pxTransform(viewHeight * 0.02)} ${pxTransform(windowWidth * 0.05)}`,
@@ -613,7 +625,7 @@ export default function Order() {
                                                 if (cartList.find((findItem) => {
                                                   return findItem.commodityId === goodsItem.id
                                                 })?.count === goodsItem.minimumPurchaseQuantity) {
-                                                  console.log('删除购物车项', goodsItem.mealName);
+                                                  // console.log('删除购物车项', goodsItem.mealName);
                                                   deleteCartGoodAPI({
                                                     "commodityId": goodsItem.id,
                                                     "isSet": false,
@@ -630,7 +642,7 @@ export default function Order() {
                                                     }
                                                   })
                                                 } else {
-                                                  console.log('购物车商品数量减一', goodsItem.mealName);
+                                                  // console.log('购物车商品数量减一', goodsItem.mealName);
                                                   const queryData = {
                                                     "commodityId": goodsItem.id,
                                                     "count": 1,
@@ -681,7 +693,7 @@ export default function Order() {
                                         icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                         onClick={() => {
                                           const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
-                                          console.log('购物车商品数量加一', goodsItem.mealName);
+                                          // console.log('购物车商品数量加一', goodsItem.mealName);
                                           const queryData = {
                                             "commodityId": goodsItem.id,
                                             "count": count,
@@ -934,7 +946,7 @@ export default function Order() {
                     }
                   ))
                 }, (res: IResponseApi<any>) => {
-                  console.log('confirmPaymentAPI res', res)
+                  // console.log('confirmPaymentAPI res', res)
                   if (res.success) {
                     dispatch(setCheckoutOrderAction({
                       type: 'set', data: {
@@ -1014,7 +1026,7 @@ export default function Order() {
                     // if (cartSelectedList.length == 0) {
                     //   return
                     // }
-                    console.log('购物车全选状态改变', state);
+                    // console.log('购物车全选状态改变', state);
                     const queryDataList = cartList.map((item) => ({
                       ...item,
                       selected: state,
@@ -1086,7 +1098,7 @@ export default function Order() {
                             value={cartItem.commodityId}
                             checked={cartSelectedList.some((mapItem) => mapItem.commodityId === cartItem.commodityId)}
                             onChange={(state) => {
-                              console.log('购物车选中状态改变', state);
+                              // console.log('购物车选中状态改变', state);
                               const queryDataList = cartList.filter((item) => item.commodityId === cartItem.commodityId).map((item) => ({
                                 ...item,
                                 selected: state,
@@ -1214,7 +1226,7 @@ export default function Order() {
                               }}
                               onClick={() => {
                                 if (cartItem.count === cartItem.minimumPurchaseQuantity) {
-                                  console.log('删除购物车项', cartItem.name);
+                                  // console.log('删除购物车项', cartItem.name);
                                   deleteCartGoodAPI({
                                     "commodityId": cartItem.commodityId,
                                     "isSet": false,
@@ -1231,7 +1243,7 @@ export default function Order() {
                                     }
                                   })
                                 } else {
-                                  console.log('购物车商品数量减一', cartItem.name);
+                                  // console.log('购物车商品数量减一', cartItem.name);
                                   const queryData = {
                                     "commodityId": cartItem.commodityId,
                                     "count": 1,
@@ -1284,7 +1296,7 @@ export default function Order() {
                                   return
                                 }
                                 const count = cartList.filter(cartItem => cartItem.commodityId == cartItem.commodityId).length == 0 ? cartItem.minimumPurchaseQuantity : 1
-                                console.log('购物车商品数量加一', cartItem.name);
+                                // console.log('购物车商品数量加一', cartItem.name);
                                 const queryData = {
                                   "commodityId": cartItem.commodityId,
                                   "count": count,

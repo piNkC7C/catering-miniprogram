@@ -152,7 +152,7 @@ export default function CouponList() {
                 <Tabs
                     value={currentTabvalue}
                     onChange={(value) => {
-                        console.log('value', value)
+                        // console.log('value', value)
                         setCurrentTabvalue(value)
                     }}
                     style={{

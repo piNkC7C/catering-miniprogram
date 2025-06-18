@@ -39,7 +39,7 @@ export default function Address() {
                 longitude
             },
             success(res) {
-                console.log('逆解析成功:', res.result);
+                // console.log('逆解析成功:', res.result);
                 const { province, city, district, street } = res.result.address_component;
                 setAddressProvince(province)
                 setAddressCity(city)

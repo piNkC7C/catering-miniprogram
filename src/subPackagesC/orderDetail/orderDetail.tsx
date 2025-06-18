@@ -9,8 +9,8 @@ import GoodList from '@/components/goodList'
 import Card from '@/components/Card'
 import dayjs from 'dayjs'
 import { routes } from '@/utils/constants'
-import { setPayOrderInfoAction } from '@/redux/modules/order'
-import { getOrderDetailOrPrePayAPI } from '@/api/order'
+import { setCurrentOrderAction, setPayOrderInfoAction } from '@/redux/modules/order'
+import { getOrderDetailOrPrePayAPI, cancelOrderAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 
 export default function OrderDetail() {
@@ -292,9 +292,23 @@ export default function OrderDetail() {
                                                 content: '确定取消订单吗？',
                                                 success: (res) => {
                                                     if (res.confirm) {
-                                                        console.log('用户点击了确定')
+                                                        // console.log('用户点击了确定')
+                                                        cancelOrderAPI({
+                                                            id: currentOrder?.orderId
+                                                        }, (res: IResponseApi<any>) => {
+                                                            // console.log('cancelOrderAPI res', res)
+                                                            if (res.success) {
+                                                                dispatch(setCurrentOrderAction({
+                                                                    type: 'set',
+                                                                    data: {
+                                                                        ...currentOrder,
+                                                                        orderStatus: 2
+                                                                    }
+                                                                }))
+                                                            }
+                                                        })
                                                     } else if (res.cancel) {
-                                                        console.log('用户点击了取消')
+                                                        // console.log('用户点击了取消')
                                                     }
                                                 },
                                             })
@@ -314,7 +328,7 @@ export default function OrderDetail() {
                                                 getOrderDetailOrPrePayAPI({
                                                     id: currentOrder?.orderId.toString()
                                                 }, (res: IResponseApi<any>) => {
-                                                    console.log('getOrderDetailOrPrePayAPI res', res)
+                                                    // console.log('getOrderDetailOrPrePayAPI res', res)
                                                     dispatch(setPayOrderInfoAction({
                                                         type: 'set',
                                                         data: {
