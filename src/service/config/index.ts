@@ -46,6 +46,7 @@ export const confirmPaymentURL = '/member/trade/cart/check-please'
 export const clearSelectedCartURL = '/member/trade/cart/order-remove'
 export const payOrderURL = '/member/trade/order/create'
 export const cancelOrderURL = '/member/trade/order/cancel'
+export const getOrderDetailOrPrePayURL = '/member/trade/order/getOrderItem'
 
 export const loginByPhoneURL = '/member/auth/weixin-mini-app-login'
 export const loginURL = '/member/auth/auth-session'

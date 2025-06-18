@@ -5,7 +5,7 @@ import './confirmPayment.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Price, Radio, RadioGroup } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, Clock, Scan } from '@nutui/icons-react-taro'
-import { confirmPaymentAPI } from '@/api/order'
+import { confirmPaymentAPI, getOrderDetailOrPrePayAPI } from '@/api/order'
 import { routes } from '@/utils/constants'
 import { setCurrentOrderAction } from '@/redux/modules/order'
 import { IResponseApi } from '@/api/type'
@@ -131,35 +131,17 @@ export default function ConfirmPayment() {
     }
 
     const intoOrderDetail = () => {
-        dispatch(setCurrentOrderAction({
-            type: 'set',
-            data: {
-                orderId: 1, // 订单id
-                orderIdentifier: '', //订单编号
-                orderStatus: 1, // 1: 待支付, 2: 已取消, 3: 已完成, 4: 已关闭，5: 退款中
-                tableNumber: 1, // 桌号
-                personNumber: 1, // 人数
-                goodsList: [], //商品列表
-                isUseCoupon: false, // 是否用券
-                couponList: [], //券列表
-                totalCount: 1, //总数
-                totalPrice: 1, //优惠前金额
-                couponedPrice: 1, //优惠的金额
-                orderTag: '', // 订单标签
-                shopName: '', // 店铺名称
-                orderType: 1, // 1: 门店, 2: 外卖, 3: 商城
-                shopAddressProvince: '',
-                shopAddressCity: '',
-                shopAddressArea: '',
-                shopAddressStreet: '',
-                shopAddressDetail: '',
-                orderPayTime: 1, // 支付时间
-                orderPayType: 1, // 支付方式
-                orderTime: 1, // 下单时间
-            }
-        }))
-        navigateTo({
-            url: routes.find(route => route.name == 'orderDetail')?.path! + '?type=1',
+        getOrderDetailOrPrePayAPI({
+            id: payOrderInfo?.prepayId!,
+        }, (res: IResponseApi<any>) => {
+            console.log('getOrderDetailOrPrePayAPI res', res)
+            dispatch(setCurrentOrderAction({
+                type: 'set',
+                data: res.data
+            }))
+            navigateTo({
+                url: routes.find(route => route.name == 'orderDetail')?.path! + '?type=1',
+            })
         })
     }
 

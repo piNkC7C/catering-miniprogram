@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, useDidShow, showToast } from '@tarojs/taro'
 import './orderList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
@@ -19,6 +19,7 @@ export default function OrderList() {
   const {
     login: {
       loginStatus,
+      userInfo,
     },
     order: {
       orderList,
@@ -26,6 +27,7 @@ export default function OrderList() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
 
+  // 获取订单列表
   const getOrderList = (res: IResponseApi<IOrderItem[]>) => {
     if (res.success) {
       // console.log(res.data);
@@ -38,12 +40,14 @@ export default function OrderList() {
     }
   }
 
-  useLoad(() => {
+  // 每次进入页面时获取订单列表
+  useDidShow(() => {
     getOrderListAPI({
-      openId: '1111'
+      openId: userInfo?.openid!
     }, getOrderList)
   })
 
+  // 根据tab值过滤订单列表
   const filterOrderList = (tabValue: number) => {
     if (tabValue === 0) {
       return orderList
@@ -61,15 +65,18 @@ export default function OrderList() {
   //   }
   // }, [])
 
+  // 窗口的高度和宽度
   const [windowHeight, setRealWindowHeight] = useState(0)
   const [windowWidth, setRealWindowWidth] = useState(0)
 
+  // 获取窗口初始化的高度和宽度避免进入详情页再返回时窗口高度和宽度没有及时更新
   useLoad(() => {
     const { windowHeight: realWindowHeight, windowWidth: realWindowWidth } = getSystemInfoSync()
     setRealWindowHeight(realWindowHeight)
     setRealWindowWidth(realWindowWidth)
   })
 
+  // 订单列表的tab列表
   const tabsList = [
     {
       title: '全部订单',
@@ -350,13 +357,29 @@ export default function OrderList() {
                                   <View
                                     className='order-status1'
                                   >
+                                    {/* <Button
+                                      type="default"
+                                      size="normal"
+                                      style={{
+                                        borderRadius: pxTransform(20),
+                                      }}
+                                    >再来一单</Button> */}
                                     <Button
                                       type="default"
                                       size="normal"
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
-                                    >再来一单</Button>
+                                      onClick={() => {
+                                        dispatch(setCurrentOrderAction({
+                                          type: 'set',
+                                          data: orderItem
+                                        }))
+                                        navigateTo({
+                                          url: routes.find((route) => route.name === 'orderDetail')?.path || ''
+                                        })
+                                      }}
+                                    >查看订单</Button>
                                   </View>
                                 )
                               }
@@ -389,18 +412,24 @@ export default function OrderList() {
                                   <View
                                     className='order-status0'
                                   >
-                                    <Button
+                                    {/* <Button
                                       type="default"
                                       size="normal"
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
-                                    >再来一单</Button>
+                                    >再来一单</Button> */}
                                     <Button
                                       type='primary'
                                       size="normal"
                                       style={{
                                         borderRadius: pxTransform(20),
+                                      }}
+                                      onClick={() => {
+                                        showToast({
+                                          title: '请联系商家进行售后',
+                                          icon: 'none',
+                                        })
                                       }}
                                     >申请售后</Button>
                                   </View>

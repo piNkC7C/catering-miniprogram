@@ -9,6 +9,9 @@ import GoodList from '@/components/goodList'
 import Card from '@/components/Card'
 import dayjs from 'dayjs'
 import { routes } from '@/utils/constants'
+import { setPayOrderInfoAction } from '@/redux/modules/order'
+import { getOrderDetailOrPrePayAPI } from '@/api/order'
+import { IResponseApi } from '@/api/type'
 
 export default function OrderDetail() {
     // 获取登录状态和用户信息
@@ -18,10 +21,11 @@ export default function OrderDetail() {
             currentRefund
         }
     } = useAppSelector((state) => state)
+    const dispatch = useAppDispatch()
 
-    useDidShow(() => {
-        console.log('useDidShow', currentOrder);
-    })
+    // useDidShow(() => {
+    //     console.log('useDidShow', currentOrder);
+    // })
 
     const router = useRouter()
     const { type } = router.params
@@ -63,25 +67,18 @@ export default function OrderDetail() {
                             width: `calc(${pxTransform(widthMenuButton / 2)} - ${pxTransform(windowWidth * 0.04)})`,
                         }}
                     >
-                        {
-                            type && type == '1' ? (
-                                <Home
-                                    size={pxTransform(windowWidth * 0.05)}
-                                    onClick={() => {
-                                        switchTab({
-                                            url: routes.find(route => route.name == 'index')?.path!
-                                        })
-                                    }}
-                                />
-                            ) : (
-                                <ArrowLeft
-                                    size={pxTransform(windowWidth * 0.05)}
-                                    onClick={() => {
-                                        navigateBack()
-                                    }}
-                                />
-                            )
-                        }
+                        <ArrowLeft
+                            size={pxTransform(windowWidth * 0.05)}
+                            onClick={() => {
+                                if (type && type == '1') {
+                                    switchTab({
+                                        url: routes.find(route => route.name == 'orderList')?.path!
+                                    })
+                                } else {
+                                    navigateBack()
+                                }
+                            }}
+                        />
                     </View>
                     {
                         currentOrder?.orderStatus === 4 && (
@@ -314,8 +311,24 @@ export default function OrderDetail() {
                                             if (type && type == '1') {
                                                 navigateBack()
                                             } else {
-                                                navigateTo({
-                                                    url: routes.find(route => route.name == 'confirmPayment')?.path!
+                                                getOrderDetailOrPrePayAPI({
+                                                    id: currentOrder?.orderId.toString()
+                                                }, (res: IResponseApi<any>) => {
+                                                    console.log('getOrderDetailOrPrePayAPI res', res)
+                                                    dispatch(setPayOrderInfoAction({
+                                                        type: 'set',
+                                                        data: {
+                                                            timeStamp: res.data.timeStamp,
+                                                            nonceStr: res.data.nonceStr,
+                                                            packageValue: res.data.packageValue,
+                                                            signType: res.data.signType,
+                                                            paySign: res.data.paySign,
+                                                            prepayId: res.data.packageValue.substring(10, res.data.packageValue.length - 1),
+                                                        }
+                                                    }))
+                                                    navigateTo({
+                                                        url: routes.find(route => route.name == 'confirmPayment')?.path!
+                                                    })
                                                 })
                                             }
                                         }}
