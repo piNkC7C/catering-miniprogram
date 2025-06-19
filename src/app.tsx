@@ -33,7 +33,7 @@ function App({ children }: PropsWithChildren<any>) {
             //     key: OPEN_ID,
             //     data: res.data.openid
             // })
-            // console.log('login success', res);
+            console.log('login success', res);
             store.dispatch(userInfoAction({
                 type: 'set',
                 data: {
@@ -41,6 +41,7 @@ function App({ children }: PropsWithChildren<any>) {
                     userInfo: res.data.userInfo,
                     nickname: res.data.userInfo.nickname,
                     avatar: res.data.userInfo.avatar,
+                    userId: res.data.userId || null,
                 }
             }))
             if (res.data.userInfo.isLogin) {
@@ -133,7 +134,7 @@ function App({ children }: PropsWithChildren<any>) {
                             //     key: OPEN_ID,
                             //     data: res.data.openid
                             // })
-                            // console.log('login success', res);
+                            console.log('login success', res);
                             store.dispatch(userInfoAction({
                                 type: 'set',
                                 data: {

@@ -492,6 +492,8 @@ export default function Payment() {
                         borderRadius: pxTransform(windowHeight * 0.03)
                     }}
                     onClick={() => {
+                        console.log('userInfo', userInfo)
+
                         payOrderAPI({
                             // "outTradeNo": "",
                             // "orderNo": "D8117465022766946619",
