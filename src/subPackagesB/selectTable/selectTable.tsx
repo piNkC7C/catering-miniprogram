@@ -266,7 +266,7 @@ export default function SelectTable() {
                                     }))
                                     getCartListAPI({
                                         shopId: shopId,
-                                        deskId: tableId,
+                                        deskId: 0,
                                         openId: userInfo?.openid!,
                                     }, (res: IResponseApi<any>) => {
                                         if (res.success && res.data.length > 0) {

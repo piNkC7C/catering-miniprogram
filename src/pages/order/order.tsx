@@ -13,7 +13,7 @@ import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
 import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI, confirmPaymentAPI, getSetGoodDetailAPI } from '@/api/order'
-import type { IGroupGoodsList } from '@/redux/types/order'
+import type { IGroupGoodsList, ICartRequest } from '@/redux/types/order'
 import ShopInfo from '@/components/shopInfo'
 import { useShopAndGoods } from '@/hooks/useShopAndGoods'
 
@@ -679,7 +679,8 @@ export default function Order() {
                                                       "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
                                                       "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
                                                       "standardPrice": goodsItem.standardPrice,
-                                                    }
+                                                      "mealQuantity": getGoodsQuantity(goodsItem),
+                                                    } as ICartRequest
                                                     addCartGoodAPI(queryData, (res) => {
                                                       if (res.success && res.data) {
                                                         getCartListAPI({
@@ -713,7 +714,7 @@ export default function Order() {
                                           }}
                                           disabled={cartList.find((findItem) => {
                                             return findItem.commodityId === goodsItem.id
-                                          })?.count === goodsItem.purchaseQuantityLimit}
+                                          })?.count === getGoodsQuantity(goodsItem)}
                                           icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                           onClick={() => {
                                             const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
@@ -731,7 +732,8 @@ export default function Order() {
                                               "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
                                               "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
                                               "standardPrice": goodsItem.standardPrice,
-                                            }
+                                              "mealQuantity": getGoodsQuantity(goodsItem),
+                                            } as ICartRequest
                                             addCartGoodAPI(queryData, (res) => {
                                               if (res.success && res.data) {
                                                 getCartListAPI({
@@ -923,9 +925,20 @@ export default function Order() {
               if (!(tableInfo?.tableNum && tableInfo?.peopleNum)) {
                 scanCode(
                   {
-                    scanType: ['qrCode'],
+                    // scanType: ['qrCode'],
                     success: (res) => {
-                      console.log('扫桌码成功', res)
+                      console.log('扫桌码成功', res.path)
+                      // 确保路径以 / 开头，避免相对路径问题
+                      let targetUrl = res.path
+                      if (!targetUrl.startsWith('/')) {
+                        targetUrl = '/' + targetUrl
+                      }
+                      console.log('处理后的跳转地址', targetUrl)
+                      navigateTo(
+                        {
+                          url: targetUrl
+                        }
+                      )
                     },
                     fail: (err) => {
                       console.log('扫桌码失败', err)
@@ -1295,7 +1308,8 @@ export default function Order() {
                                     "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                     "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
                                     "standardPrice": cartItem.price,
-                                  }
+                                    "mealQuantity": getGoodsQuantity(cartItem as any),
+                                  } as ICartRequest
                                   addCartGoodAPI(queryData, (res) => {
                                     if (res.success && res.data) {
                                       getCartListAPI({
@@ -1322,12 +1336,12 @@ export default function Order() {
                                 height: pxTransform(viewHeight * 0.036),
                                 color: cartList.find((findItem) => {
                                   return findItem.commodityId === cartItem.commodityId
-                                })?.count === cartItem.purchaseQuantityLimit ? '#999' : '#D61518',
+                                })?.count === getGoodsQuantity(cartItem as any) ? '#999' : '#D61518',
                               }}
                               onClick={() => {
                                 if (cartList.find((findItem) => {
                                   return findItem.commodityId === cartItem.commodityId
-                                })?.count === cartItem.purchaseQuantityLimit) {
+                                })?.count === getGoodsQuantity(cartItem as any)) {
                                   showToast({
                                     title: '可选商品数量已达上限',
                                     icon: 'none',
@@ -1349,7 +1363,8 @@ export default function Order() {
                                   "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                   "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
                                   "standardPrice": cartItem.price,
-                                }
+                                  "mealQuantity": getGoodsQuantity(cartItem as any),
+                                } as ICartRequest
                                 addCartGoodAPI(queryData, (res) => {
                                   if (res.success) {
                                     getCartListAPI({

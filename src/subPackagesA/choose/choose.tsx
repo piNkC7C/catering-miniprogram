@@ -10,6 +10,7 @@ import { IGoodItem } from './type'
 import { chooseBack } from '@/utils/constants'
 import { getSetGoodDetailAPI, addCartGoodAPI, getCartListAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
+import { ICartRequest } from '@/redux/types/order'
 
 export default function Choose() {
   // 获取登录状态和用户信息
@@ -467,6 +468,10 @@ export default function Choose() {
                 "deskId": tableInfo?.tableId || 0,
                 "shopId": currentShop?.shopId!,
                 "openId": userInfo?.openid!,
+                "minimumPurchaseQuantity": setGoodDetail?.minimumPurchaseQuantity,
+                "purchaseQuantityLimit": setGoodDetail?.purchaseQuantityLimit,
+                "standardPrice": setGoodDetail?.standardPrice,
+                "mealQuantity": setGoodDetail?.mealQuantity,
                 "cartModifyReqVOList": selectedAddOneGood.map((item) => ({
                   "commodityId": item.mealId,
                   "count": item.goodsCount,
@@ -484,9 +489,7 @@ export default function Choose() {
                   "isSet": true,
                   "isAdd": true,
                 }))),
-                "minimumPurchaseQuantity": setGoodDetail?.minimumPurchaseQuantity,
-                "purchaseQuantityLimit": setGoodDetail?.purchaseQuantityLimit,
-              }
+              } as ICartRequest
               addCartGoodAPI(queryData, (res) => {
                 if (res.success && res.data) {
                   showToast({

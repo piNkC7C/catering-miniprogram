@@ -131,6 +131,22 @@ export interface IPayOrderInfoItem {
   prepayId: string
 }
 
+export interface ICartRequest {
+  commodityId: any
+  count: any
+  isSet: any
+  isAdd: any
+  selected: any
+  deskId: any
+  shopId: any
+  openId: any
+  cartModifyReqVOList: any[]
+  minimumPurchaseQuantity: any
+  purchaseQuantityLimit: any
+  standardPrice: any
+  mealQuantity: any
+}
+
 export interface IOrderState {
   cartList: ICartItem[]
   orderTabsList: IGroupItem[]
