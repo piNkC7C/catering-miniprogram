@@ -381,10 +381,10 @@ export default function Choose() {
               style={{
                 width: pxTransform(windowWidth * 0.0848),
                 height: pxTransform(viewHeight * 0.036),
-                color: goodCount == setGoodDetail?.purchaseQuantityLimit ? '#999' : '#d61518',
+                color: goodCount >= setGoodDetail?.purchaseQuantityLimit || goodCount >= setGoodDetail?.mealQuantity ? '#999' : '#d61518',
               }}
               onClick={() => {
-                if (goodCount == setGoodDetail?.purchaseQuantityLimit) {
+                if (goodCount >= setGoodDetail?.purchaseQuantityLimit || goodCount >= setGoodDetail?.mealQuantity) {
                   return
                 } else {
                   setGoodCount(goodCount + 1)
@@ -446,20 +446,6 @@ export default function Choose() {
                 })
                 return
               }
-              if (goodCount < setGoodDetail?.minimumPurchaseQuantity) {
-                showToast({
-                  title: `套餐起购量为${setGoodDetail?.minimumPurchaseQuantity}`,
-                  icon: 'none',
-                })
-                return
-              }
-              if (goodCount == setGoodDetail?.purchaseQuantityLimit) {
-                showToast({
-                  title: `套餐最大购买量为${setGoodDetail?.purchaseQuantityLimit}`,
-                  icon: 'none',
-                })
-                return
-              }
               const queryData = {
                 "commodityId": setGoodDetail?.id,
                 "count": goodCount,
@@ -472,23 +458,6 @@ export default function Choose() {
                 "purchaseQuantityLimit": setGoodDetail?.purchaseQuantityLimit,
                 "standardPrice": setGoodDetail?.standardPrice,
                 "mealQuantity": setGoodDetail?.mealQuantity,
-                "cartModifyReqVOList": selectedAddOneGood.map((item) => ({
-                  "commodityId": item.mealId,
-                  "count": item.goodsCount,
-                  "deskId": tableInfo?.tableId || 0,
-                  "shopId": currentShop?.shopId!,
-                  "openId": userInfo?.openid!,
-                  "isSet": true,
-                  "isAdd": true,
-                })).concat(selectedIncludeGood.map((item) => ({
-                  "commodityId": item.mealId,
-                  "count": 1,
-                  "deskId": tableInfo?.tableId || 0,
-                  "shopId": currentShop?.shopId!,
-                  "openId": userInfo?.openid!,
-                  "isSet": true,
-                  "isAdd": true,
-                }))),
               } as ICartRequest
               addCartGoodAPI(queryData, (res) => {
                 if (res.success && res.data) {

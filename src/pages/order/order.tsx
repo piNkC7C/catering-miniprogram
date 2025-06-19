@@ -151,6 +151,13 @@ export default function Order() {
     })
   }
 
+  // 获取购物车中的某个商品的购买数量
+  const getCartGoodCount = (commodityId: number) => {
+    return cartList.find((findItem) => {
+      return findItem.commodityId === commodityId
+    })?.count
+  }
+
   // 门店信息
   const [shopIsFavor, setShopIsFavor] = useState<boolean>(false)
 
@@ -712,9 +719,7 @@ export default function Order() {
                                             height: pxTransform(windowWidth * 0.05),
                                             borderRadius: pxTransform(windowWidth * 0.05),
                                           }}
-                                          disabled={cartList.find((findItem) => {
-                                            return findItem.commodityId === goodsItem.id
-                                          })?.count === getGoodsQuantity(goodsItem)}
+                                          disabled={getCartGoodCount(goodsItem.id)! >= getGoodsQuantity(goodsItem) || getCartGoodCount(goodsItem.id)! >= goodsItem.purchaseQuantityLimit}
                                           icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                           onClick={() => {
                                             const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
@@ -1334,14 +1339,10 @@ export default function Order() {
                               style={{
                                 width: pxTransform(windowWidth * 0.0848),
                                 height: pxTransform(viewHeight * 0.036),
-                                color: cartList.find((findItem) => {
-                                  return findItem.commodityId === cartItem.commodityId
-                                })?.count === getGoodsQuantity(cartItem as any) ? '#999' : '#D61518',
+                                color: getCartGoodCount(cartItem.commodityId)! >= getGoodsQuantity(cartItem as any) || getCartGoodCount(cartItem.commodityId)! >= cartItem.purchaseQuantityLimit ? '#999' : '#D61518',
                               }}
                               onClick={() => {
-                                if (cartList.find((findItem) => {
-                                  return findItem.commodityId === cartItem.commodityId
-                                })?.count === getGoodsQuantity(cartItem as any)) {
+                                if (getCartGoodCount(cartItem.commodityId)! >= getGoodsQuantity(cartItem as any) || getCartGoodCount(cartItem.commodityId)! >= cartItem.purchaseQuantityLimit) {
                                   showToast({
                                     title: '可选商品数量已达上限',
                                     icon: 'none',
