@@ -12,6 +12,7 @@ export interface IGoodsItem {
   standardPrice: number // 商品价格
   minimumPurchaseQuantity: number // 最小购买数量
   purchaseQuantityLimit: number // 最大购买量
+  mealQuantity: number // 库存
   // packageId?: number // 套餐id
   // packageName?: string // 套餐名称
   // packagePrice?: number // 套餐价格
@@ -72,7 +73,8 @@ export interface IOrderItem {
   orderId: number // 订单id
   orderIdentifier: string //订单编号
   orderStatus: 1 | 2 | 3 | 4 | 5 // 1: 待支付, 2: 已取消, 3: 已完成, 4: 已关闭，5: 退款中
-  tableNumber: number // 桌号
+  tableNumber: number // 桌id
+  tableName: string // 桌号
   personNumber: number // 人数
   goodsList: IOrderGoodsItem[] //商品列表
   isUseCoupon: boolean // 是否用券
@@ -91,6 +93,7 @@ export interface IOrderItem {
   orderPayTime: number // 支付时间
   orderPayType: number // 支付方式
   orderTime: number // 下单时间
+  orderCloseTime: number // 订单关闭时间
 }
 
 export interface IRefundItem {

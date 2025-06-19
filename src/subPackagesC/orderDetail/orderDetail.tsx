@@ -10,7 +10,7 @@ import Card from '@/components/Card'
 import dayjs from 'dayjs'
 import { routes } from '@/utils/constants'
 import { setCurrentOrderAction, setPayOrderInfoAction } from '@/redux/modules/order'
-import { getOrderDetailOrPrePayAPI, cancelOrderAPI } from '@/api/order'
+import { getPrePayByOrderIdAPI, cancelOrderAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 
 export default function OrderDetail() {
@@ -22,6 +22,55 @@ export default function OrderDetail() {
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
+
+    // 倒计时状态
+    const [countdown, setCountdown] = useState('')
+
+    // 倒计时逻辑
+    useEffect(() => {
+        let timer: NodeJS.Timeout | null = null
+        
+        if (currentOrder?.orderStatus === 1 && currentOrder?.orderCloseTime) {
+            const updateCountdown = () => {
+                const now = Date.now()
+                const closeTime = currentOrder.orderCloseTime
+                const remainingTime = closeTime - now
+                
+                if (remainingTime <= 0) {
+                    setCountdown('00:00')
+                    // 订单已过期，可以在这里更新订单状态
+                    if (timer) {
+                        clearInterval(timer)
+                        timer = null
+                    }
+                    dispatch(setCurrentOrderAction({
+                        type: 'set',
+                        data: {
+                            ...currentOrder,
+                            orderStatus: 2
+                        }
+                    }))
+                    return
+                }
+                
+                const minutes = Math.floor(remainingTime / (1000 * 60))
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000)
+                setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
+            }
+            
+            // 立即执行一次
+            updateCountdown()
+            
+            // 每秒更新一次
+            timer = setInterval(updateCountdown, 1000)
+        }
+        
+        return () => {
+            if (timer) {
+                clearInterval(timer)
+            }
+        }
+    }, [currentOrder?.orderStatus, currentOrder?.orderCloseTime])
 
     // useDidShow(() => {
     //     console.log('useDidShow', currentOrder);
@@ -108,7 +157,7 @@ export default function OrderDetail() {
                                     marginBottom: pxTransform(windowHeight * 0.01),
                                 }}
                             >
-                                {currentOrder?.orderStatus === 1 && '待支付'}
+                                {currentOrder?.orderStatus === 1 && `请在${countdown}内支付`}
                                 {currentOrder?.orderStatus === 2 && '已取消'}
                                 {currentOrder?.orderStatus === 3 && '已完成'}
                             </View>
@@ -222,7 +271,7 @@ export default function OrderDetail() {
                             }, {
                                 id: '2',
                                 label: '桌号',
-                                value: currentOrder?.tableNumber
+                                value: currentOrder?.tableName
                             }, {
                                 id: '3',
                                 label: '用餐人数',
@@ -325,10 +374,10 @@ export default function OrderDetail() {
                                             if (type && type == '1') {
                                                 navigateBack()
                                             } else {
-                                                getOrderDetailOrPrePayAPI({
+                                                getPrePayByOrderIdAPI({
                                                     id: currentOrder?.orderId.toString()
                                                 }, (res: IResponseApi<any>) => {
-                                                    // console.log('getOrderDetailOrPrePayAPI res', res)
+                                                    console.log('getPrePayByOrderIdAPI res', res)
                                                     dispatch(setPayOrderInfoAction({
                                                         type: 'set',
                                                         data: {

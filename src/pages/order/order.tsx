@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import type { IntersectionObserver } from '@tarojs/taro'
-import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode, showToast } from '@tarojs/taro'
+import { useLoad, useReady, useUnload, useDidShow, getSystemInfoSync, getMenuButtonBoundingClientRect, createIntersectionObserver, nextTick, createSelectorQuery, navigateTo, useRouter, setStorage, getStorage, scanCode, showToast, showModal, getLocation } from '@tarojs/taro'
 import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction, setCheckoutOrderAction, setOrderTabsListAction, setGroupGoodsListAction } from '@/redux/modules/order'
@@ -12,10 +12,10 @@ import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
 import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
-import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI, confirmPaymentAPI } from '@/api/order'
+import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI, confirmPaymentAPI, getSetGoodDetailAPI } from '@/api/order'
 import type { IGroupGoodsList } from '@/redux/types/order'
 import ShopInfo from '@/components/shopInfo'
-import shopInfo from '@/components/shopInfo'
+import { useShopAndGoods } from '@/hooks/useShopAndGoods'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -36,28 +36,11 @@ export default function Order() {
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
-
-  // useEffect(() => {
-  //   if (currentShop?.shopId && tableInfo?.tableId) {
-  //     getCartListAPI({
-  //       shopId: currentShop.shopId,
-  //       deskId: tableInfo.tableId,
-  //     }, (res: IResponseApi<any>) => {
-  //       if (res.success) {
-  //         dispatch(setCartListAction({
-  //           type: 'set',
-  //           data: res.data
-  //         }))
-  //       }
-  //     })
-  //   }
-  // }, [currentShop?.shopId, tableInfo?.tableId])
+  const { finish, getAddressByLocation, handleAutoSelectShop } = useShopAndGoods()
 
   // 获取购物车列表
   const getCartList = (res: IResponseApi<any>) => {
     if (res.success) {
-      // console.log('111111112222222',res);
-
       dispatch(setCartListAction({
         type: 'set',
         data: res.data
@@ -84,29 +67,8 @@ export default function Order() {
   // 存储各个分类的位置信息
   const sectionPositions = useRef<{ id: string | number; top: number }[]>([])
 
+  // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
   const [realWindowHeight, setRealWindowHeight] = useState(0)
-  // 每次进入页面都检查是否选择了门店
-  useDidShow(() => {
-    // 重新设置侧边栏，但不触发自动滚动
-    if (orderTabsList.length > 0) {
-      setSideBarValue(orderTabsList[0].classificationId)
-      setIsUserClick(false) // 确保页面进入时不会自动滚动
-    }
-    // 如果未选择门店，则跳转到选择门店页面
-    if (!currentShop) {
-      navigateTo({
-        url: (routes.find((route) => route.name === 'chooseShop')?.path || '') + '?type=init',
-      })
-    }
-    // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
-    const { windowHeight } = getSystemInfoSync()
-    setRealWindowHeight(windowHeight)
-    
-    // 延迟初始化分类位置信息
-    setTimeout(() => {
-      initSectionPositions()
-    }, 300)
-  })
 
   // 初始化各分类位置信息
   const initSectionPositions = () => {
@@ -122,6 +84,48 @@ export default function Order() {
       }
     })
   }
+
+  // 每次进入页面都检查是否选择了门店
+  useDidShow(() => {
+    // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
+    const { windowHeight } = getSystemInfoSync()
+    setRealWindowHeight(windowHeight)
+    // 如果未选择门店
+    if (!currentShop) {
+      getLocation({
+        type: 'wgs84',
+        success: (res) => {
+          getAddressByLocation(res.latitude, res.longitude, handleAutoSelectShop)
+        },
+        fail: (err) => {
+          console.log(err)
+        },
+      }).catch(() => {
+      })
+    } else {
+      // 重新设置侧边栏，但不触发自动滚动
+      if (orderTabsList.length > 0) {
+        setSideBarValue(orderTabsList[0].classificationId)
+        setIsUserClick(false) // 确保页面进入时不会自动滚动
+      }
+      // 延迟初始化分类位置信息
+      setTimeout(() => {
+        initSectionPositions()
+      }, 300)
+    }
+  })
+
+  useEffect(() => {
+    if (finish) {
+      // 重新设置侧边栏，但不触发自动滚动
+      if (orderTabsList.length > 0) {
+        setSideBarValue(orderTabsList[0].classificationId)
+        setIsUserClick(false) // 确保页面进入时不会自动滚动
+      }
+      // 初始化分类位置信息
+      initSectionPositions()
+    }
+  }, [finish])
 
   const { statusBarHeight, windowWidth } = getSystemInfoSync()
   const finalStatusBarHeight = statusBarHeight || 0
@@ -146,35 +150,6 @@ export default function Order() {
       return findItem.commodityId === commodityId
     })
   }
-
-  // console.log('viewHeight', viewHeight)
-
-  // 桌号信息
-  // const [tableInfo, setTableInfo] = useState<any>({
-  //   tableId: null,
-  //   peopleNum: null,
-  // })
-
-  // 获取桌号
-  // useEffect(() => {
-  //   if (isRetrieve || !tableInfo.tableId) {
-  //     getStorage(
-  //       {
-  //         key: TABLE_INFO,
-  //         fail: (err) => {
-  //           console.log('点单页获取桌号失败', err)
-  //         },
-  //         success: (res) => {
-  //           setTableInfo(res.data)
-  //         },
-  //       },
-  //     )
-  //     dispatch(setIsRetrieve(false))
-  //   }
-  // }, [isRetrieve, tableInfo.tableId])
-  // useLoad(() => {
-  //   console.log('Order page loaded.')
-  // })
 
   // 门店信息
   const [shopIsFavor, setShopIsFavor] = useState<boolean>(false)
@@ -211,7 +186,7 @@ export default function Order() {
     if (isUserClick) {
       return
     }
-    
+
     const scrollTop = e.detail.scrollTop
     // console.log('当前滚动位置:', scrollTop)
 
@@ -222,10 +197,10 @@ export default function Order() {
 
     // 找出当前应该激活的分类
     let activeSection = sectionPositions.current[0]?.id
-    
+
     for (let i = sectionPositions.current.length - 1; i >= 0; i--) {
       const position = sectionPositions.current[i]
-      
+
       if (scrollTop >= position.top) {
         // console.log('position', position)
         activeSection = position.id
@@ -250,7 +225,7 @@ export default function Order() {
     // console.log('侧边栏点击:', key)
     setIsUserClick(true)
     setSideBarValue(key)
-    
+
     // 延迟重置用户点击状态，给自动滚动留出时间
     setTimeout(() => {
       setIsUserClick(false)
@@ -281,7 +256,7 @@ export default function Order() {
             alignItems: 'center',
           }}
         >
-          <SearchBar
+          {/* <SearchBar
             placeholder="搜索商品"
             shape="round"
             style={{
@@ -293,7 +268,7 @@ export default function Order() {
               '--nutui-searchbar-content-background': '#f5f5f5',
               '--nutui-searchbar-input-text-color': '#f5f5f5',
             } as any}
-          />
+          /> */}
         </View>
       </View>
       <View className='order-page'
@@ -400,7 +375,7 @@ export default function Order() {
             </View>
           </View>
         </View>
-        <View
+        {/* <View
           className='order-page-vipbox'
           style={{
             marginBottom: pxTransform(viewHeight * 0.02),
@@ -416,7 +391,7 @@ export default function Order() {
             src={orderJoinVip}
             width={windowWidth * 0.93}
           />
-        </View>
+        </View> */}
         <View
           className='order-page-list'
           style={{
@@ -442,7 +417,9 @@ export default function Order() {
                   <>
                     <Badge value={cartList.filter((findItem) => {
                       return findItem.classificationId === item.classificationId
-                    }).length}>{item.classificationName}</Badge>
+                    }).reduce((acc, curr) => acc + curr.count, 0)}>
+                      {item.classificationName}
+                    </Badge>
                   </>
                 } value={item.classificationId}>
                 </SideBar.Item>
@@ -526,7 +503,32 @@ export default function Order() {
                                 fontWeight: 'bold',
                               }}
                             >
-                              <Text>{goodsItem.mealName}</Text>
+                              <View
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                }}
+                              >
+                                <Text>{goodsItem.mealName}</Text>
+                                <Text
+                                  style={{
+                                    color: '#999',
+                                    fontSize: pxTransform(viewHeight * 0.012),
+                                  }}
+                                >{goodsItem.minimumPurchaseQuantity}份起购</Text>
+                                <Text
+                                  style={{
+                                    color: '#999',
+                                    fontSize: pxTransform(viewHeight * 0.012),
+                                  }}
+                                >限购{goodsItem.purchaseQuantityLimit}份</Text>
+                                <Text
+                                  style={{
+                                    color: '#999',
+                                    fontSize: pxTransform(viewHeight * 0.012),
+                                  }}
+                                >库存{goodsItem.mealQuantity}</Text>
+                              </View>
                               <View
                                 style={{
                                   display: 'flex',
@@ -569,158 +571,181 @@ export default function Order() {
                                   </Text>
                                 </View>
                                 {
-                                  goodsItem.isSet ? (
-                                    <Badge
+                                  goodsItem.mealQuantity <= 0 || goodsItem.mealQuantity < goodsItem.minimumPurchaseQuantity ? (
+                                    <Button
+                                      type='default'
+                                      size='mini'
                                       style={{
+                                        borderRadius: pxTransform(viewHeight * 0.05),
                                         marginRight: pxTransform(windowWidth * 0.02),
                                       }}
-                                      value={cartList.find((findItem) => {
-                                        return findItem.commodityId === goodsItem.id
-                                      })?.count}>
-                                      <Button
-                                        type="primary"
-                                        size="mini"
+                                      disabled
+                                    >{goodsItem.mealQuantity <= 0 ? '已售罄' : '库存不足'}</Button>
+                                  )
+                                    : goodsItem.isSet ? (
+                                      <Badge
                                         style={{
-                                          borderRadius: pxTransform(viewHeight * 0.05),
+                                          marginRight: pxTransform(windowWidth * 0.02),
                                         }}
-                                        onClick={() => {
-                                          navigateTo({
-                                            url: (routes.find((route) => route.name === 'choose')?.path || '') + `?id=${goodsItem.id}`,
-                                          })
-                                        }}
-                                      >选规格</Button>
-                                    </Badge>
-                                  ) : (
-                                    <View
-                                      style={{
-                                        marginRight: pxTransform(windowWidth * 0.02),
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'flex-end',
-                                        justifyContent: 'space-between',
-                                      }}
-                                    >
-                                      {
-                                        cartList.find((findItem) => {
+                                        value={cartList.find((findItem) => {
                                           return findItem.commodityId === goodsItem.id
-                                        }) && (
-                                          <View
-                                            style={{
-                                              display: 'flex',
-                                              flexDirection: 'row',
-                                              alignItems: 'center',
-                                            }}
-                                          >
-                                            <Button
-                                              type="primary"
-                                              size="small"
-                                              fill='outline'
-                                              style={{
-                                                width: pxTransform(windowWidth * 0.05),
-                                                height: pxTransform(windowWidth * 0.05),
-                                                borderRadius: pxTransform(windowWidth * 0.05),
-                                              }}
-                                              icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
-                                              onClick={() => {
-                                                if (cartList.find((findItem) => {
-                                                  return findItem.commodityId === goodsItem.id
-                                                })?.count === goodsItem.minimumPurchaseQuantity) {
-                                                  // console.log('删除购物车项', goodsItem.mealName);
-                                                  deleteCartGoodAPI({
-                                                    "commodityId": goodsItem.id,
-                                                    "isSet": false,
-                                                    "deskId": tableInfo?.tableId || 0,
-                                                    "shopId": currentShop?.shopId!,
-                                                    "openId": userInfo?.openid!,
-                                                  }, (res) => {
-                                                    if (res.success && res.data) {
-                                                      getCartListAPI({
-                                                        "deskId": tableInfo?.tableId || 0,
-                                                        "shopId": currentShop?.shopId!,
-                                                        "openId": userInfo?.openid!,
-                                                      }, getCartList)
-                                                    }
-                                                  })
-                                                } else {
-                                                  // console.log('购物车商品数量减一', goodsItem.mealName);
-                                                  const queryData = {
-                                                    "commodityId": goodsItem.id,
-                                                    "count": 1,
-                                                    "isSet": false,
-                                                    "isAdd": false,
-                                                    "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
-                                                    "deskId": tableInfo?.tableId || 0,
-                                                    "shopId": currentShop?.shopId!,
-                                                    "openId": userInfo?.openid!,
-                                                    "cartModifyReqVOList": [],
-                                                    "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
-                                                    "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
-                                                  }
-                                                  addCartGoodAPI(queryData, (res) => {
-                                                    if (res.success && res.data) {
-                                                      getCartListAPI({
-                                                        "deskId": tableInfo?.tableId || 0,
-                                                        "shopId": currentShop?.shopId!,
-                                                        "openId": userInfo?.openid!,
-                                                      }, getCartList)
-                                                    }
-                                                  })
-                                                }
-                                              }}
-                                            >
-                                            </Button>
-                                            <Text
-                                              style={{
-                                                margin: `0 ${pxTransform(windowWidth * 0.02)}`,
-                                              }}
-                                            >{cartList.find((findItem) => {
-                                              return findItem.commodityId === goodsItem.id
-                                            })?.count}</Text>
-                                          </View>
-                                        )
-                                      }
-                                      <Button
-                                        type="primary"
-                                        size="small"
+                                        })?.count}>
+                                        <Button
+                                          type="primary"
+                                          size="mini"
+                                          style={{
+                                            borderRadius: pxTransform(viewHeight * 0.05),
+                                          }}
+                                          onClick={() => {
+                                            getSetGoodDetailAPI({ id: goodsItem.id }, (res: IResponseApi<any>) => {
+                                              if (res.success) {
+                                                navigateTo({
+                                                  url: (routes.find((route) => route.name === 'choose')?.path || '') + `?id=${goodsItem.id}`,
+                                                })
+                                              } else {
+                                                showToast({
+                                                  title: '获取套餐详情失败',
+                                                  icon: 'none',
+                                                  duration: 2000,
+                                                })
+                                              }
+                                            })
+                                          }}
+                                        >选规格</Button>
+                                      </Badge>
+                                    ) : (
+                                      <View
                                         style={{
-                                          width: pxTransform(windowWidth * 0.05),
-                                          height: pxTransform(windowWidth * 0.05),
-                                          borderRadius: pxTransform(windowWidth * 0.05),
-                                        }}
-                                        disabled={cartList.find((findItem) => {
-                                          return findItem.commodityId === goodsItem.id
-                                        })?.count === goodsItem.purchaseQuantityLimit}
-                                        icon={<Add color='#fff' size={windowWidth * 0.036} />}
-                                        onClick={() => {
-                                          const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
-                                          // console.log('购物车商品数量加一', goodsItem.mealName);
-                                          const queryData = {
-                                            "commodityId": goodsItem.id,
-                                            "count": count,
-                                            "isSet": false,
-                                            "isAdd": true,
-                                            "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
-                                            "deskId": tableInfo?.tableId || 0,
-                                            "shopId": currentShop?.shopId!,
-                                            "openId": userInfo?.openid!,
-                                            "cartModifyReqVOList": [],
-                                            "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
-                                            "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
-                                          }
-                                          addCartGoodAPI(queryData, (res) => {
-                                            if (res.success && res.data) {
-                                              getCartListAPI({
-                                                "deskId": tableInfo?.tableId || 0,
-                                                "shopId": currentShop?.shopId!,
-                                                "openId": userInfo?.openid!,
-                                              }, getCartList)
-                                            }
-                                          })
+                                          marginRight: pxTransform(windowWidth * 0.02),
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'flex-end',
+                                          justifyContent: 'space-between',
                                         }}
                                       >
-                                      </Button>
-                                    </View>
-                                  )
+                                        {
+                                          cartList.find((findItem) => {
+                                            return findItem.commodityId === goodsItem.id
+                                          }) && (
+                                            <View
+                                              style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                              }}
+                                            >
+                                              <Button
+                                                type="primary"
+                                                size="small"
+                                                fill='outline'
+                                                style={{
+                                                  width: pxTransform(windowWidth * 0.05),
+                                                  height: pxTransform(windowWidth * 0.05),
+                                                  borderRadius: pxTransform(windowWidth * 0.05),
+                                                }}
+                                                icon={<Minus color='#D61518' size={windowWidth * 0.036} />}
+                                                onClick={() => {
+                                                  if (cartList.find((findItem) => {
+                                                    return findItem.commodityId === goodsItem.id
+                                                  })?.count === goodsItem.minimumPurchaseQuantity) {
+                                                    // console.log('删除购物车项', goodsItem.mealName);
+                                                    deleteCartGoodAPI({
+                                                      "commodityId": goodsItem.id,
+                                                      "isSet": false,
+                                                      "deskId": tableInfo?.tableId || 0,
+                                                      "shopId": currentShop?.shopId!,
+                                                      "openId": userInfo?.openid!,
+                                                    }, (res) => {
+                                                      if (res.success && res.data) {
+                                                        getCartListAPI({
+                                                          "deskId": tableInfo?.tableId || 0,
+                                                          "shopId": currentShop?.shopId!,
+                                                          "openId": userInfo?.openid!,
+                                                        }, getCartList)
+                                                      }
+                                                    })
+                                                  } else {
+                                                    // console.log('购物车商品数量减一', goodsItem.mealName);
+                                                    const queryData = {
+                                                      "commodityId": goodsItem.id,
+                                                      "count": 1,
+                                                      "isSet": false,
+                                                      "isAdd": false,
+                                                      "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
+                                                      "deskId": tableInfo?.tableId || 0,
+                                                      "shopId": currentShop?.shopId!,
+                                                      "openId": userInfo?.openid!,
+                                                      "cartModifyReqVOList": [],
+                                                      "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
+                                                      "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
+                                                      "standardPrice": goodsItem.standardPrice,
+                                                    }
+                                                    addCartGoodAPI(queryData, (res) => {
+                                                      if (res.success && res.data) {
+                                                        getCartListAPI({
+                                                          "deskId": tableInfo?.tableId || 0,
+                                                          "shopId": currentShop?.shopId!,
+                                                          "openId": userInfo?.openid!,
+                                                        }, getCartList)
+                                                      }
+                                                    })
+                                                  }
+                                                }}
+                                              >
+                                              </Button>
+                                              <Text
+                                                style={{
+                                                  margin: `0 ${pxTransform(windowWidth * 0.02)}`,
+                                                }}
+                                              >{cartList.find((findItem) => {
+                                                return findItem.commodityId === goodsItem.id
+                                              })?.count}</Text>
+                                            </View>
+                                          )
+                                        }
+                                        <Button
+                                          type="primary"
+                                          size="small"
+                                          style={{
+                                            width: pxTransform(windowWidth * 0.05),
+                                            height: pxTransform(windowWidth * 0.05),
+                                            borderRadius: pxTransform(windowWidth * 0.05),
+                                          }}
+                                          disabled={cartList.find((findItem) => {
+                                            return findItem.commodityId === goodsItem.id
+                                          })?.count === goodsItem.purchaseQuantityLimit}
+                                          icon={<Add color='#fff' size={windowWidth * 0.036} />}
+                                          onClick={() => {
+                                            const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
+                                            // console.log('购物车商品数量加一', goodsItem.mealName);
+                                            const queryData = {
+                                              "commodityId": goodsItem.id,
+                                              "count": count,
+                                              "isSet": false,
+                                              "isAdd": true,
+                                              "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
+                                              "deskId": tableInfo?.tableId || 0,
+                                              "shopId": currentShop?.shopId!,
+                                              "openId": userInfo?.openid!,
+                                              "cartModifyReqVOList": [],
+                                              "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
+                                              "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
+                                              "standardPrice": goodsItem.standardPrice,
+                                            }
+                                            addCartGoodAPI(queryData, (res) => {
+                                              if (res.success && res.data) {
+                                                getCartListAPI({
+                                                  "deskId": tableInfo?.tableId || 0,
+                                                  "shopId": currentShop?.shopId!,
+                                                  "openId": userInfo?.openid!,
+                                                }, getCartList)
+                                              }
+                                            })
+                                          }}
+                                        >
+                                        </Button>
+                                      </View>
+                                    )
                                 }
                               </View>
                             </View>
@@ -896,22 +921,22 @@ export default function Order() {
             }}
             onClick={() => {
               if (!(tableInfo?.tableNum && tableInfo?.peopleNum)) {
-                // scanCode(
-                //   {
-                //     scanType: ['qrCode'],
-                //     success: (res) => {
-                //       console.log('扫桌码成功', res)
-                //     },
-                //     fail: (err) => {
-                //       console.log('扫桌码失败', err)
-                //     }
-                //   }
-                // )
-                navigateTo(
+                scanCode(
                   {
-                    url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?id=5&shopId=8`,
+                    scanType: ['qrCode'],
+                    success: (res) => {
+                      console.log('扫桌码成功', res)
+                    },
+                    fail: (err) => {
+                      console.log('扫桌码失败', err)
+                    }
                   }
                 )
+                // navigateTo(
+                //   {
+                //     url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?id=5&shopId=8`,
+                //   }
+                // )
               } else {
                 if (cartSelectedList.length == 0) {
                   return
@@ -1049,13 +1074,26 @@ export default function Order() {
               <View
                 className='title-right title-item'
                 onClick={() => {
-                  clearCartAPI({
-                    "deskId": tableInfo?.tableId || 0,
-                    "shopId": currentShop?.shopId!,
-                    "openId": userInfo?.openid!,
-                  }, (res: IResponseApi<any>) => {
-                    if (res.success && res.data) {
-                      dispatch(setCartListAction({ type: 'clear' }))
+                  if (cartList.length == 0) {
+                    return
+                  }
+                  showModal({
+                    title: '提示',
+                    content: '确定清空购物车吗？',
+                    success: (res) => {
+                      if (res.confirm) {
+                        console.log('res', res);
+
+                        clearCartAPI({
+                          "deskId": tableInfo?.tableId || 0,
+                          "shopId": currentShop?.shopId!,
+                          "openId": userInfo?.openid!,
+                        }, (res: IResponseApi<any>) => {
+                          if (res.success && res.data) {
+                            dispatch(setCartListAction({ type: 'clear' }))
+                          }
+                        })
+                      }
                     }
                   })
                 }}
@@ -1256,6 +1294,7 @@ export default function Order() {
                                     "cartModifyReqVOList": [],
                                     "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                     "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
+                                    "standardPrice": cartItem.price,
                                   }
                                   addCartGoodAPI(queryData, (res) => {
                                     if (res.success && res.data) {
@@ -1309,6 +1348,7 @@ export default function Order() {
                                   "cartModifyReqVOList": [],
                                   "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                   "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
+                                  "standardPrice": cartItem.price,
                                 }
                                 addCartGoodAPI(queryData, (res) => {
                                   if (res.success) {

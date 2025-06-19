@@ -1,16 +1,16 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, navigateTo, useDidShow, showToast } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, useDidShow, showToast, showLoading, hideLoading, showModal } from '@tarojs/taro'
 import './orderList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
 import { ArrowRight, IconFont } from '@nutui/icons-react-taro'
 import { useState, useEffect } from 'react'
 import { noOrderList, logoSmall, userNologin } from '@/utils/constants'
-import { setCurrentOrderAction, setOrderListAction, setRefundListAction } from '@/redux/modules/order'
+import { setCurrentOrderAction, setOrderListAction, setPayOrderInfoAction, setRefundListAction } from '@/redux/modules/order'
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
-import { getOrderListAPI, getRefundListAPI } from '@/api/order'
+import { getOrderListAPI, getRefundListAPI, getPrePayByOrderIdAPI, cancelOrderAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -35,13 +35,18 @@ export default function OrderList() {
         type: 'set',
         data: res.data,
       }))
+      hideLoading()
     } else {
       console.log('获取订单列表失败', res);
+      hideLoading()
     }
   }
 
   // 每次进入页面时获取订单列表
   useDidShow(() => {
+    showLoading({
+      title: '加载中...',
+    })
     getOrderListAPI({
       openId: userInfo?.openid!
     }, getOrderList)
@@ -130,7 +135,7 @@ export default function OrderList() {
           }}
           style={{
             '--nutui-tabs-titles-background-color': '#fff',
-            '--nutui-tabs-tabpane-backgroundColor': '#f5f5f5',
+            '--nutui-tabs-tabpane-background-color': '#f5f5f5',
             '--nutui-tabs-titles-item-color': '#666',
           } as any}
         >
@@ -313,7 +318,7 @@ export default function OrderList() {
                                   fontWeight: 'bold',
                                   color: '#333',
                                 }}
-                              >{orderItem.tableNumber}</Text>
+                              >{orderItem.tableName}</Text>
                             </View>
                             <View
                               className='orderlist-item-bottom'
@@ -332,6 +337,28 @@ export default function OrderList() {
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
+                                      onClick={() => {
+                                        showModal({
+                                          title: '提示',
+                                          content: '确定取消订单吗？',
+                                          success: (res) => {
+                                            if (res.confirm) {
+                                              showLoading({
+                                                title: '取消中...',
+                                              })
+                                              cancelOrderAPI({
+                                                id: orderItem.orderId
+                                              }, (res: IResponseApi<any>) => {
+                                                // console.log('cancelOrderAPI res', res)
+                                                getOrderListAPI({
+                                                  openId: userInfo?.openid!
+                                                }, getOrderList)
+                                                hideLoading()
+                                              })
+                                            }
+                                          }
+                                        })
+                                      }}
                                     >取消订单</Button>
                                     <Button
                                       type='primary'
@@ -340,12 +367,30 @@ export default function OrderList() {
                                         borderRadius: pxTransform(20),
                                       }}
                                       onClick={() => {
-                                        dispatch(setCurrentOrderAction({
-                                          type: 'set',
-                                          data: orderItem
-                                        }))
-                                        navigateTo({
-                                          url: routes.find((route) => route.name === 'orderDetail')?.path || ''
+                                        getPrePayByOrderIdAPI({
+                                          id: orderItem.orderId.toString()
+                                        }, (res: IResponseApi<any>) => {
+                                          console.log('getPrePayByOrderIdAPI res', res)
+                                          if (res.success) {
+                                            dispatch(setPayOrderInfoAction({
+                                              type: 'set',
+                                              data: {
+                                                timeStamp: res.data.timeStamp,
+                                                nonceStr: res.data.nonceStr,
+                                                packageValue: res.data.packageValue,
+                                                signType: res.data.signType,
+                                                paySign: res.data.paySign,
+                                                prepayId: res.data.packageValue.substring(10, res.data.packageValue.length),
+                                              }
+                                            }))
+                                            dispatch(setCurrentOrderAction({
+                                              type: 'set',
+                                              data: orderItem
+                                            }))
+                                            navigateTo({
+                                              url: routes.find((route) => route.name === 'confirmPayment')?.path || ''
+                                            })
+                                          }
                                         })
                                       }}
                                     >立即支付</Button>

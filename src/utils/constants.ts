@@ -83,6 +83,10 @@ export const routes = [
         path: '/pages/order/order'
     },
     {
+        name: 'orderList',
+        path: '/pages/orderList/orderList'
+    },
+    {
         name: 'confirmPayment',
         path: '/subPackagesE/confirmPayment/confirmPayment'
     }

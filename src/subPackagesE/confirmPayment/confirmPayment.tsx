@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, requestPayment, showToast, reLaunch, showModal, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, requestPayment, showToast, reLaunch, showModal, navigateTo, switchTab } from '@tarojs/taro'
 import './confirmPayment.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Price, Radio, RadioGroup } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, Clock, Scan } from '@nutui/icons-react-taro'
-import { confirmPaymentAPI, getOrderDetailOrPrePayAPI } from '@/api/order'
+import { confirmPaymentAPI, getPrePayByOrderIdAPI, getOrderDetailByPrePayAPI } from '@/api/order'
 import { routes } from '@/utils/constants'
 import { setCurrentOrderAction } from '@/redux/modules/order'
 import { IResponseApi } from '@/api/type'
@@ -22,13 +22,14 @@ export default function ConfirmPayment() {
             tableInfo
         },
         order: {
-            checkoutOrder,
-            payOrderInfo
+            // checkoutOrder,
+            payOrderInfo,
+            currentOrder
         }
     } = useAppSelector((state) => state)
 
-    // 支付倒计时 (15分钟)
-    const [countdown, setCountdown] = useState(15 * 60)
+    // 支付倒计时
+    const [countdown, setCountdown] = useState(Math.floor((currentOrder?.orderCloseTime! - currentOrder?.orderTime!) / 1000))
 
     // 支付方式 (1: 微信支付, 2: 支付宝, 3: 银行卡)
     const [paymentMethod, setPaymentMethod] = useState('1')
@@ -57,7 +58,9 @@ export default function ConfirmPayment() {
                         icon: 'none'
                     })
                     setTimeout(() => {
-                        navigateBack()
+                        switchTab({
+                            url: routes.find(route => route.name == 'orderList')?.path!
+                        })
                     }, 2000)
                     return 0
                 }
@@ -77,7 +80,7 @@ export default function ConfirmPayment() {
 
     // 处理支付
     const handlePayment = () => {
-        if (!checkoutOrder) {
+        if (!currentOrder) {
             showToast({
                 title: '订单信息异常',
                 icon: 'none'
@@ -99,7 +102,7 @@ export default function ConfirmPayment() {
                     title: '支付成功',
                     icon: 'success'
                 })
-                intoOrderDetail()
+                intoOrderDetail(3)
             },
             fail: (err) => {
                 setPaying(false)
@@ -120,24 +123,27 @@ export default function ConfirmPayment() {
             success: (res) => {
                 if (res.confirm) {
                     cancelOrderAPI({
-                        prepay_id: payOrderInfo?.prepayId!,
+                        id: currentOrder?.orderId!,
                     }, (res: IResponseApi<any>) => {
-                        console.log('cancelOrderAPI res', res)
-                        intoOrderDetail()
+                        // console.log('cancelOrderAPI res', res)
+                        intoOrderDetail(2)
                     })
                 }
             }
         })
     }
 
-    const intoOrderDetail = () => {
-        getOrderDetailOrPrePayAPI({
+    const intoOrderDetail = (status: number) => {
+        getOrderDetailByPrePayAPI({
             id: payOrderInfo?.prepayId!,
         }, (res: IResponseApi<any>) => {
-            console.log('getOrderDetailOrPrePayAPI res', res)
+            console.log('getOrderDetailByPrePayAPI res', res)
             dispatch(setCurrentOrderAction({
                 type: 'set',
-                data: res.data
+                data: {
+                    ...res.data,
+                    orderStatus: status
+                }
             }))
             navigateTo({
                 url: routes.find(route => route.name == 'orderDetail')?.path! + '?type=1',
@@ -180,7 +186,7 @@ export default function ConfirmPayment() {
                                     cancelText: '确认离开',
                                     success: (res) => {
                                         if (res.cancel) {
-                                            intoOrderDetail()
+                                            intoOrderDetail(1)
                                         }
                                     }
                                 })
@@ -226,17 +232,17 @@ export default function ConfirmPayment() {
                         </View>
                         <View className='amount-content'>
                             <Price
-                                price={checkoutOrder?.checkoutOrderCouponedPrice || 0}
+                                price={currentOrder?.couponedPrice}
                                 size='large'
                                 thousands
                                 symbol='¥'
                                 className='payment-price'
                             />
-                            {checkoutOrder?.checkoutOrderTotalPrice !== checkoutOrder?.checkoutOrderCouponedPrice && (
+                            {currentOrder?.totalPrice !== currentOrder?.couponedPrice && (
                                 <View className='original-price'>
                                     <Text className='original-text'>原价：</Text>
                                     <Price
-                                        price={checkoutOrder?.checkoutOrderTotalPrice || 0}
+                                        price={currentOrder?.totalPrice}
                                         size='small'
                                         thousands
                                         symbol='¥'
@@ -255,15 +261,15 @@ export default function ConfirmPayment() {
                         <View className='order-info-content'>
                             <View className='info-row'>
                                 <Text className='info-label'>桌号：</Text>
-                                <Text className='info-value'>{tableInfo?.tableNum}号桌</Text>
+                                <Text className='info-value'>{currentOrder?.tableName}号桌</Text>
                             </View>
                             <View className='info-row'>
                                 <Text className='info-label'>人数：</Text>
-                                <Text className='info-value'>{tableInfo?.peopleNum}人</Text>
+                                <Text className='info-value'>{currentOrder?.personNumber}人</Text>
                             </View>
                             <View className='info-row'>
                                 <Text className='info-label'>商品数量：</Text>
-                                <Text className='info-value'>{checkoutOrder?.checkoutOrderTotalCount}件</Text>
+                                <Text className='info-value'>{currentOrder?.totalCount}件</Text>
                             </View>
                         </View>
                     </View>
@@ -336,7 +342,7 @@ export default function ConfirmPayment() {
                             borderRadius: pxTransform(windowHeight * 0.04),
                         }}
                     >
-                        {paying ? '支付中...' : `确认支付 ¥${checkoutOrder?.checkoutOrderCouponedPrice || 0}`}
+                        {paying ? '支付中...' : `确认支付 ¥${currentOrder?.couponedPrice}`}
                     </Button>
                 </View>
             </View>

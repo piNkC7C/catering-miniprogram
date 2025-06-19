@@ -50,7 +50,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                 {
                     currentOrder?.orderStatus === 1 && (
                         <>
-                            <Text>{currentOrder?.tableNumber}号桌</Text>
+                            <Text>{currentOrder?.tableName}号桌</Text>
                             <Text>{currentOrder?.personNumber}人就餐</Text>
                         </>
                     )

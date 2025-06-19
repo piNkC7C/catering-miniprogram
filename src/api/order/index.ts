@@ -1,5 +1,5 @@
 import { taroGet, taroPost, taroDelete } from '@/service'
-import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL, getOrderDetailOrPrePayURL } from '@/service/config'
+import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL, getOrderDetailByPrePayURL, getPrePayByOrderIdURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -420,10 +420,11 @@ export const payOrderAPI = (data: any, callback: (res: IResponseApi<any>) => voi
     })
 }
 
-export const cancelOrderAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
+export const cancelOrderAPI = (data: {
+    id: number
+}, callback: (res: IResponseApi<any>) => void) => {
     taroDelete({
-        url: cancelOrderURL,
-        data,
+        url: cancelOrderURL + '?id=' + data.id,
         success: (res) => {
             callback({
                 success: true,
@@ -449,11 +450,11 @@ export const cancelOrderAPI = (data: any, callback: (res: IResponseApi<any>) => 
     })
 }
 
-export const getOrderDetailOrPrePayAPI = (data: {
+export const getOrderDetailByPrePayAPI = (data: {
     id: string
 }, callback: (res: IResponseApi<any>) => void) => {
     taroGet({
-        url: getOrderDetailOrPrePayURL + '?id=' + data.id,
+        url: getOrderDetailByPrePayURL + '?id=' + data.id,
         success: (res) => {
             callback({
                 success: true,
@@ -476,5 +477,34 @@ export const getOrderDetailOrPrePayAPI = (data: {
             }
         }
     }).catch(() => {
+    })
+}
+
+export const getPrePayByOrderIdAPI = (data: {
+    id: string
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroGet({
+        url: getPrePayByOrderIdURL + '?id=' + data.id,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
     })
 }

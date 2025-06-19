@@ -11,15 +11,15 @@ import store from './redux'
 
 import { loginAPI, getUserInfoAPI } from './api/login'
 import { userInfoAction, setLoginStatus } from './redux/modules/login'
-import { setCurrentShopAction, setNowAddressAction } from './redux/modules/address'
+// import { setCurrentShopAction, setNowAddressAction } from './redux/modules/address'
 import { IResponseApi } from './api/type'
 import { IUserInfo } from './redux/types/login'
-import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
-import { getShopListAPI } from './api/address'
-import dayjs from 'dayjs'
-import { IGroupGoodsList } from './redux/types/order'
-import { setOrderTabsListAction, setGroupGoodsListAction } from './redux/modules/order'
-import { getGroupGoodsListAPI } from './api/order'
+// import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
+// import { getShopListAPI } from './api/address'
+// import dayjs from 'dayjs'
+// import { IGroupGoodsList } from './redux/types/order'
+// import { setOrderTabsListAction, setGroupGoodsListAction } from './redux/modules/order'
+// import { getGroupGoodsListAPI } from './api/order'
 
 function App({ children }: PropsWithChildren<any>) {
 
@@ -75,94 +75,6 @@ function App({ children }: PropsWithChildren<any>) {
         }).catch(() => {
         })
     }
-
-    const getGroupGoodsList = (res: IResponseApi<IGroupGoodsList[]>) => {
-        if (res.success) {
-            const orderData = res.data.sort((a, b) => a.classificationSorting - b.classificationSorting)
-                // .map((item, index) => {
-                //     if (index == res.data.length - 1) {
-                //         return {
-                //             ...item,
-                //             title: item.classificationName,
-                //             list: item.goodsList.map((goods) => {
-                //                 return {
-                //                     ...goods,
-                //                     id: goods.id,
-                //                     name: goods.mealName
-                //                 }
-                //             }).concat([
-                //                 {
-                //                     id: 'test',
-                //                     name: '测试',
-                //                 } as any
-                //             ])
-                //         }
-                //     }
-                //     return {
-                //         ...item,
-                //         title: item.classificationName,
-                //         list: item.goodsList.map((goods) => {
-                //             return {
-                //                 ...goods,
-                //                 id: goods.id,
-                //                 name: goods.mealName
-                //             }
-                //         })
-                //     }
-                // })
-            // console.log('11111', orderData);
-
-            store.dispatch(setOrderTabsListAction({
-                type: 'set',
-                data: orderData,
-            }))
-            store.dispatch(setGroupGoodsListAction({
-                type: 'set',
-                data: orderData
-            }))
-        } else {
-            console.log('获取商品列表失败:', res)
-        }
-    }
-
-    let qqmapsdk: any
-    const getAddressByLocation = (latitude, longitude) => {
-        qqmapsdk = new QQMapWX({
-            key: qqmapsdkKey
-        })
-        qqmapsdk.reverseGeocoder({
-            location: {
-                latitude,
-                longitude
-            },
-            success(res) {
-                // console.log('逆解析成功:', res.result);
-                store.dispatch(setNowAddressAction({
-                    type: 'set',
-                    data: res.result
-                }))
-                getShopListAPI({
-                    cityId: Number(res.result.ad_info.adcode.substring(0, 4)),
-                    shopLongitude: res.result.ad_info.location.lng,
-                    shopLatitude: res.result.ad_info.location.lat,
-                    locationName: ''
-                }, (res: IResponseApi<any>) => {
-                    if (res.success) {
-                        store.dispatch(setCurrentShopAction({
-                            type: 'set',
-                            data: res.data.shops[0]
-                        }))
-                        getGroupGoodsListAPI({
-                            shopId: res.data.shops[0].shopId
-                        }, getGroupGoodsList)
-                    }
-                })
-            },
-            fail(err) {
-                console.error('逆解析失败:', err);
-            }
-        });
-    };
 
     useEffect(() => {
         // console.log('prepay_id=wx17142701774247d677935f80dc3fbf0001'.substring(10, 'prepay_id=wx17142701774247d677935f80dc3fbf0001'.length - 1));
@@ -249,18 +161,6 @@ function App({ children }: PropsWithChildren<any>) {
             fail(err) {
                 quikLogin()
             },
-        })
-
-
-        getLocation({
-            type: 'wgs84',
-            success: (res) => {
-                getAddressByLocation(res.latitude, res.longitude)
-            },
-            fail: (err) => {
-                console.log(err)
-            },
-        }).catch(() => {
         })
     }, [])
 

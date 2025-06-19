@@ -11,8 +11,10 @@ import { setCurrentShopAction } from '@/redux/modules/address'
 import { getShopDetailAPI } from '@/api/address'
 import { IResponseApi } from '@/api/type'
 import { IShopItem } from '@/redux/types/address'
-import { addSharedCartGoodsAPI, getCartListAPI } from '@/api/order'
-import { setCartListAction } from '@/redux/modules/order'
+import { IGroupGoodsList } from '@/redux/types/order'
+import { addSharedCartGoodsAPI, getCartListAPI, getGroupGoodsListAPI } from '@/api/order'
+import { setCartListAction, setGroupGoodsListAction, setOrderTabsListAction } from '@/redux/modules/order'
+import { useShopAndGoods } from '@/hooks/useShopAndGoods'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
@@ -27,15 +29,18 @@ export default function SelectTable() {
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
 
+    // 更新商品列表
+    const { handleGroupGoodsList } = useShopAndGoods()
+
     // 选中的就餐人数
     const [selectedNum, setSelectedNum] = useState<number>(0)
     const [inputFocus, setInputFocus] = useState<boolean>(false)
     // const [numberKeyboardVisible, setNumberKeyboardVisible] = useState<boolean>(false)
     // const [inputValue, setInputValue] = useState<string>('')
 
-    const [tableId, setTableId] = useState<any>(2)
-    const [tableNum, setTableNum] = useState<any>('A-11')
-    const [shopId, setShopId] = useState<any>(2)
+    const [tableId, setTableId] = useState<any>(null)
+    const [tableNum, setTableNum] = useState<any>(null)
+    const [shopId, setShopId] = useState<any>(null)
 
     const router = useRouter()
     const { scene } = router.params
@@ -67,6 +72,7 @@ export default function SelectTable() {
                     shopId
                 }, (res: IResponseApi<IShopItem>) => {
                     if (res.success) {
+                        // console.log('res', res);
                         dispatch(setCurrentShopAction({
                             type: 'set',
                             data: res.data
@@ -75,6 +81,9 @@ export default function SelectTable() {
                         console.log('获取门店失败', res);
                     }
                 })
+                getGroupGoodsListAPI({
+                    shopId
+                }, handleGroupGoodsList)
             }
         }
     }, [])
@@ -240,6 +249,8 @@ export default function SelectTable() {
                             }}
                             onClick={() => {
                                 if (selectedNum && selectedNum !== 0) {
+                                    // console.log('111222222222222', tableNum);
+
                                     // setStorage({
                                     //     key: TABLE_INFO,
                                     //     data: {
@@ -255,7 +266,7 @@ export default function SelectTable() {
                                     }))
                                     getCartListAPI({
                                         shopId: shopId,
-                                        deskId: 0,
+                                        deskId: tableId,
                                         openId: userInfo?.openid!,
                                     }, (res: IResponseApi<any>) => {
                                         if (res.success && res.data.length > 0) {
@@ -270,7 +281,7 @@ export default function SelectTable() {
                                                             singleShare: true,
                                                             appCartModifyReqVOs: cartList.map((cartItem) => {
                                                                 // console.log('cartItem', cartItem);
-                                                                
+
                                                                 return {
                                                                     "commodityId": cartItem.commodityId,
                                                                     "count": cartItem.count,
@@ -336,6 +347,10 @@ export default function SelectTable() {
                                                         })
                                                     }
                                                 }
+                                            })
+                                        } else {
+                                            switchTab({
+                                                url: '/pages/order/order',
                                             })
                                         }
                                     })

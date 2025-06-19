@@ -31,10 +31,13 @@ export default function Choose() {
   useEffect(() => {
     if (id) {
       getSetGoodDetailAPI({ id }, (res) => {
-        // console.log('res', res)
-        setAllSelectedAddOneGood(res.data.mealSetOptionalGroupInfoList)
-        setSelectedIncludeGood(res.data.mealSpecificationInfoList)
-        setSetGoodDetail(res.data)
+        if (res.success) {
+          console.log('res', res)
+          setAllSelectedAddOneGood(res.data.mealSetOptionalGroupInfoList)
+          setSelectedIncludeGood(res.data.mealSpecificationInfoList)
+          setSetGoodDetail(res.data)
+          setGoodCount(res.data.minimumPurchaseQuantity)
+        }
       })
     }
   }, [])
@@ -55,7 +58,7 @@ export default function Choose() {
   // 商品价格
   const [goodPrice, setGoodPrice] = useState<number>(39)
   // 商品数量
-  const [goodCount, setGoodCount] = useState<number>(1)
+  const [goodCount, setGoodCount] = useState<number>(0)
 
   // 商品列表
   const gridItem = (listItem: any, index: number, max: number | null, total: number) => {
@@ -355,8 +358,15 @@ export default function Choose() {
               style={{
                 width: pxTransform(windowWidth * 0.0848),
                 height: pxTransform(viewHeight * 0.036),
+                color: goodCount == setGoodDetail?.minimumPurchaseQuantity ? '#999' : '#d61518',
               }}
-              onClick={() => setGoodCount(goodCount > 1 ? goodCount - 1 : 1)}
+              onClick={() => {
+                if (goodCount == setGoodDetail?.minimumPurchaseQuantity) {
+                  return
+                } else {
+                  setGoodCount(goodCount - 1)
+                }
+              }}
             >-</View>
             <View
               className="custom-value"
@@ -370,8 +380,15 @@ export default function Choose() {
               style={{
                 width: pxTransform(windowWidth * 0.0848),
                 height: pxTransform(viewHeight * 0.036),
+                color: goodCount == setGoodDetail?.purchaseQuantityLimit ? '#999' : '#d61518',
               }}
-              onClick={() => setGoodCount(goodCount + 1)}
+              onClick={() => {
+                if (goodCount == setGoodDetail?.purchaseQuantityLimit) {
+                  return
+                } else {
+                  setGoodCount(goodCount + 1)
+                }
+              }}
             >+</View>
           </View>
         </View>
@@ -421,7 +438,7 @@ export default function Choose() {
               //   })
               //   return
               // }
-              if (selectedAddOneGood.length == 0) {
+              if (selectedAddOneGood.length == 0 && allSelectedAddOneGood.length > 0) {
                 showToast({
                   title: '请至少选择一款商品',
                   icon: 'none',
@@ -447,13 +464,13 @@ export default function Choose() {
                 "count": goodCount,
                 "isSet": true,
                 "isAdd": true,
-                "deskId": tableInfo?.tableId || null,
+                "deskId": tableInfo?.tableId || 0,
                 "shopId": currentShop?.shopId!,
                 "openId": userInfo?.openid!,
                 "cartModifyReqVOList": selectedAddOneGood.map((item) => ({
                   "commodityId": item.mealId,
                   "count": item.goodsCount,
-                  "deskId": tableInfo?.tableId || null,
+                  "deskId": tableInfo?.tableId || 0,
                   "shopId": currentShop?.shopId!,
                   "openId": userInfo?.openid!,
                   "isSet": true,
@@ -461,7 +478,7 @@ export default function Choose() {
                 })).concat(selectedIncludeGood.map((item) => ({
                   "commodityId": item.mealId,
                   "count": 1,
-                  "deskId": tableInfo?.tableId || null,
+                  "deskId": tableInfo?.tableId || 0,
                   "shopId": currentShop?.shopId!,
                   "openId": userInfo?.openid!,
                   "isSet": true,
@@ -477,7 +494,7 @@ export default function Choose() {
                     icon: 'success',
                   })
                   getCartListAPI({
-                    "deskId": tableInfo?.tableId || null,
+                    "deskId": tableInfo?.tableId || 0,
                     "shopId": currentShop?.shopId!,
                     "openId": userInfo?.openid!,
                   }, (res: IResponseApi<any>) => {

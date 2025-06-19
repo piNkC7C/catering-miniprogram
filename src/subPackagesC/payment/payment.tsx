@@ -3,14 +3,14 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getStorage, navigateTo } from '@tarojs/taro'
 import './payment.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setCheckoutOrderCouponAction, setPayOrderInfoAction, setCurrentOrderAction } from '@/redux/modules/order'
+import { setCheckoutOrderCouponAction, setPayOrderInfoAction, setCurrentOrderAction, setCartListAction } from '@/redux/modules/order'
 import { pxTransform, Image, Button, Divider, Tabs, Price, Tag, Popup, Dialog, Cell, TextArea, Ellipsis } from '@nutui/nutui-react-taro'
 import { ArrowLeft, Search, IconFont, ArrowUp, ArrowDown, ArrowRight } from '@nutui/icons-react-taro'
 import { billTop, billBottom, tableIcon, peopleIcon } from '@/utils/constants'
 import { TABLE_INFO } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
 import CouponCard from '@/components/couponCard'
-import { clearSelectedCartAPI, payOrderAPI, getOrderDetailOrPrePayAPI } from '@/api/order'
+import { clearSelectedCartAPI, payOrderAPI, getOrderDetailByPrePayAPI, getCartListAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { routes } from '@/utils/constants'
 
@@ -567,10 +567,10 @@ export default function Payment() {
                                         prepayId: res.data.packageValue.substring(10, res.data.packageValue.length),
                                     }
                                 }))
-                                getOrderDetailOrPrePayAPI({
+                                getOrderDetailByPrePayAPI({
                                     id: res.data.packageValue.substring(10, res.data.packageValue.length)
                                 }, (res: IResponseApi<any>) => {
-                                    console.log('getOrderDetailOrPrePayAPI res', res)
+                                    console.log('getOrderDetailByPrePayAPI res', res)
                                     if (res.success) {
                                         dispatch(setCurrentOrderAction({
                                             type: 'set',
@@ -604,8 +604,21 @@ export default function Payment() {
                                             }), (res: IResponseApi<any>) => {
                                                 // console.log('clearSelectedCartAPI res', res)
                                                 if (res.success) {
-                                                    navigateTo({
-                                                        url: routes.find(route => route.name == 'confirmPayment')?.path!
+                                                    getCartListAPI({
+                                                        shopId: currentShop?.shopId!,
+                                                        deskId: tableInfo?.tableId!,
+                                                        openId: userInfo?.openid!,
+                                                    }, (res: IResponseApi<any>) => {
+                                                        console.log('getCartListAPI res', res)
+                                                        if (res.success) {
+                                                            dispatch(setCartListAction({
+                                                                type: 'set',
+                                                                data: res.data
+                                                            }))
+                                                            navigateTo({
+                                                                url: routes.find(route => route.name == 'confirmPayment')?.path!
+                                                            })
+                                                        }
                                                     })
                                                 }
                                             })
