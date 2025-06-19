@@ -19,7 +19,7 @@
 // console.log(import.meta.env.VITE_BASE_URL)
 
 export const TIME_OUT = 999999999999999
-export const BASE_URL = 'http://192.168.110.20:9503/app-api'
+export const BASE_URL = 'https://console.imissniu.com/app-api'
 // export const BASE_URL = 'http://192.168.110.5:9500/app-api'
 
 export const getAddressListURL = '/member/user/address/list'
