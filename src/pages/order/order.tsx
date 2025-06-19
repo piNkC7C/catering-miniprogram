@@ -36,7 +36,7 @@ export default function Order() {
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
-  const { finish, getAddressByLocation, handleAutoSelectShop } = useShopAndGoods()
+  const { finish, getAddressByLocation, handleAutoSelectShop, getGoodsQuantity } = useShopAndGoods()
 
   // 获取购物车列表
   const getCartList = (res: IResponseApi<any>) => {
@@ -527,7 +527,7 @@ export default function Order() {
                                     color: '#999',
                                     fontSize: pxTransform(viewHeight * 0.012),
                                   }}
-                                >库存{goodsItem.mealQuantity}</Text>
+                                >库存{getGoodsQuantity(goodsItem)}</Text>
                               </View>
                               <View
                                 style={{
@@ -571,7 +571,7 @@ export default function Order() {
                                   </Text>
                                 </View>
                                 {
-                                  goodsItem.mealQuantity <= 0 || goodsItem.mealQuantity < goodsItem.minimumPurchaseQuantity ? (
+                                  getGoodsQuantity(goodsItem) <= 0 || getGoodsQuantity(goodsItem) < goodsItem.minimumPurchaseQuantity ? (
                                     <Button
                                       type='default'
                                       size='mini'
@@ -580,7 +580,7 @@ export default function Order() {
                                         marginRight: pxTransform(windowWidth * 0.02),
                                       }}
                                       disabled
-                                    >{goodsItem.mealQuantity <= 0 ? '已售罄' : '库存不足'}</Button>
+                                    >{getGoodsQuantity(goodsItem) <= 0 ? '已售罄' : '库存不足'}</Button>
                                   )
                                     : goodsItem.isSet ? (
                                       <Badge

@@ -11,6 +11,7 @@ import { useAppDispatch } from "@/hooks/useAppStore"
 import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
 import { qqmapsdkKey } from "@/utils/constants"
 import { IShopItem } from "@/redux/types/address"
+import { IGoodsItem } from "@/redux/types/order"
 
 export function useShopAndGoods() {
     const dispatch = useAppDispatch()
@@ -76,6 +77,17 @@ export function useShopAndGoods() {
         }
     }
 
+    // 获取商品库存数
+    const getGoodsQuantity = (goodsItem: IGoodsItem) => {
+        if (goodsItem.mealQuantity && goodsItem.mealQuantity != null) {
+            return goodsItem.mealQuantity
+        } else if (goodsItem.mealSpecQuantity && goodsItem.mealSpecQuantity != null) {
+            return goodsItem.mealSpecQuantity
+        } else {
+            return 0
+        }
+    }
+
     let qqmapsdk: any
     const getAddressByLocation = (latitude: number, longitude: number, callback: (res: IResponseApi<any>) => void) => {
         qqmapsdk = new QQMapWX({
@@ -106,6 +118,7 @@ export function useShopAndGoods() {
         finish,
         handleGroupGoodsList,
         getAddressByLocation,
-        handleAutoSelectShop
+        handleAutoSelectShop,
+        getGoodsQuantity
     }
 }

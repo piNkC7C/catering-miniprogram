@@ -12,7 +12,8 @@ export interface IGoodsItem {
   standardPrice: number // 商品价格
   minimumPurchaseQuantity: number // 最小购买数量
   purchaseQuantityLimit: number // 最大购买量
-  mealQuantity: number // 库存
+  mealQuantity: number // 商品库存
+  mealSpecQuantity: number // 套餐规格库存
   // packageId?: number // 套餐id
   // packageName?: string // 套餐名称
   // packagePrice?: number // 套餐价格
