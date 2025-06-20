@@ -9,10 +9,10 @@
     "enhance": true,
     "compileHotReLoad": false,
     "postcss": false,
-    "minified": false,
+    "minified": true,
     "compileWorklet": false,
     "uglifyFileName": false,
-    "uploadWithSourceMap": true,
+    "uploadWithSourceMap": false,
     "packNpmManually": false,
     "packNpmRelationList": [],
     "minifyWXSS": true,
@@ -27,12 +27,68 @@
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    }
+    },
+    "useStaticServer": true,
+    "checkSiteMap": true,
+    "useMultiFrameRuntime": true,
+    "useApiHook": true,
+    "useApiHostProcess": true,
+    "showShadowRootInWxmlPanel": true,
+    "enableEngineNative": false,
+    "bundleHtmlReport": false,
+    "coverView": true,
+    "nodeModules": false,
+    "lazyloadPlaceholderEnable": false,
+    "preloadBackgroundData": false,
+    "autoAudits": false,
+    "showES6CompileOption": false,
+    "checkInvalidKey": true
   },
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "node_modules"
+      },
+      {
+        "type": "folder", 
+        "value": "src"
+      },
+      {
+        "type": "folder",
+        "value": "config"
+      },
+      {
+        "type": "folder",
+        "value": "__tests__"
+      },
+      {
+        "type": "file",
+        "value": "babel.config.js"
+      },
+      {
+        "type": "file",
+        "value": "jest.config.ts"
+      },
+      {
+        "type": "file",
+        "value": "README.md"
+      },
+      {
+        "type": "file",
+        "value": "tsconfig.json"
+      },
+      {
+        "type": "file",
+        "value": "package.json"
+      },
+      {
+        "type": "file",
+        "value": "pnpm-lock.yaml"
+      }
+    ],
     "include": []
   },
   "editorSetting": {},

@@ -136,5 +136,7 @@ export default defineAppConfig({
     'scope.userLocation': {
       desc: '你的位置信息将用于小程序位置接口的效果展示'
     }
-  }
+  },
+  // 启用按需注入，优化小程序启动性能
+  lazyCodeLoading: "requiredComponents"
 })
