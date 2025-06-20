@@ -63,17 +63,6 @@ export default defineConfig(async (merge, { command, mode }) => {
       enable: false // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache
     },
     mini: {
-      // 暂时禁用 XML 压缩以避免标签解析问题
-      // minifyXML: {
-      //   collapseWhitespace: true
-      // },
-      // 启用样式压缩
-      optimizeMainPackage: {
-        enable: true,
-        exclude: []
-      },
-      // 简化 Tree Shaking 配置
-      commonChunks: ['runtime', 'vendors', 'common'],
       postcss: {
         pxtransform: {
           enable: true,
@@ -97,69 +86,8 @@ export default defineConfig(async (merge, { command, mode }) => {
         }
       },
       webpackChain(chain) {
-        // 检查是否为生产环境
-        const isProduction = process.env.NODE_ENV === 'production'
-        
+        // 通用配置：TypeScript 路径映射
         chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
-        
-        // 配置代码分割和 Tree Shaking（修复空白页面问题）
-        chain.optimization
-          .splitChunks({
-            chunks: 'all',
-            maxInitialRequests: Infinity,
-            minSize: 0,
-            cacheGroups: {
-              default: {
-                minChunks: 2,
-                priority: -20,
-                reuseExistingChunk: true
-              },
-              vendors: {
-                test: /[\\/]node_modules[\\/]/,
-                name: 'vendors',
-                priority: -10,
-                chunks: 'all'
-              },
-              nutui: {
-                test: /[\\/]node_modules[\\/]@nutui[\\/]/,
-                name: 'nutui',
-                priority: 10,
-                chunks: 'all'
-              },
-              taro: {
-                test: /[\\/]node_modules[\\/]@tarojs[\\/]/,
-                name: 'taro',
-                priority: 5,
-                chunks: 'all'
-              }
-            }
-          })
-          // 启用 Tree Shaking 但保持更安全的配置
-          .usedExports(true)
-          // 暂时禁用激进的 sideEffects 设置以避免空白页面问题
-          .sideEffects(true)
-        
-        // 在生产环境中禁用过度优化
-        if (isProduction) {
-          // 禁用代码分割以避免空白页面问题
-          chain.optimization.splitChunks({
-            cacheGroups: {
-              default: false,
-              vendors: {
-                test: /[\\/]node_modules[\\/]/,
-                name: 'vendors',
-                chunks: 'all',
-                priority: 10
-              }
-            }
-          })
-        }
-
-        // 添加 Bundle Analyzer（可选，用于分析包大小）
-        if (process.env.ANALYZE) {
-          const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-          chain.plugin('analyzer').use(BundleAnalyzerPlugin)
-        }
       }
     },
     h5: {
