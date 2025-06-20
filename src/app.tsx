@@ -29,10 +29,10 @@ function App({ children }: PropsWithChildren<any>) {
 
     const setLogin = (res: IResponseApi<IUserInfo>) => {
         if (res.success) {
-            // setStorage({
-            //     key: OPEN_ID,
-            //     data: res.data.openid
-            // })
+            setStorage({
+                key: OPEN_ID,
+                data: res.data.openid
+            })
             console.log('login success', res);
             store.dispatch(userInfoAction({
                 type: 'set',
@@ -162,6 +162,7 @@ function App({ children }: PropsWithChildren<any>) {
             fail(err) {
                 quikLogin()
             },
+        }).catch(() => {
         })
     }, [])
 
