@@ -12,6 +12,7 @@ import { routes } from '@/utils/constants'
 import { setCurrentOrderAction, setPayOrderInfoAction } from '@/redux/modules/order'
 import { getPrePayByOrderIdAPI, cancelOrderAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
+import { getRefundStep } from '@/utils/order'
 
 export default function OrderDetail() {
     // 获取登录状态和用户信息
@@ -29,13 +30,13 @@ export default function OrderDetail() {
     // 倒计时逻辑
     useEffect(() => {
         let timer: NodeJS.Timeout | null = null
-        
+
         if (currentOrder?.orderStatus === 1 && currentOrder?.orderCloseTime) {
             const updateCountdown = () => {
                 const now = Date.now()
                 const closeTime = currentOrder.orderCloseTime
                 const remainingTime = closeTime - now
-                
+
                 if (remainingTime <= 0) {
                     setCountdown('00:00')
                     // 订单已过期，可以在这里更新订单状态
@@ -52,19 +53,19 @@ export default function OrderDetail() {
                     }))
                     return
                 }
-                
+
                 const minutes = Math.floor(remainingTime / (1000 * 60))
                 const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000)
                 setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
             }
-            
+
             // 立即执行一次
             updateCountdown()
-            
+
             // 每秒更新一次
             timer = setInterval(updateCountdown, 1000)
         }
-        
+
         return () => {
             if (timer) {
                 clearInterval(timer)
@@ -98,7 +99,7 @@ export default function OrderDetail() {
                 className='nav'
                 style={{
                     height: pxTransform(navHeight),
-                    backgroundColor: currentOrder?.orderStatus === 4 ? '#fff' : '#f5f5f5',
+                    backgroundColor: (currentOrder?.orderStatus === 4 || currentOrder?.orderStatus === 5) ? '#fff' : '#f5f5f5', // 已关闭、部分退款为白色，其他为灰色
                 }}
             >
                 <View
@@ -129,8 +130,9 @@ export default function OrderDetail() {
                             }}
                         />
                     </View>
+                    {/* 已关闭、部分退款订单标题：退款详情 */}
                     {
-                        currentOrder?.orderStatus === 4 && (
+                        (currentOrder?.orderStatus === 4 || currentOrder?.orderStatus === 5) && (
                             <View
                                 className='nav-middle'
                             >
@@ -143,11 +145,12 @@ export default function OrderDetail() {
             <View
                 className='content'
                 style={{
-                    height: currentOrder?.orderStatus !== 2 && currentOrder?.orderStatus !== 4 ? `calc(${pxTransform(viewHeight - windowHeight * 0.1)} - 20rpx)` : `calc(${pxTransform(viewHeight)} - 20rpx)`,
+                    height: currentOrder?.orderStatus !== 2 && currentOrder?.orderStatus !== 4 && currentOrder?.orderStatus !== 5 ? `calc(${pxTransform(viewHeight - windowHeight * 0.1)} - 20rpx)` : `calc(${pxTransform(viewHeight)} - 20rpx)`, // 已取消、已关闭、部分退款底部没有按钮，待支付、已完成底部有按钮
                 }}
             >
+                {/* 待支付、已取消、已完成顶部：请在xx内支付、已取消、已完成 */}
                 {
-                    currentOrder?.orderStatus !== 4 && (
+                    currentOrder?.orderStatus !== 4 && currentOrder?.orderStatus !== 5 && (
                         <View
                             className='top'
                         >
@@ -172,8 +175,9 @@ export default function OrderDetail() {
                         </View>
                     )
                 }
+                {/* 已关闭、部分退款顶部：退款进度 */}
                 {
-                    currentOrder?.orderStatus === 4 && (
+                    (currentOrder?.orderStatus === 4 || currentOrder?.orderStatus === 5) && (
                         <View
                             className='refund-step'
                             style={{
@@ -225,7 +229,7 @@ export default function OrderDetail() {
                                 direction="vertical"
                                 type="dot"
                                 status="enhanced"
-                                value={(currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? 1 : 2}
+                                value={getRefundStep(currentRefund?.refundStatus)}
                             >
                                 <Step
                                     value={1}
@@ -234,12 +238,8 @@ export default function OrderDetail() {
                                 />
                                 <Step
                                     value={2}
-                                    title={
-                                        (currentRefund?.refundStatus == 2) || (currentRefund?.refundStatus == 13) || (currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? '商家已退款' : currentRefund?.refundStatus == 3 ? '部分退款失败' : '商家拒绝退款'
-                                    }
-                                    description={
-                                        (currentRefund?.refundStatus == 2) || (currentRefund?.refundStatus == 13) || (currentRefund?.refundStatus === 1) || (currentRefund?.refundStatus == 11) || (currentRefund?.refundStatus == 14) ? "商家已处理您的退款，按支付方式原路返回，将在1-7个工作日内到账，如有疑问请联系我们" : currentRefund?.refundStatus == 3 ? '部分退款失败' : "商家拒绝了您的退款，如有疑问请联系我们"
-                                    }
+                                    title='商家已退款'
+                                    description='商家已处理您的退款，按支付方式原路返回，将在1-7个工作日内到账，如有疑问请联系我们'
                                 />
                             </Steps>
                         </View>
@@ -250,8 +250,9 @@ export default function OrderDetail() {
                 >
                     <GoodList orderId={currentOrder?.orderStatus} />
                 </View>
+                {/* 已取消、已完成订单内容：门店信息、用餐信息、订单信息 */}
                 {
-                    currentOrder?.orderStatus !== 1 && currentOrder?.orderStatus !== 4 && (
+                    currentOrder?.orderStatus !== 1 && currentOrder?.orderStatus !== 4 && currentOrder?.orderStatus !== 5 && (
                         <View
                             className='order-card'
                         >
@@ -293,8 +294,9 @@ export default function OrderDetail() {
                         </View>
                     )
                 }
+                {/* 已关闭、部分退款订单内容：退款详情 */}
                 {
-                    currentOrder?.orderStatus === 4 && (
+                    (currentOrder?.orderStatus === 4 || currentOrder?.orderStatus === 5) && (
                         <View
                             className='order-card'
                         >
@@ -315,8 +317,9 @@ export default function OrderDetail() {
                     )
                 }
             </View>
+            {/* 待支付、已完成底部：取消订单、去支付、立即评价 */}
             {
-                currentOrder?.orderStatus !== 2 && currentOrder?.orderStatus !== 4 && (
+                currentOrder?.orderStatus !== 2 && currentOrder?.orderStatus !== 4 && currentOrder?.orderStatus !== 5 && (
                     <View
                         className='bottom'
                         style={{
@@ -326,6 +329,7 @@ export default function OrderDetail() {
                             justifyContent: currentOrder?.orderStatus === 1 ? 'space-between' : 'flex-end',
                         }}
                     >
+                        {/* 待支付底部：取消订单、去支付 */}
                         {
                             currentOrder?.orderStatus === 1 && (
                                 <>
@@ -401,6 +405,7 @@ export default function OrderDetail() {
                                 </>
                             )
                         }
+                        {/* 已完成底部：立即评价 */}
                         {
                             currentOrder?.orderStatus === 3 && (
                                 <Button

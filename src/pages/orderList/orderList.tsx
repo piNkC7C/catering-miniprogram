@@ -2,7 +2,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, navigateTo, useDidShow, showToast, showLoading, hideLoading, showModal } from '@tarojs/taro'
 import './orderList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
+import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Divider, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
 import { ArrowRight, IconFont } from '@nutui/icons-react-taro'
 import { useState, useEffect } from 'react'
 import { noOrderList, logoSmall, userNologin } from '@/utils/constants'
@@ -214,26 +214,31 @@ export default function OrderList() {
                                 className='orderlist-item-top-right'
                                 style={{
                                   fontSize: pxTransform(windowHeight * 0.02),
-                                  color: orderItem.orderStatus === 1 ? '#D7181A' : '#676767'
+                                  color: orderItem.orderStatus === 1 ? '#D7181A' : '#676767' // 待支付为红色，其他为灰色
                                 }}
                               >
                                 {orderItem.orderStatus === 1 && '待支付'}
                                 {orderItem.orderStatus === 2 && '已取消'}
                                 {orderItem.orderStatus === 3 && '已完成'}
                                 {orderItem.orderStatus === 4 && '已关闭'}
-                                {/* {orderItem.orderStatus === 5 && '退款中'} */}
+                                {orderItem.orderStatus === 5 && '部分退款'}
                               </View>
                             </View>
+                            <Divider
+                              style={{
+                                '--nutui-divider-margin': 0
+                              } as any}
+                            />
                             <View
                               className='orderlist-item-middle'
                               style={{
-                                padding: `${pxTransform(windowHeight * 0.015)} 0`,
-                                height: `calc(40% - ${pxTransform(windowHeight * 0.03)})`,
                               }}
                               onClick={() => {
-                                if (orderItem.orderStatus === 1 || orderItem.orderStatus === 4) {
+                                // 待支付、已关闭、部分退款的订单不能进入详情页
+                                if (orderItem.orderStatus === 4 || orderItem.orderStatus === 5) {
                                   return
                                 }
+                                // 已取消、已完成的订单可以进入详情页
                                 dispatch(setCurrentOrderAction({
                                   type: 'set',
                                   data: orderItem
@@ -246,6 +251,9 @@ export default function OrderList() {
                               <ScrollView
                                 scrollX
                                 className='orderlist-item-middle-left'
+                                style={{
+                                  padding: `${pxTransform(windowHeight * 0.015)} 0`,
+                                }}
                               >
                                 {
                                   orderItem.goodsList.map((goodsItem) => (
@@ -281,6 +289,9 @@ export default function OrderList() {
                               </ScrollView>
                               <View
                                 className='orderlist-item-middle-right'
+                                style={{
+                                  padding: pxTransform(windowHeight * 0.015),
+                                }}
                               >
                                 <View
                                   className='orderlist-item-middle-right-top'
@@ -302,7 +313,7 @@ export default function OrderList() {
                                     fontSize: pxTransform(windowHeight * 0.015),
                                   }}
                                 >
-                                  共{orderItem.totalCount}件
+                                  共&nbsp;{orderItem.totalCount}&nbsp;件
                                 </View>
                               </View>
                             </View>
@@ -326,6 +337,7 @@ export default function OrderList() {
 
                               }}
                             >
+                              {/* 待支付订单按钮：取消订单、立即支付 */}
                               {
                                 orderItem.orderStatus === 1 && (
                                   <View
@@ -397,6 +409,7 @@ export default function OrderList() {
                                   </View>
                                 )
                               }
+                              {/* 已取消订单按钮：再来一单、查看订单 */}
                               {
                                 orderItem.orderStatus === 2 && (
                                   <View
@@ -428,8 +441,9 @@ export default function OrderList() {
                                   </View>
                                 )
                               }
+                              {/* 已关闭、部分退款订单按钮：退款记录 */}
                               {
-                                orderItem.orderStatus === 4 && (
+                                (orderItem.orderStatus === 4 || orderItem.orderStatus === 5) && (
                                   <View
                                     className='order-status1'
                                   >
@@ -452,10 +466,11 @@ export default function OrderList() {
                                   </View>
                                 )
                               }
+                              {/* 已完成订单按钮：再来一单、申请售后 */}
                               {
                                 orderItem.orderStatus === 3 && (
                                   <View
-                                    className='order-status0'
+                                    className='order-status1'
                                   >
                                     {/* <Button
                                       type="default"

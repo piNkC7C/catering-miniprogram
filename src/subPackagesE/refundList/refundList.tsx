@@ -196,10 +196,10 @@ export default function RefundList() {
                                                     ))
                                                 }
                                             </ScrollView>
-                                            {/* <View
+                                            <View
                                                 className='refundlist-item-middle-right'
                                             >
-                                                <View
+                                                {/* <View
                                                     className='refundlist-item-middle-right-top'
                                                 >
                                                     <Price
@@ -219,9 +219,16 @@ export default function RefundList() {
                                                         fontSize: pxTransform(viewHeight * 0.015),
                                                     }}
                                                 >
-                                                    共{refundItem.totalCount}件
-                                                </View>
-                                            </View> */}
+                                                    共 100 件
+                                                </View> */}
+                                                <Text
+                                                    className='right-text'
+                                                    style={{
+                                                        fontSize: pxTransform(windowHeight * 0.012),
+                                                    }}>
+                                                    共 100 件
+                                                </Text>
+                                            </View>
                                         </View>
                                         {/* <View
                                             className='refundlist-item-table'
@@ -245,17 +252,54 @@ export default function RefundList() {
                                         <View
                                             className='refundlist-item-bottom'
                                         >
-                                            <View className='refund-status1'>
-                                                退款合计：<Price
-                                                    color="gray"
-                                                    price={refundItem.refundPrice}
-                                                    size="normal"
-                                                    thousands
+                                            <View className='refund-status0'>
+                                                <View
+                                                    className='bottom-price'
                                                     style={{
-                                                        fontWeight: 'bold',
-                                                        '--nutui-price-color': '#333',
-                                                    } as any}
-                                                />
+                                                        fontSize: pxTransform(windowHeight * 0.013),
+                                                    }}
+                                                >
+                                                    <View
+                                                        className='bottom-text'
+                                                    >
+                                                        退款合计：
+                                                    </View>
+                                                    <Price
+                                                        color="gray"
+                                                        price={refundItem.refundPrice}
+                                                        size="normal"
+                                                        thousands
+                                                        style={{
+                                                            fontWeight: 'bold',
+                                                            '--nutui-price-color': '#333',
+                                                        } as any}
+                                                    />
+                                                </View>
+                                                <Button
+                                                    size="normal"
+                                                    style={{
+                                                        borderRadius: pxTransform(20),
+                                                    }}
+                                                    onClick={() => {
+                                                        dispatch(setCurrentOrderAction({
+                                                            type: 'set',
+                                                            data: {
+                                                                ...currentOrder,
+                                                                isUseCoupon: false,
+                                                                goodsList: refundItem.goodsList
+                                                            }
+                                                        }))
+                                                        dispatch(setCurrentRefundAction({
+                                                            type: 'set',
+                                                            data: refundItem
+                                                        }))
+                                                        navigateTo({
+                                                            url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
+                                                        })
+                                                    }}
+                                                >
+                                                    查看详情
+                                                </Button>
                                             </View>
                                         </View>
                                     </View>

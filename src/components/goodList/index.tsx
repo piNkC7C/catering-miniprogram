@@ -36,7 +36,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
             style={{
                 marginTop: pxTransform(windowHeight * 0.02),
                 borderRadius: pxTransform(windowHeight * 0.015),
-                backgroundColor: currentOrder?.orderStatus === 1 ? '#E8E8E8' : '#fff'
+                backgroundColor: '#fff'
             }}
         >
             <View
@@ -44,9 +44,11 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                 style={{
                     padding: `0 ${pxTransform(windowHeight * 0.015)}`,
                     width: `calc(100% - ${pxTransform(windowHeight * 0.03)})`,
-                    height: pxTransform(windowHeight * 0.05)
+                    height: pxTransform(windowHeight * 0.05),
+                    // backgroundColor: currentOrder?.orderStatus === 1 ? '#E8E8E8' : '#fff', // 待支付为灰色，其他为白色
                 }}
             >
+                {/* 待支付顶部：桌号、人数 */}
                 {
                     currentOrder?.orderStatus === 1 && (
                         <>
@@ -55,33 +57,30 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                         </>
                     )
                 }
+                {/* 已取消、已完成顶部：门店名称 */}
                 {
-                    currentOrder?.orderStatus !== 1 && currentOrder?.orderStatus !== 4 && (
+                    currentOrder?.orderStatus !== 1 && currentOrder?.orderStatus !== 4 && currentOrder?.orderStatus !== 5 && (
                         <Text>{currentOrder?.shopName}</Text>
                     )
                 }
+                {/* 已关闭、部分退款顶部：退款明细 */}
                 {
-                    currentOrder?.orderStatus === 4 && (
+                    (currentOrder?.orderStatus === 4 || currentOrder?.orderStatus === 5) && (
                         <Text>退款明细</Text>
                     )
                 }
             </View>
-            {
-                currentOrder?.orderStatus !== 1 && (
-                    <Divider
-                        style={{
-                            '--nutui-divider-margin': 0
-                        } as any}
-                    />
-                )
-            }
+            <Divider
+                style={{
+                    '--nutui-divider-margin': 0
+                } as any}
+            />
             <View
                 className='good-list-bottom'
                 style={{
                     padding: pxTransform(windowHeight * 0.015),
                     width: `calc(100% - ${pxTransform(windowHeight * 0.03)})`,
                     // height: pxTransform(windowHeight * 0.05),
-                    borderRadius: `${pxTransform(windowHeight * 0.015)} ${pxTransform(windowHeight * 0.015)} 0 0`
                 }}
             >
                 <View
@@ -90,6 +89,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                         padding: `0 ${pxTransform(windowWidth * 0.05)}`,
                         width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
                         height: isFoldGoodsList ? pxTransform(windowHeight * 0.24) : 'max-content',
+                        borderRadius: `${pxTransform(windowHeight * 0.015)} ${pxTransform(windowHeight * 0.015)} 0 0`,
                     }}
                 >
                     {
@@ -186,43 +186,59 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                     )
                 }
             </View>
-            {/* {
-                currentOrder?.orderStatus !== 1 && (
-                    <Divider />
-                )
-            } */}
+            <Divider
+                style={{
+                    '--nutui-divider-margin': 0
+                } as any}
+            />
+            {/* 待支付、已完成、已取消底部：共xx件、合计 */}
             {
-                currentOrder?.orderStatus !== 4 && (
-                    <View
-                        className='good-list-total'
-                        style={{
-                            marginBottom: currentOrder?.orderStatus !== 1 && pxTransform(windowHeight * 0.01),
-                            padding: `0 ${pxTransform(windowWidth * 0.05)}`,
-                            // width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
-                        }}
-                    >
+                currentOrder?.orderStatus !== 4 && currentOrder?.orderStatus !== 5 && (
+                    <>
                         <View
+                            className='good-list-total'
                             style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                justifyContent: 'flex-end',
-                                marginBottom: pxTransform(windowWidth * 0.02),
-                                height: '100%',
-                                fontSize: pxTransform(windowHeight * 0.012),
+                                marginBottom: currentOrder?.orderStatus !== 1 && pxTransform(windowHeight * 0.01),
+                                padding: `0 ${pxTransform(windowWidth * 0.05)}`,
+                                // width: `calc(100% - ${pxTransform(windowWidth * 0.1)})`,
                             }}
                         >
-                            共{currentOrder?.totalCount}件&nbsp;&nbsp;合计：
+                            <View
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'flex-end',
+                                    marginBottom: pxTransform(windowWidth * 0.02),
+                                    height: '100%',
+                                    fontSize: pxTransform(windowHeight * 0.012),
+                                }}
+                            >
+                                共{currentOrder?.totalCount}件&nbsp;&nbsp;合计：
+                            </View>
+                            <Price
+                                color='gray'
+                                price={Number(currentOrder?.totalPrice)}
+                                size="normal"
+                                thousands
+                            />
                         </View>
-                        <Price
-                            color='gray'
-                            price={Number(currentOrder?.totalPrice)}
-                            size="normal"
-                            thousands
-                        />
-                    </View>
+                        {
+                            currentOrder?.orderStatus === 1 && (
+                                <View
+                                    style={{
+                                        width: '100%',
+                                        height: '10rpx',
+                                        backgroundColor: '#fff'
+                                    }}
+                                >
+                                </View>
+                            )
+                        }
+                    </>
                 )
             }
+            {/* 优惠券：优惠券、优惠券列表、实付 */}
             {
                 currentOrder?.isUseCoupon && (
                     <>

@@ -498,7 +498,7 @@ export default function Payment() {
                             // "outTradeNo": "",
                             // "orderNo": "D8117465022766946619",
                             // "terminal": 1,
-                            "userId": userInfo?.userId || null,
+                            "userId": userInfo?.userId,
                             "openId": userInfo?.openid!,
                             "shopId": currentShop?.shopId!,
                             "deskId": tableInfo?.tableId!,

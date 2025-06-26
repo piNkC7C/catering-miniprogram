@@ -4,6 +4,7 @@ export interface IUserInfo {
   userId?: number
   nickname?: string
   avatar?: string
+  routineOpenid?: string
 }
 
 export interface ITableInfo {

@@ -33,7 +33,7 @@ function App({ children }: PropsWithChildren<any>) {
                 key: OPEN_ID,
                 data: res.data.openid
             })
-            console.log('login success', res);
+            console.log('本地没有openid', res);
             store.dispatch(userInfoAction({
                 type: 'set',
                 data: {
@@ -41,7 +41,7 @@ function App({ children }: PropsWithChildren<any>) {
                     userInfo: res.data.userInfo,
                     nickname: res.data.userInfo.nickname,
                     avatar: res.data.userInfo.avatar,
-                    userId: res.data.userId || null,
+                    userId: res.data.userInfo.isLogin ? res.data.userId : null,
                 }
             }))
             if (res.data.userInfo.isLogin) {
@@ -51,7 +51,7 @@ function App({ children }: PropsWithChildren<any>) {
             }
             hideLoading()
         } else {
-            console.log('获取openid失败', res);
+            console.log('登录失败', res);
             hideLoading()
         }
     }
@@ -130,28 +130,29 @@ function App({ children }: PropsWithChildren<any>) {
                         openid: storgeRes.data
                     }, (res: IResponseApi<any>) => {
                         if (res.success) {
-                            // setStorage({
-                            //     key: OPEN_ID,
-                            //     data: res.data.openid
-                            // })
-                            console.log('login success', res);
+                            setStorage({
+                                key: OPEN_ID,
+                                data: res.data.routineOpenid
+                            })
+                            console.log('本地有openid', res);
                             store.dispatch(userInfoAction({
                                 type: 'set',
                                 data: {
-                                    openid: storgeRes.data,
+                                    openid: res.data.routineOpenid,
                                     userInfo: res.data,
                                     nickname: res.data.nickname,
                                     avatar: res.data.avatar,
+                                    userId: res.data.isLogin ? res.data.id : null,
                                 }
                             }))
                             if (res.data.isLogin) {
                                 store.dispatch(setLoginStatus(1))
                             } else {
-                                store.dispatch(setLoginStatus(1))
+                                store.dispatch(setLoginStatus(0))
                             }
                             hideLoading()
                         } else {
-                            console.log('获取openid失败', res);
+                            console.log('获取用户信息失败', res);
                             hideLoading()
                         }
                     })
