@@ -21,13 +21,13 @@
 export const TIME_OUT = 999999999999999
 // export const BASE_URL = 'https://console.imissniu.com/app-api'
 export const BASE_URL = 'http://192.168.110.23:9500/app-api'
+export const ADMIN_BASE_URL = 'http://192.168.110.23:9500/admin-api'
 
 export const getAddressListURL = '/member/user/address/list'
 export const addAddressURL = '/member/user/address/create'
 export const editAddressURL = '/member/user/address/update'
 export const deleteAddressURL = '/member/user/address/delete'
 export const getSuggestListURL = '/member/user/suggest/list'
-
 export const getGroupGoodsListURL = '/member/mini-app/commodity/list'
 export const getSetGoodURL = '/member/mini-app/commodity/set/detail'
 export const getOrderListURL = '/member/trade/order/list'
@@ -48,10 +48,15 @@ export const payOrderURL = '/member/trade/order/create'
 export const cancelOrderURL = '/member/trade/order/cancel'
 export const getOrderDetailByPrePayURL = '/member/trade/order/getOrderItem'
 export const getPrePayByOrderIdURL = '/member/trade/order/getPrepayItem'
-
+export const getOrderRefundRecordURL = '/member/trade/order/getOrderRefundRecord'
 export const loginByPhoneURL = '/member/auth/weixin-mini-app-login'
 export const loginURL = '/member/auth/auth-session'
 export const getUserInfoURL = '/member/user/get-userinfo'
 export const getVipCodeURL = '/member/user/get-member-code'
+// 获取商品级退款记录
+export const getGoodsRefundRecordURL = '/member/trade/order/getOrderRefundRecordDetails'
+// 获取商品级退款记录详情
+export const getGoodsRefundRecordDetailsURL = '/member/trade/order/getOrderRefundRecordDetailsItem'
 
-export const uploadURL = '/admin-api/infra/file/upload'
+export const uploadURL = '/infra/file/upload'
+export const getIsOrderRefundURL = '/infra/order/getOrderRefund'

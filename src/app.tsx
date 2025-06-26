@@ -153,6 +153,16 @@ function App({ children }: PropsWithChildren<any>) {
                             hideLoading()
                         } else {
                             console.log('获取用户信息失败', res);
+                            store.dispatch(userInfoAction({
+                                type: 'set',
+                                data: {
+                                    openid: storgeRes.data,
+                                    userInfo: {},
+                                    nickname: '',
+                                    avatar: '',
+                                    userId: null,
+                                }
+                            }))
                             hideLoading()
                         }
                     })

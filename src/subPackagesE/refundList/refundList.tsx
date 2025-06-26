@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, navigateTo, getMenuButtonBoundingClientRect, navigateBack } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, getMenuButtonBoundingClientRect, navigateBack, showToast } from '@tarojs/taro'
 import './refundList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Popup, Space, Checkbox, Toast, Divider } from '@nutui/nutui-react-taro'
@@ -10,6 +10,10 @@ import { setCurrentRefundAction, setCurrentOrderAction } from '@/redux/modules/o
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
+import { getGoodsRefundRecordDetailsAPI } from '@/api/order'
+import { IResponseApi } from '@/api/type'
+import { error } from 'console'
+import goodList from '@/components/goodList'
 
 export default function RefundList() {
     // 获取登录状态和用户信息
@@ -226,7 +230,7 @@ export default function RefundList() {
                                                     style={{
                                                         fontSize: pxTransform(windowHeight * 0.012),
                                                     }}>
-                                                    共 100 件
+                                                    共&nbsp;{refundItem.totalGoods}&nbsp;件
                                                 </Text>
                                             </View>
                                         </View>
@@ -281,20 +285,37 @@ export default function RefundList() {
                                                         borderRadius: pxTransform(20),
                                                     }}
                                                     onClick={() => {
-                                                        dispatch(setCurrentOrderAction({
-                                                            type: 'set',
-                                                            data: {
-                                                                ...currentOrder,
-                                                                isUseCoupon: false,
-                                                                goodsList: refundItem.goodsList
+                                                        // console.log(refundItem.goodsList);
+                                                        
+                                                        getGoodsRefundRecordDetailsAPI({
+                                                            id: refundItem.id
+                                                        }, (res: IResponseApi<any>) => {
+                                                            if (res.success) {
+                                                                dispatch(setCurrentOrderAction({
+                                                                    type: 'set',
+                                                                    data: {
+                                                                        ...currentOrder,
+                                                                        isUseCoupon: false,
+                                                                        goodsList: refundItem.goodsList
+                                                                    }
+                                                                }))
+                                                                dispatch(setCurrentRefundAction({
+                                                                    type: 'set',
+                                                                    data: {
+                                                                        ...res.data,
+                                                                        goodList: refundItem.goodsList
+                                                                    }
+                                                                }))
+                                                                navigateTo({
+                                                                    url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
+                                                                })
+                                                            } else {
+                                                                showToast({
+                                                                    title: '获取详情失败',
+                                                                    icon: 'error'
+                                                                })
+
                                                             }
-                                                        }))
-                                                        dispatch(setCurrentRefundAction({
-                                                            type: 'set',
-                                                            data: refundItem
-                                                        }))
-                                                        navigateTo({
-                                                            url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
                                                         })
                                                     }}
                                                 >

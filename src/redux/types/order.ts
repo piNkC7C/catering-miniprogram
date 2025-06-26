@@ -105,6 +105,7 @@ export interface IRefundItem {
   refundTime: number // 退款时间戳
   refundReason: string // 退款原因
   refundPrice: number // 退款金额
+  totalGoods: number // 总数
   goodsList: IOrderGoodsItem[] //商品列表
 }
 

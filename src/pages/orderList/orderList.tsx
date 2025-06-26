@@ -6,11 +6,11 @@ import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Divider, Pop
 import { ArrowRight, IconFont } from '@nutui/icons-react-taro'
 import { useState, useEffect } from 'react'
 import { noOrderList, logoSmall, userNologin } from '@/utils/constants'
-import { setCurrentOrderAction, setOrderListAction, setPayOrderInfoAction, setRefundListAction } from '@/redux/modules/order'
+import { setCurrentOrderAction, setOrderListAction, setPayOrderInfoAction, setRefundListAction, setCurrentRefundAction } from '@/redux/modules/order'
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
-import { getOrderListAPI, getRefundListAPI, getPrePayByOrderIdAPI, cancelOrderAPI } from '@/api/order'
+import { getOrderListAPI, getGoodsRefundRecordAPI, getPrePayByOrderIdAPI, cancelOrderAPI, getIsOrderRefundAPI, getOrderRefundRecordAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -110,7 +110,18 @@ export default function OrderList() {
       // console.log(res.data);
       dispatch(setRefundListAction({
         type: 'set',
-        data: res.data,
+        data: res.data.map((item) => {
+          return {
+            ...item,
+            goodsList: item.goodsList.map((goods) => {
+              return {
+                ...goods,
+                userOrderQuantity: goods.mealSpecQuantity,
+                totalPrice: goods.standardPrice,
+              }
+            })
+          }
+        }),
       }))
       navigateTo({
         url: (routes.find((route) => route.name === 'refundList')?.path) || ''
@@ -458,9 +469,45 @@ export default function OrderList() {
                                           type: 'set',
                                           data: orderItem
                                         }))
-                                        getRefundListAPI({
-                                          id: orderItem.orderId
-                                        }, getRefundList)
+                                        // 判断是否发生过订单级退款
+                                        getIsOrderRefundAPI({
+                                          orderId: orderItem.orderId
+                                        }, (res: IResponseApi<any>) => {
+                                          if (res.success) {
+                                            if (res.data.isRefundOrder) {
+                                              // 获取订单级退款详情，直接跳转详情页
+                                              // console.log('获取订单级退款详情');
+                                              getOrderRefundRecordAPI({
+                                                orderId: orderItem.orderId
+                                              }, (res: IResponseApi<any>) => {
+                                                if (res.success) {
+                                                  // console.log('getOrderRefundRecordAPI res', res)
+                                                  dispatch(setCurrentRefundAction({
+                                                    type: 'set',
+                                                    data: {
+                                                      ...res.data,
+                                                      refundTime: res.data.refundTime || res.data.wxRefundSuccessTime, // 退款时间戳
+                                                      goodsList: orderItem.goodsList //商品列表
+                                                    }
+                                                  }))
+                                                  navigateTo({
+                                                    url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
+                                                  })
+                                                } else {
+                                                  showToast({
+                                                    title: '获取退款记录失败',
+                                                    icon: 'none',
+                                                  })
+                                                }
+                                              })
+                                            } else {
+                                              // 获取商品级退款记录，跳转退款记录页
+                                              getGoodsRefundRecordAPI({
+                                                orderId: orderItem.orderId
+                                              }, getRefundList)
+                                            }
+                                          }
+                                        })
                                       }}
                                     >退款记录</Button>
                                   </View>

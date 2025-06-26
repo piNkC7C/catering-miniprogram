@@ -509,7 +509,7 @@ export default function Payment() {
                             // "status": 0,
                             // "payStatus": 1,
                             "orderType": 1,
-                            // "totalGoods": 0,
+                            "totalGoods": checkoutOrder?.checkoutOrderTotalCount,
                             // "originalPrice": 0,
                             "isInvoicing": 0,
                             "remark": notesContent,

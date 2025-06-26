@@ -1,5 +1,5 @@
-import { taroGet, taroPost, taroDelete } from '@/service'
-import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL, getOrderDetailByPrePayURL, getPrePayByOrderIdURL } from '@/service/config'
+import { taroGet, taroPost, taroDelete, adminTaroGet } from '@/service'
+import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL, getOrderDetailByPrePayURL, getPrePayByOrderIdURL, getIsOrderRefundURL, getOrderRefundRecordURL, getGoodsRefundRecordURL, getGoodsRefundRecordDetailsURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
 
@@ -498,6 +498,122 @@ export const getPrePayByOrderIdAPI = (data: {
                         success: false,
                         data: errMsg
                     })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    })
+}
+
+export const getIsOrderRefundAPI = (data: {
+    orderId: number
+}, callback: (res: IResponseApi<any>) => void) => {
+    adminTaroGet({
+        url: getIsOrderRefundURL + '?orderId=' + data.orderId,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    })
+}
+
+export const getOrderRefundRecordAPI = (data: {
+    orderId: number
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroGet({
+        url: getOrderRefundRecordURL + '?orderId=' + data.orderId,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    })
+}
+
+/**
+ * 获取商品级退款记录
+ */
+export const getGoodsRefundRecordAPI = (data: {
+    orderId: number
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroGet({
+        url: getGoodsRefundRecordURL + '?orderId=' + data.orderId,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    })
+}
+
+// 获取商品级退款记录详情
+export const getGoodsRefundRecordDetailsAPI = (data: {
+    id: number
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroGet({
+        url: getGoodsRefundRecordDetailsURL + '?id=' + data.id,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
                 })
             } else {
                 callback({

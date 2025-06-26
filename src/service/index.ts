@@ -1,42 +1,48 @@
-import { BASE_URL, TIME_OUT } from './config'
+import { BASE_URL, TIME_OUT, ADMIN_BASE_URL } from './config'
 import TaroRequest from './request'
 
-// 创建Taro请求实例
-export const taroRequest = new TaroRequest({
-  baseURL: BASE_URL,
-  timeout: TIME_OUT,
-  header: {
-    'Authorization': `Bearer test1`,
-    'tenant-id': '1'
-  },
-  interceptors: {
-    requestSuccessFn: (config) => {
-      return config
+// 创建Taro请求实例的工厂函数
+const createTaroRequest = (baseURL: string) => {
+  return new TaroRequest({
+    baseURL,
+    timeout: TIME_OUT,
+    header: {
+      'Authorization': `Bearer test1`,
+      'tenant-id': '1'
     },
-    requestFailureFn: (error) => {
-      console.log('Taro请求失败', error)
-      return error
-      // return Promise.reject(error)
-    },
-    responseSuccessFn: (res) => {
-      // 统一处理响应数据
-      if (res.statusCode === 200) {
-        if (res.data.code == 0) {
-          return res.data
+    interceptors: {
+      requestSuccessFn: (config) => {
+        return config
+      },
+      requestFailureFn: (error) => {
+        console.log('Taro请求失败', error)
+        return error
+        // return Promise.reject(error)
+      },
+      responseSuccessFn: (res) => {
+        // 统一处理响应数据
+        if (res.statusCode === 200) {
+          if (res.data.code == 0) {
+            return res.data
+          } else {
+            throw res.data
+          }
         } else {
-          throw res.data
+          throw res
         }
-      } else {
-        throw res
+      },
+      responseFailureFn: (error) => {
+        console.log('Taro响应失败', error)
+        return error
+        // return Promise.reject(error)
       }
-    },
-    responseFailureFn: (error) => {
-      console.log('Taro响应失败', error)
-      return error
-      // return Promise.reject(error)
     }
-  }
-})
+  })
+}
+
+// 创建不同的请求实例
+export const taroRequest = createTaroRequest(BASE_URL)
+export const adminTaroRequest = createTaroRequest(ADMIN_BASE_URL)
 
 // 简化的请求方法，可以直接替换原生Taro.request
 export const taroHttpRequest = taroRequest.request.bind(taroRequest)
@@ -44,6 +50,13 @@ export const taroGet = taroRequest.get.bind(taroRequest)
 export const taroPost = taroRequest.post.bind(taroRequest)
 export const taroPut = taroRequest.put.bind(taroRequest)
 export const taroDelete = taroRequest.delete.bind(taroRequest)
+
+// admin请求方法
+export const adminTaroHttpRequest = adminTaroRequest.request.bind(adminTaroRequest)
+export const adminTaroGet = adminTaroRequest.get.bind(adminTaroRequest)
+export const adminTaroPost = adminTaroRequest.post.bind(adminTaroRequest)
+export const adminTaroPut = adminTaroRequest.put.bind(adminTaroRequest)
+export const adminTaroDelete = adminTaroRequest.delete.bind(adminTaroRequest)
 
 // import Taro from '@tarojs/taro'
 // import { AxiosRequestHeaders, AxiosError } from 'axios'

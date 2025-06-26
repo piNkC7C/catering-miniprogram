@@ -137,7 +137,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                     >
                                         <Price
                                             color='gray'
-                                            price={Number(goodsItem.standardPrice * goodsItem.userOrderQuantity)}
+                                            price={goodsItem.totalPrice ? goodsItem.totalPrice : Number(goodsItem.standardPrice * goodsItem.userOrderQuantity)}
                                             size="small"
                                             thousands
                                             style={{
