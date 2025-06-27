@@ -7,6 +7,7 @@ import { vipFrame } from '@/utils/constants'
 import { getVipCodeAPI } from '@/api/login'
 import { IResponseApi } from '@/api/type'
 import dayjs from 'dayjs'
+import { useAppSelector } from '@/hooks/useAppStore'
 
 interface IVipCodeProps {
     vipCodeVisible: boolean
@@ -14,7 +15,11 @@ interface IVipCodeProps {
 }
 
 const PureVipCode: React.FC<IVipCodeProps> = ({ vipCodeVisible, onClose }) => {
-
+    const {
+        login: {
+            loginStatus
+        }
+    } = useAppSelector((state) => state)
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
     // 获取胶囊按钮信息
@@ -29,13 +34,15 @@ const PureVipCode: React.FC<IVipCodeProps> = ({ vipCodeVisible, onClose }) => {
     const [barCode, setBarCode] = useState<string>('')
     const [qrCode, setQrCode] = useState<string>('')
     useEffect(() => {
-        getVipCodeAPI((res: IResponseApi<any>) => {
-            if (res.success) {
-                setBarCode(res.data.barCode)
-                setQrCode(res.data.qrCode)
-            }
-        })
-    }, [])
+        if (loginStatus === 1) {
+            getVipCodeAPI((res: IResponseApi<any>) => {
+                if (res.success) {
+                    setBarCode(res.data.barCode)
+                    setQrCode(res.data.qrCode)
+                }
+            })
+        }
+    }, [loginStatus])
 
     return (
         <Popup
@@ -71,7 +78,7 @@ const PureVipCode: React.FC<IVipCodeProps> = ({ vipCodeVisible, onClose }) => {
             <View
                 style={{
                     width: '85%',
-                    textAlign:'center'
+                    textAlign: 'center'
                 }}
             >
                 {dayjs().format('YYYY-MM-DD HH:mm:ss')}

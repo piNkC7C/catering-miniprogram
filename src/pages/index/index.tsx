@@ -155,7 +155,11 @@ export default function Index() {
                 <View
                   onClick={(e) => {
                     e.stopPropagation()
-                    setVipCodeVisible(true)
+                    if (loginStatus === 1) {
+                      setVipCodeVisible(true)
+                    } else {
+                      setShowBottomPopup(true)
+                    }
                   }}
                   style={{
                     display: 'flex',

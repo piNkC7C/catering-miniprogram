@@ -286,7 +286,11 @@ export default function Mine() {
                         url: item.path
                       })
                     } else if (item.title === '会员码') {
-                      setVipCodeVisible(true)
+                      if (loginStatus === 1) {
+                        setVipCodeVisible(true)
+                      } else {
+                        setLoginPopupVisible(true)
+                      }
                     } else if (item.title === '联系客服') {
                       showToast({
                         title: '暂未配置',
