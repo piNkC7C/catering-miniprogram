@@ -20,8 +20,8 @@
 
 export const TIME_OUT = 999999999999999
 // export const BASE_URL = 'https://console.imissniu.com/app-api'
-export const BASE_URL = 'http://192.168.110.23:9500/app-api'
-export const ADMIN_BASE_URL = 'http://192.168.110.23:9500/admin-api'
+export const BASE_URL = 'http://192.168.110.12:9500/app-api'
+export const ADMIN_BASE_URL = 'http://192.168.110.12:9500/admin-api'
 
 export const getAddressListURL = '/member/user/address/list'
 export const addAddressURL = '/member/user/address/create'

@@ -27,7 +27,7 @@ function App({ children }: PropsWithChildren<any>) {
     //     console.log('App launched.')
     // })
 
-    const setLogin = (res: IResponseApi<IUserInfo>) => {
+    const setLogin = (res: IResponseApi<IUserInfo>, openid: string | null = null) => {
         if (res.success) {
             setStorage({
                 key: OPEN_ID,
@@ -52,12 +52,31 @@ function App({ children }: PropsWithChildren<any>) {
             hideLoading()
         } else {
             console.log('登录失败', res);
+            if (openid) {
+                setStorage({
+                    key: OPEN_ID,
+                    data: openid
+                })
+                store.dispatch(userInfoAction({
+                    type: 'set',
+                    data: {
+                        openid,
+                        userInfo: {},
+                        nickname: '',
+                        avatar: '',
+                        userId: null,
+                    }
+                }))
+                store.dispatch(setLoginStatus(0))
+            } else {
+
+            }
             hideLoading()
         }
     }
 
 
-    const quikLogin = () => {
+    const quikLogin = (openid: string | null = null) => {
         login({
             success: (res) => {
                 // console.log('login success', res)
@@ -65,10 +84,18 @@ function App({ children }: PropsWithChildren<any>) {
                     type: 10,
                     code: res.code,
                     state: 'weixin'
-                }, setLogin)
+                }, (res: IResponseApi<IUserInfo>) => {
+                    setLogin(res, openid)
+                })
             },
             fail: (err) => {
                 console.log('login fail', err)
+                if (openid) {
+                    setLogin({
+                        success: false,
+                        data: null as any
+                    }, openid)
+                }
                 hideLoading()
             },
             timeout: 10000,
@@ -153,16 +180,7 @@ function App({ children }: PropsWithChildren<any>) {
                             hideLoading()
                         } else {
                             console.log('获取用户信息失败', res);
-                            store.dispatch(userInfoAction({
-                                type: 'set',
-                                data: {
-                                    openid: storgeRes.data,
-                                    userInfo: {},
-                                    nickname: '',
-                                    avatar: '',
-                                    userId: null,
-                                }
-                            }))
+                            quikLogin(storgeRes.data)
                             hideLoading()
                         }
                     })
