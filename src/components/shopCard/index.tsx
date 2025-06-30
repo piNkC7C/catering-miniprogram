@@ -76,9 +76,11 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
         <View
             className='shop-card'
             style={{
+                boxSizing: 'border-box',
                 padding: pxTransform(windowWidth * 0.02),
                 marginBottom: pxTransform(windowHeight * 0.01),
                 // width: `calc(100% - ${pxTransform(windowWidth * 0.04)} - 4px)`,
+                border: '2rpx solid #ccc',
                 borderRadius: pxTransform(windowWidth * 0.015),
                 borderColor: isClickShop ? '#FA2400' : '#CCC',
             }}

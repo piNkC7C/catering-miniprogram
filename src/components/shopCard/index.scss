@@ -1,7 +1,7 @@
 .shop-card {
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
+    width: calc(100% - 4rpx);
+    // box-sizing: border-box;
+    // border: 2rpx solid #ccc;
     display: flex;
     flex-direction: row;
     align-items: center;
