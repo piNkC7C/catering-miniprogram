@@ -141,6 +141,7 @@ export interface ICartRequest {
   deskId: any
   shopId: any
   openId: any
+  classificationId: any
   cartModifyReqVOList: any[]
   minimumPurchaseQuantity: any
   purchaseQuantityLimit: any

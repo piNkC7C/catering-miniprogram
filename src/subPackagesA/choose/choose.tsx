@@ -459,10 +459,10 @@ export default function Choose() {
                 }
               })
               // 检查数组1中是否有数组2中没有的数据
-              const hasUnselectedGroup = groupedByCategory.some((groupId: any) => 
+              const hasUnselectedGroup = groupedByCategory.some((groupId: any) =>
                 !selectedAddOneGood.some((selected: any) => selected.groupId === groupId.id) || selectedAddOneGood.filter((selected: any) => selected.groupId === groupId.id).reduce((acc, item) => acc + item.goodsCount, 0) < groupId.mealOptionalQuantity
               )
-              
+
               if (hasUnselectedGroup) {
                 showToast({
                   title: '请完成所有商品选择',
@@ -478,10 +478,17 @@ export default function Choose() {
                 "deskId": tableInfo?.tableId || 0,
                 "shopId": currentShop?.shopId!,
                 "openId": userInfo?.openid!,
+                "classificationId": setGoodDetail?.classificationId,
                 "minimumPurchaseQuantity": setGoodDetail?.minimumPurchaseQuantity,
                 "purchaseQuantityLimit": setGoodDetail?.purchaseQuantityLimit,
                 "standardPrice": setGoodDetail?.standardPrice,
                 "mealQuantity": setGoodDetail?.mealQuantity,
+                "cartModifyReqVOList": selectedAddOneGood.map((item: any) => {
+                  return {
+                    "commodityId": item.mealId,
+                    "count": item.goodsCount,
+                  }
+                }),
               } as ICartRequest
               addCartGoodAPI(queryData, (res) => {
                 if (res.success && res.data) {

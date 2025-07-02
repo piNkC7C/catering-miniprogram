@@ -228,6 +228,12 @@ export default function Index() {
           <View
             className='action-card-item'
             onClick={() => {
+              showToast({
+                title: '暂未开放',
+                icon: 'none',
+                duration: 1000,
+              })
+              return
               navigateTo({
                 url: routes.find((route) => route.name === 'points')?.path || '',
               })
