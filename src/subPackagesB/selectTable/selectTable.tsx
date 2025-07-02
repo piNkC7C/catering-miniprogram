@@ -56,9 +56,9 @@ export default function SelectTable() {
             }, {});
 
 
-            // console.log('id', id);
-            // console.log('shopId', shopId);
-            // console.log('desNum', desNum);
+            console.log('id', id);
+            console.log('shopId', shopId);
+            console.log('desNum', desNum);
 
             if (id) {
                 setTableId(id)
