@@ -25,14 +25,11 @@ export default function Address() {
 
     let qqmapsdk: any
 
-    useLoad(() => {
+    // 逆解析经纬度获取地址信息
+    const getAddressByLocation = (latitude, longitude) => {
         qqmapsdk = new QQMapWX({
             key: qqmapsdkKey
         })
-    })
-
-    // 逆解析经纬度获取地址信息
-    const getAddressByLocation = (latitude, longitude) => {
         qqmapsdk.reverseGeocoder({
             location: {
                 latitude,
