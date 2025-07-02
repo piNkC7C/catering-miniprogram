@@ -38,6 +38,7 @@ export default function Choose() {
           setSelectedIncludeGood(res.data.mealSpecificationInfoList)
           setSetGoodDetail(res.data)
           setGoodCount(res.data.minimumPurchaseQuantity)
+          setGoodPrice(res.data.setStandardPrice)
         }
       })
     }
@@ -57,12 +58,12 @@ export default function Choose() {
   const [selectedAddOneGood, setSelectedAddOneGood] = useState<any[]>([])
 
   // 商品价格
-  const [goodPrice, setGoodPrice] = useState<number>(39)
+  const [goodPrice, setGoodPrice] = useState<number>(0)
   // 商品数量
   const [goodCount, setGoodCount] = useState<number>(0)
 
   // 商品列表
-  const gridItem = (listItem: any, index: number, max: number | null, total: number) => {
+  const gridItem = (listItem: any, index: number, max: number | null, total: number, groupId: number) => {
     return (
       <Grid.Item
         key={listItem.id}
@@ -78,12 +79,13 @@ export default function Choose() {
               {/* &nbsp;&nbsp;x{listItem.specificationQuantity} */}
             </View>
             <InputNumber
+              readOnly
               defaultValue={0}
-              disabled={total - selectedAddOneGood.reduce((acc, item) => acc + item.goodsCount, 0) == 0 && selectedAddOneGood.every((item) => {
+              disabled={total - selectedAddOneGood.filter((item: any) => item.groupId === groupId).reduce((acc, item) => acc + item.goodsCount, 0) == 0 && selectedAddOneGood.every((item) => {
                 return item.id !== listItem.id
               })}
               value={selectedAddOneGood.find((item: any) => item.id === listItem.id)?.goodsCount || 0}
-              max={max || total - selectedAddOneGood.reduce((acc, item) => acc + item.goodsCount, 0)}
+              max={max || total - selectedAddOneGood.filter((item: any) => item.groupId === groupId).reduce((acc, item) => acc + item.goodsCount, 0)}
               min={0}
               allowEmpty
               onChange={(value) => {
@@ -100,6 +102,7 @@ export default function Choose() {
                       mealName: listItem.mealName,
                       mealImage: listItem.mealImage,
                       goodsCount: count,
+                      groupId: groupId,
                     }
                     setSelectedAddOneGood([...selectedAddOneGood, { ...cartData }])
                   }
@@ -307,7 +310,7 @@ export default function Choose() {
                 </View>
                 <Grid columns={3} gap={7}>
                   {groupItem?.mealSpecificationInfoList.map((listItem, index) => (
-                    gridItem(listItem, index, groupItem.canRepeated == 0 ? 1 : null, groupItem.mealOptionalQuantity)
+                    gridItem(listItem, index, groupItem.canRepeated == 0 ? 1 : null, groupItem.mealOptionalQuantity, groupItem.id)
                   ))}
                 </Grid>
               </View>
@@ -409,6 +412,9 @@ export default function Choose() {
               } else {
                 smoothScrollTo(0, 200)
               }
+              // 回复默认起购数量
+              setGoodCount(setGoodDetail?.minimumPurchaseQuantity)
+              // 清空选择的加一商品
               setSelectedAddOneGood([])
             }}
           >恢复默认</Button>
@@ -442,6 +448,24 @@ export default function Choose() {
               if (selectedAddOneGood.length == 0 && allSelectedAddOneGood.length > 0) {
                 showToast({
                   title: '请至少选择一款商品',
+                  icon: 'none',
+                })
+                return
+              }
+              const groupedByCategory = allSelectedAddOneGood.map((item: any) => {
+                return {
+                  id: item.id,
+                  mealOptionalQuantity: item.mealOptionalQuantity,
+                }
+              })
+              // 检查数组1中是否有数组2中没有的数据
+              const hasUnselectedGroup = groupedByCategory.some((groupId: any) => 
+                !selectedAddOneGood.some((selected: any) => selected.groupId === groupId.id) || selectedAddOneGood.filter((selected: any) => selected.groupId === groupId.id).reduce((acc, item) => acc + item.goodsCount, 0) < groupId.mealOptionalQuantity
+              )
+              
+              if (hasUnselectedGroup) {
+                showToast({
+                  title: '请完成所有商品选择',
                   icon: 'none',
                 })
                 return

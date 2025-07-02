@@ -158,6 +158,13 @@ export default function Order() {
     })?.count
   }
 
+  // 侧边栏徽标
+  const getSideBarBadgeValue = (item: any) => {
+    return cartList.filter((findItem) => {
+      return findItem.classificationId === item.classificationId
+    }).reduce((acc, curr) => acc + curr.count, 0)
+  }
+
   // 门店信息
   const [shopIsFavor, setShopIsFavor] = useState<boolean>(false)
 
@@ -422,9 +429,7 @@ export default function Order() {
                 // 忽视ts，title类型为string，但是这里需要传入一个组件
                 <SideBar.Item title={
                   <>
-                    <Badge value={cartList.filter((findItem) => {
-                      return findItem.classificationId === item.classificationId
-                    }).reduce((acc, curr) => acc + curr.count, 0)}>
+                    <Badge value={getSideBarBadgeValue(item)}>
                       {item.classificationName}
                     </Badge>
                   </>
@@ -604,6 +609,13 @@ export default function Order() {
                                             borderRadius: pxTransform(viewHeight * 0.05),
                                           }}
                                           onClick={() => {
+                                            if (getCartGoodCount(goodsItem.id)! >= goodsItem.purchaseQuantityLimit) {
+                                              showToast({
+                                                title: '已达到限购数量',
+                                                icon: 'none',
+                                              })
+                                              return
+                                            }
                                             getSetGoodDetailAPI({ id: goodsItem.id }, (res: IResponseApi<any>) => {
                                               if (res.success) {
                                                 navigateTo({
@@ -682,6 +694,7 @@ export default function Order() {
                                                       "deskId": tableInfo?.tableId || 0,
                                                       "shopId": currentShop?.shopId!,
                                                       "openId": userInfo?.openid!,
+                                                      "classificationId": groupItem.classificationId,
                                                       "cartModifyReqVOList": [],
                                                       "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
                                                       "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
@@ -733,6 +746,7 @@ export default function Order() {
                                               "deskId": tableInfo?.tableId || 0,
                                               "shopId": currentShop?.shopId!,
                                               "openId": userInfo?.openid!,
+                                              "classificationId": groupItem.classificationId,
                                               "cartModifyReqVOList": [],
                                               "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
                                               "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
@@ -861,7 +875,7 @@ export default function Order() {
                 }
               }}
             >
-              <Badge value={cartSelectedList.length}>
+              <Badge value={cartSelectedList.reduce((acc, item) => acc + item.count, 0)}>
                 <Cart
                   size={pxTransform(windowWidth * 0.1)}
                 />
@@ -1309,6 +1323,7 @@ export default function Order() {
                                     "deskId": tableInfo?.tableId || 0,
                                     "shopId": currentShop?.shopId!,
                                     "openId": userInfo?.openid!,
+                                    "classificationId": cartItem.classificationId,
                                     "cartModifyReqVOList": [],
                                     "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                     "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
@@ -1360,6 +1375,7 @@ export default function Order() {
                                   "deskId": tableInfo?.tableId || 0,
                                   "shopId": currentShop?.shopId!,
                                   "openId": userInfo?.openid!,
+                                  "classificationId": cartItem.classificationId,
                                   "cartModifyReqVOList": [],
                                   "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                   "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,

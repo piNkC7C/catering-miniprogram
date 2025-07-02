@@ -1,47 +1,48 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { IPointsState } from '../types/points'
+import { jifenDetail } from '@/utils/constants'
 
 const initialState: IPointsState = {
     pointsList: [
         {
             id: 1,
             name: '50元电子优惠券',
-            img: 'points-list',
+            img: jifenDetail,
             cost: 100,
             left: 1000
         },
         {
             id: 2,
             name: '100元电子优惠券',
-            img: 'points-rule',
+            img: jifenDetail,
             cost: 100,
             left: 1000
         },
         {
             id: 3,
             name: '100元电子优惠券',
-            img: 'points-rule',
+            img: jifenDetail,
             cost: 100,
             left: 1000
         },
         {
             id: 4,
             name: '100元电子优惠券',
-            img: 'points-rule',
+            img: jifenDetail,
             cost: 100,
             left: 1000
         },
         {
             id: 5,
             name: '100元电子优惠券',
-            img: 'points-rule',
+            img: jifenDetail,
             cost: 100,
             left: 1000
         },
         {
             id: 6,
             name: '100元电子优惠券',
-            img: 'points-rule',
+            img: jifenDetail,
             cost: 100,
             left: 1000
         }

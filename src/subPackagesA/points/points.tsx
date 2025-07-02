@@ -210,7 +210,7 @@ export default function Points() {
                                         }}
                                         src={item.img}
                                         width='100%'
-                                        height='65%'
+                                        height='100%'
                                     ></Image>
                                     <Text
                                         style={{

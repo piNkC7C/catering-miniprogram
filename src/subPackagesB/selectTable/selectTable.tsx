@@ -294,6 +294,7 @@ export default function SelectTable() {
                                                                     "shopId": shopId,
                                                                     "deskId": tableId,
                                                                     "openId": userInfo?.openid!,
+                                                                    "classificationId": cartItem.classificationId,
                                                                     "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
                                                                     "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
                                                                     "cartModifyReqVOList": cartItem.cartDOS?.map((cartDO) => {
