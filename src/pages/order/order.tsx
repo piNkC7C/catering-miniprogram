@@ -942,33 +942,33 @@ export default function Order() {
             }}
             onClick={() => {
               if (!(tableInfo?.tableNum && tableInfo?.peopleNum)) {
-                // scanCode(
-                //   {
-                //     // scanType: ['qrCode'],
-                //     success: (res) => {
-                //       console.log('扫桌码成功', res.path)
-                //       // 确保路径以 / 开头，避免相对路径问题
-                //       let targetUrl = res.path
-                //       if (!targetUrl.startsWith('/')) {
-                //         targetUrl = '/' + targetUrl
-                //       }
-                //       console.log('处理后的跳转地址', targetUrl)
-                //       navigateTo(
-                //         {
-                //           url: targetUrl
-                //         }
-                //       )
-                //     },
-                //     fail: (err) => {
-                //       console.log('扫桌码失败', err)
-                //     }
-                //   }
-                // )
-                navigateTo(
+                scanCode(
                   {
-                    url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?scene=${encodeURIComponent(`id=2&shopId=2&desNum=7`)}`,
+                    // scanType: ['qrCode'],
+                    success: (res) => {
+                      console.log('扫桌码成功', res.path)
+                      // 确保路径以 / 开头，避免相对路径问题
+                      let targetUrl = res.path
+                      if (!targetUrl.startsWith('/')) {
+                        targetUrl = '/' + targetUrl
+                      }
+                      console.log('处理后的跳转地址', targetUrl)
+                      navigateTo(
+                        {
+                          url: targetUrl
+                        }
+                      )
+                    },
+                    fail: (err) => {
+                      console.log('扫桌码失败', err)
+                    }
                   }
                 )
+                // navigateTo(
+                //   {
+                //     url: (routes.find((route) => route.name === 'selectTable')?.path || '') + `?scene=${encodeURIComponent(`id=2&shopId=2&desNum=7`)}`,
+                //   }
+                // )
               } else {
                 if (cartSelectedList.length == 0) {
                   return
