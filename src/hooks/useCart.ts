@@ -48,9 +48,9 @@ export function useCart() {
 
     // 获取购物车中的某个商品的购买数量
     const getCartGoodCount = (commodityId: number) => {
-        return cartList.find((findItem) => {
+        return cartList.filter((findItem) => {
             return findItem.commodityId === commodityId
-        })?.count
+        })?.reduce((acc, item) => acc + item.count, 0)
     }
 
     // 获取购物车列表
@@ -213,8 +213,9 @@ export function useCart() {
     }
 
     // 删除购物车某个商品
-    const deleteCart = (commodityId: number, isSet: boolean) => {
+    const deleteCart = (commodityId: number, isSet: boolean, id?: string) => {
         deleteCartGoodAPI({
+            "id": id || '',
             "commodityId": commodityId,
             "isSet": isSet,
             "deskId": tableInfo?.tableId || 0,

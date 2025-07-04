@@ -6,7 +6,7 @@ import './order.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCartListAction, setCheckoutOrderAction, setOrderTabsListAction, setGroupGoodsListAction } from '@/redux/modules/order'
 import { setIsRetrieve } from '@/redux/modules/login'
-import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Collapse, Divider, Dialog } from '@nutui/nutui-react-taro'
+import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, Elevator, Card, Image, SideBar, Cell, Tag, Popup, Checkbox, Divider, Dialog } from '@nutui/nutui-react-taro'
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
@@ -85,7 +85,7 @@ export default function Order() {
   }
 
   // 每次进入页面都检查是否选择了门店
-  useDidShow(() => {
+  useEffect(() => {
     // 解决因为页面跳转导致的windowHeight变化导致页面高度出问题
     const { windowHeight } = getSystemInfoSync()
     setRealWindowHeight(windowHeight)
@@ -112,7 +112,7 @@ export default function Order() {
         initSectionPositions()
       }, 300)
     }
-  })
+  }, [])
 
   useEffect(() => {
     if (finish) {
@@ -160,6 +160,17 @@ export default function Order() {
   // 使用说明弹窗
   const [showGoodsCouponDescriptionDialog, setShowGoodsCouponDescriptionDialog] = useState<boolean>(false)
   const [goodsCouponDescriptionDialogItem, setGoodsCouponDescriptionDialogItem] = useState<string>('')
+
+  // 套餐折叠状态管理（使用商品ID作为key）
+  const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({})
+
+  // 切换折叠状态
+  const toggleExpanded = (commodityId: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [commodityId]: !prev[commodityId]
+    }))
+  }
 
   // 创建一个手动滚动事件来检测元素可见性
   // const [visibleItems, setVisibleItems] = useState<string[]>([]);
@@ -1112,53 +1123,90 @@ export default function Order() {
                       >
                         {
                           cartItem.isSet ? (
-                            // 套餐类商品样式备用
-                            <Collapse
-                              defaultActiveName={['1']} expandIcon={<ArrowDown />}
-                              style={{
-                                width: '100%',
-                                '--nutui-collapse-item-padding': 0,
-                                '--nutui-collapse-item-header-border-bottom': 'none'
-                              } as any}
-                            >
+                            // 套餐类商品原生折叠实现
+                            <View style={{ width: '100%' }}>
                               {
-                                cartList.filter((findCartItem) => findCartItem.commodityId === cartItem.commodityId).map((collapseCartItem) => (
-                                  <Collapse.Item title={collapseCartItem.name} name="1">
+                                <View key={cartItem.id}>
+                                  {/* 折叠标题栏 */}
+                                  <View
+                                    className="collapse-header"
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'row',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      paddingTop: pxTransform(8),
+                                      paddingBottom: pxTransform(8),
+                                      cursor: 'pointer',
+                                    }}
+                                    onClick={() => toggleExpanded(cartItem.id)}
+                                  >
+                                    <Text style={{ fontSize: pxTransform(windowWidth * 0.035) }}>
+                                      {cartItem.name}
+                                    </Text>
+                                    <View
+                                      className={`arrow-icon ${expandedItems[cartItem.id] ? 'rotated' : ''}`}
+                                    >
+                                      <ArrowDown size={16} />
+                                    </View>
+                                  </View>
+
+                                  {/* 折叠内容 */}
+                                  <View
+                                    className={`collapse-content ${expandedItems[cartItem.id] ? 'expanded' : ''}`}
+                                    style={{ paddingLeft: pxTransform(8) }}
+                                  >
                                     {
-                                      collapseCartItem.cartDOS?.map((goodsItem) => (
+                                      cartItem.cartDOS?.map((goodsItem, index) => (
                                         <View
+                                          key={index}
                                           className='item-detail'
+                                          style={{
+                                            paddingTop: pxTransform(4),
+                                            paddingBottom: pxTransform(4),
+                                          }}
                                         >
                                           <View
                                             style={{
                                               display: 'flex',
                                               flexDirection: 'row',
                                               alignItems: 'center',
+                                              justifyContent: 'space-between',
                                             }}
                                           >
-                                            <Image
-                                              src={goodsItem.image}
-                                              width={pxTransform(windowWidth * 0.1)}
-                                              height={pxTransform(windowWidth * 0.1)}
-                                            />
+                                            <View
+                                              style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                              }}
+                                            >
+                                              <Image
+                                                src={goodsItem.image}
+                                                width={pxTransform(windowWidth * 0.08)}
+                                                height={pxTransform(windowWidth * 0.08)}
+                                              />
+                                              <Text
+                                                style={{
+                                                  marginLeft: pxTransform(windowWidth * 0.02),
+                                                  fontSize: pxTransform(windowWidth * 0.03),
+                                                }}
+                                              >{goodsItem.name}</Text>
+                                            </View>
                                             <Text
                                               style={{
-                                                marginLeft: pxTransform(windowWidth * 0.02),
+                                                color: '#939393',
+                                                fontSize: pxTransform(windowWidth * 0.03),
                                               }}
-                                            >{goodsItem.name}</Text>
+                                            >x{goodsItem.count}</Text>
                                           </View>
-                                          <Text
-                                            style={{
-                                              color: '#939393',
-                                            }}
-                                          >x{goodsItem.count}</Text>
                                         </View>
                                       ))
                                     }
-                                  </Collapse.Item>
-                                ))
+                                  </View>
+                                </View>
                               }
-                            </Collapse>
+                            </View>
                           ) : (
                             <View
                               style={{
@@ -1205,7 +1253,7 @@ export default function Order() {
                               onClick={() => {
                                 if (cartItem.count === cartItem.minimumPurchaseQuantity) {
                                   // console.log('删除购物车项', cartItem.name);
-                                  deleteCart(cartItem.commodityId, cartItem.isSet)
+                                  deleteCart(cartItem.commodityId, cartItem.isSet, cartItem.id)
                                 } else {
                                   // console.log('购物车商品数量减一', cartItem.name);
                                   modifyCart({

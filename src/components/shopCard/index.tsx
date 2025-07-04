@@ -14,6 +14,7 @@ import { IGroupGoodsList } from '@/redux/types/order'
 import { setOrderTabsListAction, setGroupGoodsListAction } from '@/redux/modules/order'
 import { getGroupGoodsListAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
+import { setTableInfo } from '@/redux/modules/login'
 
 function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
     // 获取登录状态和用户信息
@@ -94,6 +95,7 @@ function ShopCard({ shopItem, type }: { shopItem: IShopItem, type?: string }) {
                     return
                 }
                 setIsClickShop(true)
+                dispatch(setTableInfo(null))
                 dispatch(setCurrentShopAction({
                     type: 'set',
                     data: shopItem

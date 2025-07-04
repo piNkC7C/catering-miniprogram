@@ -116,6 +116,31 @@
             color: #333;
           }
 
+          // 折叠动画样式
+          .collapse-content {
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+            max-height: 0;
+            
+            &.expanded {
+              opacity: 1;
+              max-height: 500px; // 设置一个足够大的值
+            }
+          }
+
+          .collapse-header {
+            transition: all 0.3s ease;
+            
+            .arrow-icon {
+              transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              
+              &.rotated {
+                transform: rotate(180deg);
+              }
+            }
+          }
+
           .right-bottom {
             width: 100%;
             display: flex;

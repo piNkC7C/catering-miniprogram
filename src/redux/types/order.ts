@@ -45,6 +45,7 @@ export interface ICouponItem {
 }
 
 export interface ICartItem {
+  id: string // 商品/套餐id
   commodityId: number // 商品/套餐id
   count: number // 数量
   classificationId: number // 分类id

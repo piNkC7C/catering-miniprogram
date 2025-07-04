@@ -183,6 +183,7 @@ export const addCartGoodAPI = (data: any, callback: (res: IResponseApi<any>) => 
 }
 
 export const deleteCartGoodAPI = (data: {
+    id?: string
     commodityId: number
     isSet?: boolean
     deskId: number | null
