@@ -475,6 +475,20 @@ export default function Choose() {
                 })
                 return
               }
+              // 获取已选加一商品
+              const list1 = selectedAddOneGood.map((item: any) => {
+                return {
+                  "commodityId": item.mealId,
+                  "count": item.goodsCount,
+                }
+              })
+              // 获取已选包含商品
+              const list2 = selectedIncludeGood.map((item: any) => {
+                return {
+                  "commodityId": item.mealId,
+                  "count": 1,
+                }
+              })
               modifyCart({
                 commodityId: setGoodDetail?.id,
                 selected: true,
@@ -482,17 +496,12 @@ export default function Choose() {
                 isAdd: true,
                 count: goodCount,
                 classificationId: setGoodDetail?.classificationId,
-                cartModifyReqVOList: selectedAddOneGood.map((item: any) => {
-                  return {
-                    "commodityId": item.mealId,
-                    "count": item.goodsCount,
-                  }
-                }),
+                cartModifyReqVOList: [...list1, ...list2],
                 minimumPurchaseQuantity: setGoodDetail?.minimumPurchaseQuantity,
                 purchaseQuantityLimit: setGoodDetail?.purchaseQuantityLimit,
                 standardPrice: setGoodDetail?.setStandardPrice,
                 mealQuantity: setGoodDetail?.mealQuantity,
-              })
+              }, 2)
               // if (selectedAddOneGood.length > 0) {
               //   console.log('selectedAddOneGood', selectedAddOneGood)
               //   navigateBack()

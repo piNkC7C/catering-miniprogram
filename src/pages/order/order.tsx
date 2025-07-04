@@ -649,7 +649,7 @@ export default function Order() {
                                                     return findItem.commodityId === goodsItem.id
                                                   })?.count === goodsItem.minimumPurchaseQuantity) {
                                                     // console.log('删除购物车项', goodsItem.mealName);
-                                                    deleteCart(goodsItem.id)
+                                                    deleteCart(goodsItem.id, false)
                                                   } else {
                                                     // console.log('购物车商品数量减一', goodsItem.mealName);
                                                     modifyCart({
@@ -1114,46 +1114,50 @@ export default function Order() {
                           cartItem.isSet ? (
                             // 套餐类商品样式备用
                             <Collapse
-                              defaultActiveName={['1', '2']} expandIcon={<ArrowDown />}
+                              defaultActiveName={['1']} expandIcon={<ArrowDown />}
                               style={{
                                 width: '100%',
                                 '--nutui-collapse-item-padding': 0,
                                 '--nutui-collapse-item-header-border-bottom': 'none'
                               } as any}
                             >
-                              <Collapse.Item title={cartItem.name} name="1">
-                                {
-                                  cartItem.cartDOS?.map((goodsItem) => (
-                                    <View
-                                      className='item-detail'
-                                    >
-                                      <View
-                                        style={{
-                                          display: 'flex',
-                                          flexDirection: 'row',
-                                          alignItems: 'center',
-                                        }}
-                                      >
-                                        <Image
-                                          src={goodsItem.image}
-                                          width={pxTransform(windowWidth * 0.1)}
-                                          height={pxTransform(windowWidth * 0.1)}
-                                        />
-                                        <Text
-                                          style={{
-                                            marginLeft: pxTransform(windowWidth * 0.02),
-                                          }}
-                                        >{goodsItem.name}</Text>
-                                      </View>
-                                      <Text
-                                        style={{
-                                          color: '#939393',
-                                        }}
-                                      >x{goodsItem.count}</Text>
-                                    </View>
-                                  ))
-                                }
-                              </Collapse.Item>
+                              {
+                                cartList.filter((findCartItem) => findCartItem.commodityId === cartItem.commodityId).map((collapseCartItem) => (
+                                  <Collapse.Item title={collapseCartItem.name} name="1">
+                                    {
+                                      collapseCartItem.cartDOS?.map((goodsItem) => (
+                                        <View
+                                          className='item-detail'
+                                        >
+                                          <View
+                                            style={{
+                                              display: 'flex',
+                                              flexDirection: 'row',
+                                              alignItems: 'center',
+                                            }}
+                                          >
+                                            <Image
+                                              src={goodsItem.image}
+                                              width={pxTransform(windowWidth * 0.1)}
+                                              height={pxTransform(windowWidth * 0.1)}
+                                            />
+                                            <Text
+                                              style={{
+                                                marginLeft: pxTransform(windowWidth * 0.02),
+                                              }}
+                                            >{goodsItem.name}</Text>
+                                          </View>
+                                          <Text
+                                            style={{
+                                              color: '#939393',
+                                            }}
+                                          >x{goodsItem.count}</Text>
+                                        </View>
+                                      ))
+                                    }
+                                  </Collapse.Item>
+                                ))
+                              }
                             </Collapse>
                           ) : (
                             <View
@@ -1201,7 +1205,7 @@ export default function Order() {
                               onClick={() => {
                                 if (cartItem.count === cartItem.minimumPurchaseQuantity) {
                                   // console.log('删除购物车项', cartItem.name);
-                                  deleteCart(cartItem.commodityId)
+                                  deleteCart(cartItem.commodityId, cartItem.isSet)
                                 } else {
                                   // console.log('购物车商品数量减一', cartItem.name);
                                   modifyCart({
@@ -1215,7 +1219,7 @@ export default function Order() {
                                     purchaseQuantityLimit: cartItem.purchaseQuantityLimit,
                                     standardPrice: cartItem.price,
                                     mealQuantity: getGoodsQuantity(cartItem as any),
-                                    cartModifyReqVOList: [],
+                                    cartModifyReqVOList: cartItem.cartDOS || [],
                                   })
                                 }
                               }}
@@ -1255,7 +1259,7 @@ export default function Order() {
                                   purchaseQuantityLimit: cartItem.purchaseQuantityLimit,
                                   standardPrice: cartItem.price,
                                   mealQuantity: getGoodsQuantity(cartItem as any),
-                                  cartModifyReqVOList: [],
+                                  cartModifyReqVOList: cartItem.cartDOS || [],
                                 })
                               }}
                             >+</View>

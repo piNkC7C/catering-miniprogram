@@ -82,7 +82,7 @@ export function useCart() {
         standardPrice: number,
         mealQuantity: number,
         cartModifyReqVOList: any[],
-    }) => {
+    }, type: 1 | 2 = 1) => {
         console.log('data', data);
 
         const queryData = {
@@ -105,7 +105,7 @@ export function useCart() {
         addCartGoodAPI(queryData, (res: IResponseApi<any>) => {
             if (res.success) {
                 getCartList()
-                if (data.isSet) {
+                if (data.isSet && type == 2) {
                     navigateBack()
                 }
             }
@@ -213,10 +213,10 @@ export function useCart() {
     }
 
     // 删除购物车某个商品
-    const deleteCart = (commodityId: number) => {
+    const deleteCart = (commodityId: number, isSet: boolean) => {
         deleteCartGoodAPI({
             "commodityId": commodityId,
-            "isSet": false,
+            "isSet": isSet,
             "deskId": tableInfo?.tableId || 0,
             "shopId": currentShop?.shopId!,
             "openId": userInfo?.openid!,
