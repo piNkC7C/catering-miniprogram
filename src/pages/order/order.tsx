@@ -60,8 +60,6 @@ export default function Order() {
   const [sideBarValue, setSideBarValue] = useState<number | string>(0)
   // 控制是否响应侧边栏点击事件
   const [isUserClick, setIsUserClick] = useState<boolean>(false)
-  // 当前滚动位置
-  const [currentScrollTop, setCurrentScrollTop] = useState<number>(0)
   // 滚动容器引用
   const scrollViewRef = useRef<any>(null)
   // 存储各个分类的位置信息
@@ -177,15 +175,12 @@ export default function Order() {
 
   // 滚动事件处理
   const handleScrollEvent = (e: any) => {
-    const scrollTop = e.detail.scrollTop
-    // 更新当前滚动位置
-    setCurrentScrollTop(scrollTop)
-    
-    // 如果是用户点击侧边栏触发的滚动，则不处理侧边栏更新
+    // 如果是用户点击侧边栏触发的滚动，则不处理
     if (isUserClick) {
       return
     }
 
+    const scrollTop = e.detail.scrollTop
     // console.log('当前滚动位置:', scrollTop)
 
     // 如果位置信息还没有初始化，直接返回
@@ -223,12 +218,6 @@ export default function Order() {
     console.log('侧边栏点击:', key)
     setIsUserClick(true)
     setSideBarValue(key)
-
-    // 设置滚动位置 - 只在用户点击时更新
-    const targetPosition = sectionPositions.current.find((item) => item.id === key)?.top
-    if (targetPosition !== undefined) {
-      setCurrentScrollTop(targetPosition)
-    }
 
     // 延迟重置用户点击状态，给自动滚动留出时间
     setTimeout(() => {
@@ -432,8 +421,8 @@ export default function Order() {
             ref={scrollViewRef}
             id='parentScroll'
             scrollY
-            scrollTop={isUserClick ? sectionPositions.current.find((item) => item.id === sideBarValue)?.top : currentScrollTop}
-            // scrollIntoView={isUserClick ? `sticky-${sideBarValue}` : ''}
+            // scrollTop={isUserClick ? sectionPositions.current.find((item) => item.id === sideBarValue)?.top : undefined}
+            scrollIntoView={isUserClick ? `good-${sideBarValue}-0` : ''}
             onScroll={handleScroll}
             style={{
               flex: 1,
@@ -478,8 +467,9 @@ export default function Order() {
                       }}
                     >
                       {
-                        groupItem.goodsList.map((goodsItem) => (
+                        groupItem.goodsList.map((goodsItem, index) => (
                           <View
+                            id={`good-${groupItem.classificationId}-${index}`}
                             style={{
                               width: '100%',
                               height: pxTransform(windowWidth * 0.2),

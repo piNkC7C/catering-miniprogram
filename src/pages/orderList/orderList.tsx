@@ -10,7 +10,7 @@ import { setCurrentOrderAction, setOrderListAction, setPayOrderInfoAction, setRe
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
-import { getGoodsRefundRecordAPI, getPrePayByOrderIdAPI, cancelOrderAPI, getOrderRefundRecordAPI } from '@/api/order'
+import { getGoodsRefundRecordAPI, getPrePayByOrderIdAPI, cancelOrderAPI, getOrderRefundRecordAPI, getGoodsRefundRecordDetailsAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { IOrderItem, IRefundItem } from '@/redux/types/order'
 import { useOrder } from '@/hooks/useOrder'
@@ -50,6 +50,18 @@ export default function OrderList() {
   const filterOrderList = (tabValue: number) => {
     if (tabValue === 0) {
       return orderList
+    }
+    if (tabValue === 100) {
+      return orderList.filter((orderItem) => orderItem.orderStatus === 1)
+    }
+    if (tabValue === 101) {
+      return orderList.filter((orderItem) => orderItem.orderStatus === 2)
+    }
+    if (tabValue === 102) {
+      return orderList.filter((orderItem) => orderItem.orderStatus === 3)
+    }
+    if (tabValue === 103) {
+      return orderList.filter((orderItem) => orderItem.orderStatus === 4 || orderItem.orderStatus === 5)
     }
     return orderList.filter((orderItem) => orderItem.orderType === tabValue)
   }
@@ -92,7 +104,23 @@ export default function OrderList() {
     {
       title: '商城订单',
       value: 3
-    }
+    },
+    {
+      title: '待支付',
+      value: 100
+    },
+    {
+      title: '已取消',
+      value: 101
+    },
+    {
+      title: '已完成',
+      value: 102
+    },
+    {
+      title: '有售后',
+      value: 103
+    },
   ]
 
   // 当前选中的tab
@@ -101,7 +129,6 @@ export default function OrderList() {
   // 获取退款记录并跳转
   const getRefundList = (res: IResponseApi<IRefundItem[]>) => {
     if (res.success) {
-      // console.log(res.data);
       dispatch(setRefundListAction({
         type: 'set',
         data: res.data.map((item) => {
@@ -118,8 +145,30 @@ export default function OrderList() {
         }),
       }))
       navigateTo({
-        url: (routes.find((route) => route.name === 'refundList')?.path) || ''
+        url: (routes.find((route) => route.name === 'refundList')?.path || '')
       })
+      // getGoodsRefundRecordDetailsAPI({
+      //   id: res.data[0].id
+      // }, (res: IResponseApi<any>) => {
+      //   if (res.success) {
+      //     dispatch(setCurrentRefundAction({
+      //       type: 'set',
+      //       data: {
+      //         ...res.data,
+      //         goodList: res.data[0].goodsList
+      //       }
+      //     }))
+      //     navigateTo({
+      //       url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
+      //     })
+      //   } else {
+      //     showToast({
+      //       title: '获取详情失败',
+      //       icon: 'error'
+      //     })
+
+      //   }
+      // })
     } else {
       console.log('获取退款记录失败', res);
       showToast({
@@ -132,9 +181,14 @@ export default function OrderList() {
   // 跳转订单详情页
   // type: 1 点击订单体，2 点击按钮
   const navigateToOrderDetail = (orderItem: IOrderItem) => {
+    // 设置订单详情页数据，跳转详情页
+    dispatch(setCurrentOrderAction({
+      type: 'set',
+      data: orderItem
+    }))
     // 已关闭,发生过订单级退款,跳转详情页
     if (orderItem.orderStatus === 4) {
-      getOrderRefundRecordAPI({
+      return getOrderRefundRecordAPI({
         orderId: orderItem.orderId
       }, (res: IResponseApi<any>) => {
         if (res.success) {
@@ -165,11 +219,6 @@ export default function OrderList() {
           orderId: orderItem.orderId
         }, getRefundList)
       }
-    // 设置订单详情页数据，跳转详情页
-    dispatch(setCurrentOrderAction({
-      type: 'set',
-      data: orderItem
-    }))
     navigateTo({
       url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
     })
@@ -478,7 +527,7 @@ export default function OrderList() {
                                         navigateToOrderDetail(orderItem)
                                       }}
                                     >查看订单</Button>
-                                    <Button
+                                    {/* <Button
                                       type="primary"
                                       size="normal"
                                       style={{
@@ -487,7 +536,7 @@ export default function OrderList() {
                                       onClick={() => {
                                         againOrder(orderItem.orderId, orderItem.shopId)
                                       }}
-                                    >再来一单</Button>
+                                    >再来一单</Button> */}
                                   </View>
                                 )
                               }
@@ -516,7 +565,7 @@ export default function OrderList() {
                                   <View
                                     className='order-status1'
                                   >
-                                    <Button
+                                    {/* <Button
                                       type="default"
                                       size="normal"
                                       style={{
@@ -525,7 +574,7 @@ export default function OrderList() {
                                       onClick={() => {
                                         againOrder(orderItem.orderId, orderItem.shopId)
                                       }}
-                                    >再来一单</Button>
+                                    >再来一单</Button> */}
                                     <Button
                                       type='primary'
                                       size="normal"
