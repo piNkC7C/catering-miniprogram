@@ -15,6 +15,7 @@ import { IGroupGoodsList } from '@/redux/types/order'
 import { addSharedCartGoodsAPI, getCartListAPI, getGroupGoodsListAPI } from '@/api/order'
 import { setCartListAction, setGroupGoodsListAction, setOrderTabsListAction } from '@/redux/modules/order'
 import { useShopAndGoods } from '@/hooks/useShopAndGoods'
+import { useCart } from '@/hooks/useCart'
 
 export default function SelectTable() {
     // 获取登录状态和用户信息
@@ -28,6 +29,7 @@ export default function SelectTable() {
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
+    const { getCartList } = useCart()
 
     // 更新商品列表
     const { handleGroupGoodsList } = useShopAndGoods()
@@ -350,6 +352,7 @@ export default function SelectTable() {
                                                 }
                                             })
                                         } else {
+                                            // getCartList()
                                             switchTab({
                                                 url: '/pages/order/order',
                                             })

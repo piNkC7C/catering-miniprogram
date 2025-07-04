@@ -10,12 +10,12 @@ import { pxTransform, SearchBar, ConfigProvider, Sticky, Button, Badge, Price, E
 import { Cart, Star, StarFill, ArrowDown, Add, Minus, Del } from '@nutui/icons-react-taro'
 import { useThrottleFn } from 'ahooks'
 import LoginPopup from '@/components/LoginPopup'
-import { TABLE_INFO, routes, orderJoinVip } from '@/utils/constants'
+import { routes } from '@/utils/constants'
 import { IResponseApi } from '@/api/type'
-import { getGroupGoodsListAPI, getCartListAPI, addCartGoodAPI, deleteCartGoodAPI, clearCartAPI, selectedCartAPI, confirmPaymentAPI, getSetGoodDetailAPI } from '@/api/order'
-import type { IGroupGoodsList, ICartRequest } from '@/redux/types/order'
+import { clearCartAPI, confirmPaymentAPI, getSetGoodDetailAPI } from '@/api/order'
 import ShopInfo from '@/components/shopInfo'
 import { useShopAndGoods } from '@/hooks/useShopAndGoods'
+import { useCart } from '@/hooks/useCart'
 
 export default function Order() {
   // 获取登录状态和用户信息
@@ -36,25 +36,23 @@ export default function Order() {
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
-  const { finish, getAddressByLocation, handleAutoSelectShop, getGoodsQuantity } = useShopAndGoods()
+  const { finish, setFinish, getAddressByLocation, handleAutoSelectShop, getGoodsQuantity } = useShopAndGoods()
+  // 购物车相关方法
+  const {
+    cartSelectedList, // 购物车选中的列表
+    getCartGood, // 获取购物车中的某个商品
+    getCartGoodCount, // 获取购物车中的某个商品的购买数量
+    getCartList, // 获取购物车列表
+    modifyCart, // 修改购物车
+    deleteCart, // 删除购物车某个商品
+    modifyCartSelected, // 购物车选中状态修改
+    clearCart // 清空购物车
+  } = useCart()
 
-  // 获取购物车列表
-  const getCartList = (res: IResponseApi<any>) => {
-    if (res.success) {
-      dispatch(setCartListAction({
-        type: 'set',
-        data: res.data
-      }))
-    }
-  }
 
   useEffect(() => {
     if (currentShop?.shopId) {
-      getCartListAPI({
-        shopId: currentShop?.shopId,
-        deskId: tableInfo?.tableId || 0,
-        openId: userInfo?.openid!,
-      }, getCartList)
+      getCartList()
     }
   }, [currentShop?.shopId])
 
@@ -62,6 +60,8 @@ export default function Order() {
   const [sideBarValue, setSideBarValue] = useState<number | string>(0)
   // 控制是否响应侧边栏点击事件
   const [isUserClick, setIsUserClick] = useState<boolean>(false)
+  // 当前滚动位置
+  const [currentScrollTop, setCurrentScrollTop] = useState<number>(0)
   // 滚动容器引用
   const scrollViewRef = useRef<any>(null)
   // 存储各个分类的位置信息
@@ -83,6 +83,7 @@ export default function Order() {
         console.log('分类位置信息:', sectionPositions.current)
       }
     })
+    // setFinish(false)
   }
 
   // 每次进入页面都检查是否选择了门店
@@ -138,26 +139,6 @@ export default function Order() {
   // 获取可视区域高度
   const viewHeight = realWindowHeight - navHeight
 
-
-  // 购物车
-  // 获取购物车选中的列表
-  const cartSelectedList = useMemo(() => {
-    return cartList.filter((cartItem) => cartItem.selected)
-  }, [cartList])
-  // 获取购物车中的某个商品
-  const getCartGood = (commodityId: number) => {
-    return cartList.find((findItem) => {
-      return findItem.commodityId === commodityId
-    })
-  }
-
-  // 获取购物车中的某个商品的购买数量
-  const getCartGoodCount = (commodityId: number) => {
-    return cartList.find((findItem) => {
-      return findItem.commodityId === commodityId
-    })?.count
-  }
-
   // 侧边栏徽标
   const getSideBarBadgeValue = (item: any) => {
     return cartList.filter((findItem) => {
@@ -196,12 +177,15 @@ export default function Order() {
 
   // 滚动事件处理
   const handleScrollEvent = (e: any) => {
-    // 如果是用户点击侧边栏触发的滚动，则不处理
+    const scrollTop = e.detail.scrollTop
+    // 更新当前滚动位置
+    setCurrentScrollTop(scrollTop)
+    
+    // 如果是用户点击侧边栏触发的滚动，则不处理侧边栏更新
     if (isUserClick) {
       return
     }
 
-    const scrollTop = e.detail.scrollTop
     // console.log('当前滚动位置:', scrollTop)
 
     // 如果位置信息还没有初始化，直接返回
@@ -236,9 +220,15 @@ export default function Order() {
 
   // 处理侧边栏点击事件
   const handleSideBarChange = (key: string | number) => {
-    // console.log('侧边栏点击:', key)
+    console.log('侧边栏点击:', key)
     setIsUserClick(true)
     setSideBarValue(key)
+
+    // 设置滚动位置 - 只在用户点击时更新
+    const targetPosition = sectionPositions.current.find((item) => item.id === key)?.top
+    if (targetPosition !== undefined) {
+      setCurrentScrollTop(targetPosition)
+    }
 
     // 延迟重置用户点击状态，给自动滚动留出时间
     setTimeout(() => {
@@ -442,7 +432,8 @@ export default function Order() {
             ref={scrollViewRef}
             id='parentScroll'
             scrollY
-            scrollIntoView={isUserClick ? `sticky-${sideBarValue}` : ''}
+            scrollTop={isUserClick ? sectionPositions.current.find((item) => item.id === sideBarValue)?.top : currentScrollTop}
+            // scrollIntoView={isUserClick ? `sticky-${sideBarValue}` : ''}
             onScroll={handleScroll}
             style={{
               flex: 1,
@@ -668,47 +659,21 @@ export default function Order() {
                                                     return findItem.commodityId === goodsItem.id
                                                   })?.count === goodsItem.minimumPurchaseQuantity) {
                                                     // console.log('删除购物车项', goodsItem.mealName);
-                                                    deleteCartGoodAPI({
-                                                      "commodityId": goodsItem.id,
-                                                      "isSet": false,
-                                                      "deskId": tableInfo?.tableId || 0,
-                                                      "shopId": currentShop?.shopId!,
-                                                      "openId": userInfo?.openid!,
-                                                    }, (res) => {
-                                                      if (res.success && res.data) {
-                                                        getCartListAPI({
-                                                          "deskId": tableInfo?.tableId || 0,
-                                                          "shopId": currentShop?.shopId!,
-                                                          "openId": userInfo?.openid!,
-                                                        }, getCartList)
-                                                      }
-                                                    })
+                                                    deleteCart(goodsItem.id)
                                                   } else {
                                                     // console.log('购物车商品数量减一', goodsItem.mealName);
-                                                    const queryData = {
-                                                      "commodityId": goodsItem.id,
-                                                      "count": 1,
-                                                      "isSet": false,
-                                                      "isAdd": false,
-                                                      "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
-                                                      "deskId": tableInfo?.tableId || 0,
-                                                      "shopId": currentShop?.shopId!,
-                                                      "openId": userInfo?.openid!,
-                                                      "classificationId": groupItem.classificationId,
-                                                      "cartModifyReqVOList": [],
-                                                      "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
-                                                      "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
-                                                      "standardPrice": goodsItem.standardPrice,
-                                                      "mealQuantity": getGoodsQuantity(goodsItem),
-                                                    } as ICartRequest
-                                                    addCartGoodAPI(queryData, (res) => {
-                                                      if (res.success && res.data) {
-                                                        getCartListAPI({
-                                                          "deskId": tableInfo?.tableId || 0,
-                                                          "shopId": currentShop?.shopId!,
-                                                          "openId": userInfo?.openid!,
-                                                        }, getCartList)
-                                                      }
+                                                    modifyCart({
+                                                      commodityId: goodsItem.id,
+                                                      count: 1,
+                                                      isSet: false,
+                                                      isAdd: false,
+                                                      selected: getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected! : true,
+                                                      classificationId: groupItem.classificationId,
+                                                      minimumPurchaseQuantity: goodsItem.minimumPurchaseQuantity,
+                                                      purchaseQuantityLimit: goodsItem.purchaseQuantityLimit,
+                                                      standardPrice: goodsItem.standardPrice,
+                                                      mealQuantity: getGoodsQuantity(goodsItem),
+                                                      cartModifyReqVOList: [],
                                                     })
                                                   }
                                                 }}
@@ -737,30 +702,18 @@ export default function Order() {
                                           onClick={() => {
                                             const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
                                             // console.log('购物车商品数量加一', goodsItem.mealName);
-                                            const queryData = {
-                                              "commodityId": goodsItem.id,
-                                              "count": count,
-                                              "isSet": false,
-                                              "isAdd": true,
-                                              "selected": getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected : true,
-                                              "deskId": tableInfo?.tableId || 0,
-                                              "shopId": currentShop?.shopId!,
-                                              "openId": userInfo?.openid!,
-                                              "classificationId": groupItem.classificationId,
-                                              "cartModifyReqVOList": [],
-                                              "minimumPurchaseQuantity": goodsItem.minimumPurchaseQuantity,
-                                              "purchaseQuantityLimit": goodsItem.purchaseQuantityLimit,
-                                              "standardPrice": goodsItem.standardPrice,
-                                              "mealQuantity": getGoodsQuantity(goodsItem),
-                                            } as ICartRequest
-                                            addCartGoodAPI(queryData, (res) => {
-                                              if (res.success && res.data) {
-                                                getCartListAPI({
-                                                  "deskId": tableInfo?.tableId || 0,
-                                                  "shopId": currentShop?.shopId!,
-                                                  "openId": userInfo?.openid!,
-                                                }, getCartList)
-                                              }
+                                            modifyCart({
+                                              commodityId: goodsItem.id,
+                                              count: count,
+                                              isSet: false,
+                                              isAdd: true,
+                                              selected: getCartGood(goodsItem.id) ? getCartGood(goodsItem.id)?.selected! : true,
+                                              classificationId: groupItem.classificationId,
+                                              minimumPurchaseQuantity: goodsItem.minimumPurchaseQuantity,
+                                              purchaseQuantityLimit: goodsItem.purchaseQuantityLimit,
+                                              standardPrice: goodsItem.standardPrice,
+                                              mealQuantity: getGoodsQuantity(goodsItem),
+                                              cartModifyReqVOList: [],
                                             })
                                           }}
                                         >
@@ -1084,22 +1037,7 @@ export default function Order() {
                     //   return
                     // }
                     // console.log('购物车全选状态改变', state);
-                    const queryDataList = cartList.map((item) => ({
-                      ...item,
-                      selected: state,
-                      shopId: currentShop?.shopId!,
-                      deskId: tableInfo?.tableId || 0,
-                      openId: userInfo?.openid!,
-                    }))
-                    selectedCartAPI(queryDataList, (res: IResponseApi<any>) => {
-                      if (res.success && res.data) {
-                        getCartListAPI({
-                          "deskId": tableInfo?.tableId || 0,
-                          "shopId": currentShop?.shopId!,
-                          "openId": userInfo?.openid!,
-                        }, getCartList)
-                      }
-                    })
+                    modifyCartSelected(cartList, state)
                   }}
                 />
               </View>
@@ -1114,17 +1052,8 @@ export default function Order() {
                     content: '确定清空购物车吗？',
                     success: (res) => {
                       if (res.confirm) {
-                        console.log('res', res);
-
-                        clearCartAPI({
-                          "deskId": tableInfo?.tableId || 0,
-                          "shopId": currentShop?.shopId!,
-                          "openId": userInfo?.openid!,
-                        }, (res: IResponseApi<any>) => {
-                          if (res.success && res.data) {
-                            dispatch(setCartListAction({ type: 'clear' }))
-                          }
-                        })
+                        // console.log('res', res);
+                        clearCart()
                       }
                     }
                   })
@@ -1169,22 +1098,7 @@ export default function Order() {
                             checked={cartSelectedList.some((mapItem) => mapItem.commodityId === cartItem.commodityId)}
                             onChange={(state) => {
                               // console.log('购物车选中状态改变', state);
-                              const queryDataList = cartList.filter((item) => item.commodityId === cartItem.commodityId).map((item) => ({
-                                ...item,
-                                selected: state,
-                                shopId: currentShop?.shopId!,
-                                deskId: tableInfo?.tableId || 0,
-                                openId: userInfo?.openid!,
-                              }))
-                              selectedCartAPI(queryDataList, (res: IResponseApi<any>) => {
-                                if (res.success && res.data) {
-                                  getCartListAPI({
-                                    "deskId": tableInfo?.tableId || 0,
-                                    "shopId": currentShop?.shopId!,
-                                    "openId": userInfo?.openid!,
-                                  }, getCartList)
-                                }
-                              })
+                              modifyCartSelected(cartList.filter((item) => item.commodityId === cartItem.commodityId), state)
                             }}
                             style={{
                               '--nut-icon-width': pxTransform(windowWidth * 0.04),
@@ -1297,47 +1211,21 @@ export default function Order() {
                               onClick={() => {
                                 if (cartItem.count === cartItem.minimumPurchaseQuantity) {
                                   // console.log('删除购物车项', cartItem.name);
-                                  deleteCartGoodAPI({
-                                    "commodityId": cartItem.commodityId,
-                                    "isSet": false,
-                                    "deskId": tableInfo?.tableId || 0,
-                                    "shopId": currentShop?.shopId!,
-                                    "openId": userInfo?.openid!,
-                                  }, (res) => {
-                                    if (res.success && res.data) {
-                                      getCartListAPI({
-                                        "deskId": tableInfo?.tableId || 0,
-                                        "shopId": currentShop?.shopId!,
-                                        "openId": userInfo?.openid!,
-                                      }, getCartList)
-                                    }
-                                  })
+                                  deleteCart(cartItem.commodityId)
                                 } else {
                                   // console.log('购物车商品数量减一', cartItem.name);
-                                  const queryData = {
-                                    "commodityId": cartItem.commodityId,
-                                    "count": 1,
-                                    "isSet": false,
-                                    "isAdd": false,
-                                    "selected": cartItem.selected,
-                                    "deskId": tableInfo?.tableId || 0,
-                                    "shopId": currentShop?.shopId!,
-                                    "openId": userInfo?.openid!,
-                                    "classificationId": cartItem.classificationId,
-                                    "cartModifyReqVOList": [],
-                                    "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
-                                    "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
-                                    "standardPrice": cartItem.price,
-                                    "mealQuantity": getGoodsQuantity(cartItem as any),
-                                  } as ICartRequest
-                                  addCartGoodAPI(queryData, (res) => {
-                                    if (res.success && res.data) {
-                                      getCartListAPI({
-                                        "deskId": tableInfo?.tableId || 0,
-                                        "shopId": currentShop?.shopId!,
-                                        "openId": userInfo?.openid!,
-                                      }, getCartList)
-                                    }
+                                  modifyCart({
+                                    commodityId: cartItem.commodityId,
+                                    count: 1,
+                                    isSet: false,
+                                    isAdd: false,
+                                    selected: cartItem.selected,
+                                    classificationId: cartItem.classificationId,
+                                    minimumPurchaseQuantity: cartItem.minimumPurchaseQuantity,
+                                    purchaseQuantityLimit: cartItem.purchaseQuantityLimit,
+                                    standardPrice: cartItem.price,
+                                    mealQuantity: getGoodsQuantity(cartItem as any),
+                                    cartModifyReqVOList: [],
                                   })
                                 }
                               }}
@@ -1366,35 +1254,18 @@ export default function Order() {
                                 }
                                 const count = cartList.filter(cartItem => cartItem.commodityId == cartItem.commodityId).length == 0 ? cartItem.minimumPurchaseQuantity : 1
                                 // console.log('购物车商品数量加一', cartItem.name);
-                                const queryData = {
-                                  "commodityId": cartItem.commodityId,
-                                  "count": count,
-                                  "isSet": false,
-                                  "isAdd": true,
-                                  "selected": cartItem.selected,
-                                  "deskId": tableInfo?.tableId || 0,
-                                  "shopId": currentShop?.shopId!,
-                                  "openId": userInfo?.openid!,
-                                  "classificationId": cartItem.classificationId,
-                                  "cartModifyReqVOList": [],
-                                  "minimumPurchaseQuantity": cartItem.minimumPurchaseQuantity,
-                                  "purchaseQuantityLimit": cartItem.purchaseQuantityLimit,
-                                  "standardPrice": cartItem.price,
-                                  "mealQuantity": getGoodsQuantity(cartItem as any),
-                                } as ICartRequest
-                                addCartGoodAPI(queryData, (res) => {
-                                  if (res.success) {
-                                    getCartListAPI({
-                                      "deskId": tableInfo?.tableId || 0,
-                                      "shopId": currentShop?.shopId!,
-                                      "openId": userInfo?.openid!,
-                                    }, getCartList)
-                                  } else {
-                                    showToast({
-                                      title: res.data.msg,
-                                      icon: 'none',
-                                    })
-                                  }
+                                modifyCart({
+                                  commodityId: cartItem.commodityId,
+                                  count: count,
+                                  isSet: false,
+                                  isAdd: true,
+                                  selected: getCartGood(cartItem.commodityId) ? getCartGood(cartItem.commodityId)?.selected! : true,
+                                  classificationId: cartItem.classificationId,
+                                  minimumPurchaseQuantity: cartItem.minimumPurchaseQuantity,
+                                  purchaseQuantityLimit: cartItem.purchaseQuantityLimit,
+                                  standardPrice: cartItem.price,
+                                  mealQuantity: getGoodsQuantity(cartItem as any),
+                                  cartModifyReqVOList: [],
                                 })
                               }}
                             >+</View>

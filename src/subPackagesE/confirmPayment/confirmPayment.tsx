@@ -10,9 +10,14 @@ import { routes } from '@/utils/constants'
 import { setCurrentOrderAction } from '@/redux/modules/order'
 import { IResponseApi } from '@/api/type'
 import { cancelOrderAPI } from '@/api/order'
+import { useOrder } from '@/hooks/useOrder'
 
 export default function ConfirmPayment() {
     const dispatch = useAppDispatch()
+    // 订单相关方法
+    const {
+        getOrderList,
+    } = useOrder()
 
     // 获取用户信息和订单数据
     const {
@@ -58,6 +63,7 @@ export default function ConfirmPayment() {
                         icon: 'none'
                     })
                     setTimeout(() => {
+                        getOrderList()
                         switchTab({
                             url: routes.find(route => route.name == 'orderList')?.path!
                         })
@@ -145,6 +151,7 @@ export default function ConfirmPayment() {
                     orderStatus: status
                 }
             }))
+            getOrderList()
             navigateTo({
                 url: routes.find(route => route.name == 'orderDetail')?.path! + '?type=1',
             })

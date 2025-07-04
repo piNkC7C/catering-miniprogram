@@ -57,6 +57,10 @@ export const getVipCodeURL = '/member/user/get-member-code'
 export const getGoodsRefundRecordURL = '/member/trade/order/getOrderRefundRecordDetails'
 // 获取商品级退款记录详情
 export const getGoodsRefundRecordDetailsURL = '/member/trade/order/getOrderRefundRecordDetailsItem'
+// 批量添加购物车
+export const batchAddCartGoodsURL = '/member/trade/cart/batchModify'
+// 订单id获取商品列表
+export const getOrderGoodsListURL = '/member/trade/cart/getCartByOrderId'
 
 export const uploadURL = '/infra/file/upload'
 export const getIsOrderRefundURL = '/infra/order/getOrderRefund'

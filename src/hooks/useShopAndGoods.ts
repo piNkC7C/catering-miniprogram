@@ -116,9 +116,11 @@ export function useShopAndGoods() {
     };
     return {
         finish,
+        setFinish,
         handleGroupGoodsList,
         getAddressByLocation,
         handleAutoSelectShop,
-        getGoodsQuantity
+        getGoodsQuantity,
+        setCurrentShop
     }
 }

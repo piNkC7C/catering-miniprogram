@@ -10,9 +10,11 @@ import { setCurrentOrderAction, setOrderListAction, setPayOrderInfoAction, setRe
 import LoginPopup from '@/components/LoginPopup'
 // 路由
 import { routes, orderTagList } from '@/utils/constants'
-import { getOrderListAPI, getGoodsRefundRecordAPI, getPrePayByOrderIdAPI, cancelOrderAPI, getIsOrderRefundAPI, getOrderRefundRecordAPI } from '@/api/order'
+import { getGoodsRefundRecordAPI, getPrePayByOrderIdAPI, cancelOrderAPI, getOrderRefundRecordAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { IOrderItem, IRefundItem } from '@/redux/types/order'
+import { useOrder } from '@/hooks/useOrder'
+import { useCart } from '@/hooks/useCart'
 
 export default function OrderList() {
   // 获取登录状态和用户信息
@@ -26,30 +28,22 @@ export default function OrderList() {
     }
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
-
-  // 获取订单列表
-  const getOrderList = (res: IResponseApi<IOrderItem[]>) => {
-    if (res.success) {
-      // console.log(res.data);
-      dispatch(setOrderListAction({
-        type: 'set',
-        data: res.data,
-      }))
-      hideLoading()
-    } else {
-      console.log('获取订单列表失败', res);
-      hideLoading()
-    }
-  }
-
+  // 订单相关方法
+  const {
+    getOrderList,
+  } = useOrder()
+  // 购物车相关方法
+  const {
+    batchAddCart,
+    againOrder,
+  } = useCart()
   // 每次进入页面时获取订单列表
-  useDidShow(() => {
+  useLoad(() => {
     showLoading({
       title: '加载中...',
     })
-    getOrderListAPI({
-      openId: userInfo?.openid!
-    }, getOrderList)
+    getOrderList()
+    hideLoading()
   })
 
   // 根据tab值过滤订单列表
@@ -128,8 +122,59 @@ export default function OrderList() {
       })
     } else {
       console.log('获取退款记录失败', res);
+      showToast({
+        title: '获取订单详情失败',
+        icon: 'none',
+      })
     }
   }
+
+  // 跳转订单详情页
+  // type: 1 点击订单体，2 点击按钮
+  const navigateToOrderDetail = (orderItem: IOrderItem) => {
+    // 已关闭,发生过订单级退款,跳转详情页
+    if (orderItem.orderStatus === 4) {
+      getOrderRefundRecordAPI({
+        orderId: orderItem.orderId
+      }, (res: IResponseApi<any>) => {
+        if (res.success) {
+          // console.log('getOrderRefundRecordAPI res', res)
+          dispatch(setCurrentRefundAction({
+            type: 'set',
+            data: {
+              ...res.data,
+              refundTime: res.data.refundTime || res.data.wxRefundSuccessTime, // 退款时间戳
+              goodsList: orderItem.goodsList //商品列表
+            }
+          }))
+          navigateTo({
+            url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
+          })
+        } else {
+          showToast({
+            title: '获取订单详情失败',
+            icon: 'none',
+          })
+        }
+      })
+    } else
+      // 只发生了商品级退款
+      if (orderItem.orderStatus === 5) {
+        // 部分退款，跳转退款记录页
+        return getGoodsRefundRecordAPI({
+          orderId: orderItem.orderId
+        }, getRefundList)
+      }
+    // 设置订单详情页数据，跳转详情页
+    dispatch(setCurrentOrderAction({
+      type: 'set',
+      data: orderItem
+    }))
+    navigateTo({
+      url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
+    })
+  }
+
 
   return (
     <View className='orderlist-page'>
@@ -245,18 +290,7 @@ export default function OrderList() {
                               style={{
                               }}
                               onClick={() => {
-                                // 待支付、已关闭、部分退款的订单不能进入详情页
-                                if (orderItem.orderStatus === 4 || orderItem.orderStatus === 5) {
-                                  return
-                                }
-                                // 已取消、已完成的订单可以进入详情页
-                                dispatch(setCurrentOrderAction({
-                                  type: 'set',
-                                  data: orderItem
-                                }))
-                                navigateTo({
-                                  url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
-                                })
+                                navigateToOrderDetail(orderItem)
                               }}
                             >
                               <ScrollView
@@ -372,11 +406,19 @@ export default function OrderList() {
                                               cancelOrderAPI({
                                                 id: orderItem.orderId
                                               }, (res: IResponseApi<any>) => {
-                                                // console.log('cancelOrderAPI res', res)
-                                                getOrderListAPI({
-                                                  openId: userInfo?.openid!
-                                                }, getOrderList)
                                                 hideLoading()
+                                                if (res.success) {
+                                                  getOrderList()
+                                                  showToast({
+                                                    title: '取消订单成功',
+                                                    icon: 'none',
+                                                  })
+                                                } else {
+                                                  showToast({
+                                                    title: '取消订单失败',
+                                                    icon: 'none',
+                                                  })
+                                                }
                                               })
                                             }
                                           }
@@ -426,13 +468,6 @@ export default function OrderList() {
                                   <View
                                     className='order-status1'
                                   >
-                                    {/* <Button
-                                      type="default"
-                                      size="normal"
-                                      style={{
-                                        borderRadius: pxTransform(20),
-                                      }}
-                                    >再来一单</Button> */}
                                     <Button
                                       type="default"
                                       size="normal"
@@ -440,15 +475,19 @@ export default function OrderList() {
                                         borderRadius: pxTransform(20),
                                       }}
                                       onClick={() => {
-                                        dispatch(setCurrentOrderAction({
-                                          type: 'set',
-                                          data: orderItem
-                                        }))
-                                        navigateTo({
-                                          url: routes.find((route) => route.name === 'orderDetail')?.path || ''
-                                        })
+                                        navigateToOrderDetail(orderItem)
                                       }}
                                     >查看订单</Button>
+                                    <Button
+                                      type="primary"
+                                      size="normal"
+                                      style={{
+                                        borderRadius: pxTransform(20),
+                                      }}
+                                      onClick={() => {
+                                        againOrder(orderItem.orderId, orderItem.shopId)
+                                      }}
+                                    >再来一单</Button>
                                   </View>
                                 )
                               }
@@ -465,51 +504,9 @@ export default function OrderList() {
                                         borderRadius: pxTransform(20),
                                       }}
                                       onClick={() => {
-                                        dispatch(setCurrentOrderAction({
-                                          type: 'set',
-                                          data: orderItem
-                                        }))
-                                        // 判断是否发生过订单级退款
-                                        getIsOrderRefundAPI({
-                                          orderId: orderItem.orderId
-                                        }, (res: IResponseApi<any>) => {
-                                          if (res.success) {
-                                            if (res.data.isRefundOrder) {
-                                              // 获取订单级退款详情，直接跳转详情页
-                                              // console.log('获取订单级退款详情');
-                                              getOrderRefundRecordAPI({
-                                                orderId: orderItem.orderId
-                                              }, (res: IResponseApi<any>) => {
-                                                if (res.success) {
-                                                  // console.log('getOrderRefundRecordAPI res', res)
-                                                  dispatch(setCurrentRefundAction({
-                                                    type: 'set',
-                                                    data: {
-                                                      ...res.data,
-                                                      refundTime: res.data.refundTime || res.data.wxRefundSuccessTime, // 退款时间戳
-                                                      goodsList: orderItem.goodsList //商品列表
-                                                    }
-                                                  }))
-                                                  navigateTo({
-                                                    url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
-                                                  })
-                                                } else {
-                                                  showToast({
-                                                    title: '获取退款记录失败',
-                                                    icon: 'none',
-                                                  })
-                                                }
-                                              })
-                                            } else {
-                                              // 获取商品级退款记录，跳转退款记录页
-                                              getGoodsRefundRecordAPI({
-                                                orderId: orderItem.orderId
-                                              }, getRefundList)
-                                            }
-                                          }
-                                        })
+                                        navigateToOrderDetail(orderItem)
                                       }}
-                                    >退款记录</Button>
+                                    >{orderItem.orderStatus === 4 ? '退款详情' : '退款记录'}</Button>
                                   </View>
                                 )
                               }
@@ -519,13 +516,16 @@ export default function OrderList() {
                                   <View
                                     className='order-status1'
                                   >
-                                    {/* <Button
+                                    <Button
                                       type="default"
                                       size="normal"
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
-                                    >再来一单</Button> */}
+                                      onClick={() => {
+                                        againOrder(orderItem.orderId, orderItem.shopId)
+                                      }}
+                                    >再来一单</Button>
                                     <Button
                                       type='primary'
                                       size="normal"

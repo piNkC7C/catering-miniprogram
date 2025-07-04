@@ -1,7 +1,7 @@
 import { taroGet, taroPost, taroDelete, adminTaroGet } from '@/service'
-import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL, getOrderDetailByPrePayURL, getPrePayByOrderIdURL, getIsOrderRefundURL, getOrderRefundRecordURL, getGoodsRefundRecordURL, getGoodsRefundRecordDetailsURL } from '@/service/config'
+import { getGroupGoodsListURL, getSetGoodURL, getOrderListURL, getRefundListURL, getSetGoodDetailURL, addCartGoodURL, getCartListURL, deleteCartGoodURL, clearCartURL, selectedCartURL, addSharedCartGoodsURL, confirmPaymentURL, clearSelectedCartURL, payOrderURL, cancelOrderURL, getOrderDetailByPrePayURL, getPrePayByOrderIdURL, getIsOrderRefundURL, getOrderRefundRecordURL, getGoodsRefundRecordURL, getGoodsRefundRecordDetailsURL, batchAddCartGoodsURL, getOrderGoodsListURL } from '@/service/config'
 import type { IResponseApi } from '../type'
-import type { IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
+import type { ICartRequest, IGroupGoodsList, IOrderItem, IRefundItem } from '@/redux/types/order'
 
 export const getGroupGoodsListAPI = (data: {
     shopId: number
@@ -364,8 +364,8 @@ export const confirmPaymentAPI = (data: any, callback: (res: IResponseApi<any>) 
 
 export const clearSelectedCartAPI = (data: any, callback: (res: IResponseApi<any>) => void) => {
     taroDelete({
-        url: clearSelectedCartURL,
-        data,
+        url: clearSelectedCartURL + '?orderId=' + data.orderId,
+        data: data.goodsList,
         success: (res) => {
             callback({
                 success: true,
@@ -506,6 +506,7 @@ export const getPrePayByOrderIdAPI = (data: {
                 })
             }
         }
+    }).catch(() => {
     })
 }
 
@@ -535,6 +536,7 @@ export const getIsOrderRefundAPI = (data: {
                 })
             }
         }
+    }).catch(() => {
     })
 }
 
@@ -564,6 +566,7 @@ export const getOrderRefundRecordAPI = (data: {
                 })
             }
         }
+    }).catch(() => {
     })
 }
 
@@ -596,6 +599,7 @@ export const getGoodsRefundRecordAPI = (data: {
                 })
             }
         }
+    }).catch(() => {
     })
 }
 
@@ -622,5 +626,65 @@ export const getGoodsRefundRecordDetailsAPI = (data: {
                 })
             }
         }
+    }).catch(() => {
+    })
+}
+
+export const batchAddCartGoodsAPI = (data: ICartRequest[], callback: (res: IResponseApi<any>) => void) => {
+    taroPost({
+        url: batchAddCartGoodsURL,
+        data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
+    })
+}
+
+export const getOrderGoodsListAPI = (data: {
+    orderId: number
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroGet({
+        url: getOrderGoodsListURL + '?orderId=' + data.orderId,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
     })
 }

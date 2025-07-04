@@ -84,6 +84,7 @@ export interface IOrderItem {
   totalPrice: number //优惠前金额
   couponedPrice: number //优惠的金额
   orderTag?: string // 订单标签
+  shopId: number // 店铺id
   shopName: string // 店铺名称
   orderType: 1 | 2 | 3 // 1: 门店, 2: 外卖, 3: 商城
   shopAddressProvince: string

@@ -492,8 +492,9 @@ export default function Payment() {
                         borderRadius: pxTransform(windowHeight * 0.03)
                     }}
                     onClick={() => {
-                        console.log('userInfo', userInfo)
+                        // console.log('userInfo', userInfo)
 
+                        // 创建待支付订单
                         payOrderAPI({
                             // "outTradeNo": "",
                             // "orderNo": "D8117465022766946619",
@@ -558,6 +559,7 @@ export default function Payment() {
                         }, (res: IResponseApi<any>) => {
                             // console.log('payOrderAPI res', res)
                             if (res.success) {
+                                // 设置支付订单信息
                                 dispatch(setPayOrderInfoAction({
                                     type: 'set',
                                     data: {
@@ -569,6 +571,7 @@ export default function Payment() {
                                         prepayId: res.data.packageValue.substring(10, res.data.packageValue.length),
                                     }
                                 }))
+                                // 获取支付订单详情
                                 getOrderDetailByPrePayAPI({
                                     id: res.data.packageValue.substring(10, res.data.packageValue.length)
                                 }, (res: IResponseApi<any>) => {
@@ -578,34 +581,40 @@ export default function Payment() {
                                             type: 'set',
                                             data: res.data
                                         }))
+                                        // 清空购物车
                                         clearSelectedCartAPI(
-                                            checkoutOrder?.goodsList.map((good) => {
-                                                return {
-                                                    "commodityId": good.commodityId,
-                                                    "isSet": good.isSet,
-                                                    "deskId": tableInfo?.tableId!,
-                                                    "shopId": currentShop?.shopId!,
-                                                    "openId": userInfo?.openid!,
-                                                    "cartModifyReqVOList": good.cartDOS?.map((cartItem) => {
-                                                        return {
-                                                            "commodityId": cartItem.commodityId,
-                                                            "count": cartItem.count,
-                                                            "isSet": cartItem.isSet,
-                                                            "isAdd": cartItem.isAdd,
-                                                            "selected": cartItem.selected,
-                                                            "image": cartItem.image,
-                                                            "name": cartItem.name,
-                                                            "standardPrice": cartItem.price,
-                                                            "shopId": currentShop?.shopId!,
-                                                            "deskId": tableInfo?.tableId!,
-                                                            "openId": userInfo?.openid!,
-                                                            "cartModifyReqVOList": []
-                                                        }
-                                                    })
-                                                }
-                                            }), (res: IResponseApi<any>) => {
+                                            {
+                                                goodsList: checkoutOrder?.goodsList.map((good) => {
+                                                    return {
+                                                        "commodityId": good.commodityId,
+                                                        "isSet": good.isSet,
+                                                        "deskId": tableInfo?.tableId!,
+                                                        "shopId": currentShop?.shopId!,
+                                                        "openId": userInfo?.openid!,
+                                                        "cartModifyReqVOList": good.cartDOS?.map((cartItem) => {
+                                                            return {
+                                                                "commodityId": cartItem.commodityId,
+                                                                "count": cartItem.count,
+                                                                "isSet": cartItem.isSet,
+                                                                "isAdd": cartItem.isAdd,
+                                                                "selected": cartItem.selected,
+                                                                "image": cartItem.image,
+                                                                "name": cartItem.name,
+                                                                "standardPrice": cartItem.price,
+                                                                "shopId": currentShop?.shopId!,
+                                                                "deskId": tableInfo?.tableId!,
+                                                                "openId": userInfo?.openid!,
+                                                                "cartModifyReqVOList": []
+                                                            }
+                                                        })
+                                                    }
+                                                }),
+                                                orderId: res.data.orderId,
+                                            }
+                                            , (res: IResponseApi<any>) => {
                                                 // console.log('clearSelectedCartAPI res', res)
                                                 if (res.success) {
+                                                    // 获取购物车列表
                                                     getCartListAPI({
                                                         shopId: currentShop?.shopId!,
                                                         deskId: tableInfo?.tableId!,
@@ -617,6 +626,7 @@ export default function Payment() {
                                                                 type: 'set',
                                                                 data: res.data
                                                             }))
+                                                            // 跳转至确认支付页面
                                                             navigateTo({
                                                                 url: routes.find(route => route.name == 'confirmPayment')?.path!
                                                             })

@@ -2,15 +2,11 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getCurrentPages, showToast, useRouter } from '@tarojs/taro'
 import './choose.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setCartListAction } from '@/redux/modules/order'
-import { pxTransform, Divider, Grid, Image, Badge, ConfigProvider, Price, InputNumber, Button } from '@nutui/nutui-react-taro'
-import { Check } from '@nutui/icons-react-taro'
+import { pxTransform, Divider, Grid, Image, ConfigProvider, Price, InputNumber, Button } from '@nutui/nutui-react-taro'
 import { useEffect, useState } from 'react'
-import { IGoodItem } from './type'
 import { chooseBack } from '@/utils/constants'
-import { getSetGoodDetailAPI, addCartGoodAPI, getCartListAPI } from '@/api/order'
-import { IResponseApi } from '@/api/type'
-import { ICartRequest } from '@/redux/types/order'
+import { getSetGoodDetailAPI } from '@/api/order'
+import { useCart } from '@/hooks/useCart'
 
 export default function Choose() {
   // 获取登录状态和用户信息
@@ -28,6 +24,7 @@ export default function Choose() {
   } = useAppSelector((state) => state)
   const dispatch = useAppDispatch()
   const { id } = useRouter().params
+  const { modifyCart } = useCart()
 
   useEffect(() => {
     if (id) {
@@ -470,46 +467,23 @@ export default function Choose() {
                 })
                 return
               }
-              const queryData = {
-                "commodityId": setGoodDetail?.id,
-                "count": goodCount,
-                "isSet": true,
-                "isAdd": true,
-                "deskId": tableInfo?.tableId || 0,
-                "shopId": currentShop?.shopId!,
-                "openId": userInfo?.openid!,
-                "classificationId": setGoodDetail?.classificationId,
-                "minimumPurchaseQuantity": setGoodDetail?.minimumPurchaseQuantity,
-                "purchaseQuantityLimit": setGoodDetail?.purchaseQuantityLimit,
-                "standardPrice": setGoodDetail?.standardPrice,
-                "mealQuantity": setGoodDetail?.mealQuantity,
-                "cartModifyReqVOList": selectedAddOneGood.map((item: any) => {
+              modifyCart({
+                commodityId: setGoodDetail?.id,
+                selected: true,
+                isSet: true,
+                isAdd: true,
+                count: goodCount,
+                classificationId: setGoodDetail?.classificationId,
+                cartModifyReqVOList: selectedAddOneGood.map((item: any) => {
                   return {
                     "commodityId": item.mealId,
                     "count": item.goodsCount,
                   }
                 }),
-              } as ICartRequest
-              addCartGoodAPI(queryData, (res) => {
-                if (res.success && res.data) {
-                  showToast({
-                    title: '添加成功',
-                    icon: 'success',
-                  })
-                  getCartListAPI({
-                    "deskId": tableInfo?.tableId || 0,
-                    "shopId": currentShop?.shopId!,
-                    "openId": userInfo?.openid!,
-                  }, (res: IResponseApi<any>) => {
-                    if (res.success) {
-                      dispatch(setCartListAction({
-                        type: 'set',
-                        data: res.data
-                      }))
-                      navigateBack()
-                    }
-                  })
-                }
+                minimumPurchaseQuantity: setGoodDetail?.minimumPurchaseQuantity,
+                purchaseQuantityLimit: setGoodDetail?.purchaseQuantityLimit,
+                standardPrice: setGoodDetail?.setStandardPrice,
+                mealQuantity: setGoodDetail?.mealQuantity,
               })
               // if (selectedAddOneGood.length > 0) {
               //   console.log('selectedAddOneGood', selectedAddOneGood)
