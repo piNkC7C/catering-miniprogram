@@ -125,7 +125,8 @@
             
             &.expanded {
               opacity: 1;
-              max-height: 500px; // 设置一个足够大的值
+              max-height: 300rpx; // 设置一个足够大的值
+              overflow: auto;
             }
           }
 

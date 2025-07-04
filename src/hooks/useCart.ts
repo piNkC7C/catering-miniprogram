@@ -83,7 +83,7 @@ export function useCart() {
         mealQuantity: number,
         cartModifyReqVOList: any[],
     }, type: 1 | 2 = 1) => {
-        console.log('data', data);
+        // console.log('data', data);
 
         const queryData = {
             "commodityId": data.commodityId,
