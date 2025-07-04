@@ -60,7 +60,15 @@ export default function Choose() {
   const [goodCount, setGoodCount] = useState<number>(0)
 
   // 商品列表
-  const gridItem = (listItem: any, index: number, max: number | null, total: number, groupId: number) => {
+  const gridItem = (listItem: any, index: number, max: number, total: number, groupId: number) => {
+
+    // 获取已选商品数量
+    const selectedGoodCount = selectedAddOneGood.find((item: any) => item.id === listItem.id)?.goodsCount
+    // 获取除当前商品外已选商品数量
+    const alreadySelectedCount = selectedAddOneGood.filter((item: any) => item.groupId === groupId && item.id !== listItem.id).reduce((acc, item) => acc + item.goodsCount, 0)
+    // 不可重复时使用max = 1，可重复时使用total - alreadySelectedCount
+    const maxNum = max || total - alreadySelectedCount
+
     return (
       <Grid.Item
         key={listItem.id}
@@ -81,8 +89,8 @@ export default function Choose() {
               disabled={total - selectedAddOneGood.filter((item: any) => item.groupId === groupId).reduce((acc, item) => acc + item.goodsCount, 0) == 0 && selectedAddOneGood.every((item) => {
                 return item.id !== listItem.id
               })}
-              value={selectedAddOneGood.find((item: any) => item.id === listItem.id)?.goodsCount || 0}
-              max={max || total - selectedAddOneGood.filter((item: any) => item.groupId === groupId).reduce((acc, item) => acc + item.goodsCount, 0)}
+              value={selectedGoodCount || 0}
+              max={maxNum}
               min={0}
               allowEmpty
               onChange={(value) => {
@@ -307,7 +315,7 @@ export default function Choose() {
                 </View>
                 <Grid columns={3} gap={7}>
                   {groupItem?.mealSpecificationInfoList.map((listItem, index) => (
-                    gridItem(listItem, index, groupItem.canRepeated == 0 ? 1 : null, groupItem.mealOptionalQuantity, groupItem.id)
+                    gridItem(listItem, index, groupItem.canRepeated == 0 ? 1 : groupItem.mealOptionalQuantity, groupItem.mealOptionalQuantity, groupItem.id)
                   ))}
                 </Grid>
               </View>

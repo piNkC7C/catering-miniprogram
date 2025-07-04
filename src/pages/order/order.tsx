@@ -1207,7 +1207,7 @@ export default function Order() {
                                   modifyCart({
                                     commodityId: cartItem.commodityId,
                                     count: 1,
-                                    isSet: false,
+                                    isSet: cartItem.isSet,
                                     isAdd: false,
                                     selected: cartItem.selected,
                                     classificationId: cartItem.classificationId,
@@ -1247,7 +1247,7 @@ export default function Order() {
                                 modifyCart({
                                   commodityId: cartItem.commodityId,
                                   count: count,
-                                  isSet: false,
+                                  isSet: cartItem.isSet,
                                   isAdd: true,
                                   selected: getCartGood(cartItem.commodityId) ? getCartGood(cartItem.commodityId)?.selected! : true,
                                   classificationId: cartItem.classificationId,
