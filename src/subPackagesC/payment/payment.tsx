@@ -224,6 +224,16 @@ export default function Payment() {
                                                         fontWeight: 'bold'
                                                     }}
                                                 >{goodsItem.name}</Text>
+                                                {
+                                                    goodsItem.isSet && goodsItem.cartDOS?.map((cartItem) => (
+                                                        <Text
+                                                            style={{
+                                                                color: '#999999',
+                                                                fontSize: pxTransform(windowHeight * 0.01),
+                                                            }}
+                                                        >・{cartItem.name}&nbsp;&nbsp;x{cartItem.count}</Text>
+                                                    ))
+                                                }
                                                 <Text
                                                     style={{
                                                         fontSize: pxTransform(windowHeight * 0.012),

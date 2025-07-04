@@ -99,14 +99,13 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                     className='list-item'
                                     style={{
                                         padding: `${pxTransform(windowWidth * 0.02)} 0`,
-                                        height: pxTransform(windowHeight * 0.06),
                                     }}
                                 >
                                     <View
                                         className='left'
                                     >
                                         <Image
-                                            src={goodsItem.mealImage}
+                                            src={goodsItem.image}
                                             width={pxTransform(windowHeight * 0.06)}
                                             height={pxTransform(windowHeight * 0.06)}
                                         ></Image>
@@ -121,12 +120,22 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                                 style={{
                                                     fontWeight: 'bold'
                                                 }}
-                                            >{goodsItem.mealName}</Text>
+                                            >{goodsItem.name}</Text>
+                                            {
+                                                goodsItem.isSet && goodsItem.cartDOS?.map((cartItem) => (
+                                                    <Text
+                                                        style={{
+                                                            color: '#999999',
+                                                            fontSize: pxTransform(windowHeight * 0.01),
+                                                        }}
+                                                    >・{cartItem.name}&nbsp;&nbsp;x{cartItem.count}</Text>
+                                                ))
+                                            }
                                             <Text
                                                 style={{
                                                     fontSize: pxTransform(windowHeight * 0.012),
                                                 }}
-                                            >x{goodsItem.userOrderQuantity}</Text>
+                                            >x{goodsItem.count}</Text>
                                         </View>
                                     </View>
                                     <View
@@ -137,7 +146,7 @@ function PureGoodList<IGoodListProps>({ orderId }) {
                                     >
                                         <Price
                                             color='gray'
-                                            price={goodsItem.totalPrice ? goodsItem.totalPrice : Number(goodsItem.standardPrice * goodsItem.userOrderQuantity)}
+                                            price={goodsItem.price}
                                             size="small"
                                             thousands
                                             style={{

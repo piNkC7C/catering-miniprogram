@@ -359,7 +359,7 @@ export default function OrderList() {
                                       }}
                                     >
                                       <Image
-                                        src={goodsItem.mealImage}
+                                        src={goodsItem.image}
                                         mode='scaleToFill'
                                         width={pxTransform(windowHeight * 0.08)}
                                         height={pxTransform(windowHeight * 0.06)}
@@ -376,7 +376,7 @@ export default function OrderList() {
                                           fontSize: pxTransform(windowHeight * 0.015),
                                           marginTop: pxTransform(windowHeight * 0.005),
                                         }}
-                                      >{goodsItem.mealName}</Text>
+                                      >{goodsItem.name}</Text>
                                     </View>
                                   ))
                                 }
