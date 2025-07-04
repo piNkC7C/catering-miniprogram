@@ -181,44 +181,15 @@ export default function OrderList() {
   // 跳转订单详情页
   // type: 1 点击订单体，2 点击按钮
   const navigateToOrderDetail = (orderItem: IOrderItem) => {
+    const orderStatus = orderItem.orderStatus === 4 || orderItem.orderStatus === 5 ? 3 : orderItem.orderStatus
     // 设置订单详情页数据，跳转详情页
     dispatch(setCurrentOrderAction({
       type: 'set',
-      data: orderItem
-    }))
-    // 已关闭,发生过订单级退款,跳转详情页
-    if (orderItem.orderStatus === 4) {
-      return getOrderRefundRecordAPI({
-        orderId: orderItem.orderId
-      }, (res: IResponseApi<any>) => {
-        if (res.success) {
-          // console.log('getOrderRefundRecordAPI res', res)
-          dispatch(setCurrentRefundAction({
-            type: 'set',
-            data: {
-              ...res.data,
-              refundTime: res.data.refundTime || res.data.wxRefundSuccessTime, // 退款时间戳
-              goodsList: orderItem.goodsList //商品列表
-            }
-          }))
-          navigateTo({
-            url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
-          })
-        } else {
-          showToast({
-            title: '获取订单详情失败',
-            icon: 'none',
-          })
-        }
-      })
-    } else
-      // 只发生了商品级退款
-      if (orderItem.orderStatus === 5) {
-        // 部分退款，跳转退款记录页
-        return getGoodsRefundRecordAPI({
-          orderId: orderItem.orderId
-        }, getRefundList)
+      data: {
+        ...orderItem,
+        orderStatus: orderStatus
       }
+    }))
     navigateTo({
       url: (routes.find((route) => route.name === 'orderDetail')?.path || '') + `?id=${orderItem.orderId}`
     })
@@ -553,7 +524,43 @@ export default function OrderList() {
                                         borderRadius: pxTransform(20),
                                       }}
                                       onClick={() => {
-                                        navigateToOrderDetail(orderItem)
+                                        dispatch(setCurrentOrderAction({
+                                          type: 'set',
+                                          data: orderItem
+                                        }))
+                                        // 已关闭,发生过订单级退款,跳转详情页
+                                        if (orderItem.orderStatus === 4) {
+                                          return getOrderRefundRecordAPI({
+                                            orderId: orderItem.orderId
+                                          }, (res: IResponseApi<any>) => {
+                                            if (res.success) {
+                                              // console.log('getOrderRefundRecordAPI res', res)
+                                              dispatch(setCurrentRefundAction({
+                                                type: 'set',
+                                                data: {
+                                                  ...res.data,
+                                                  refundTime: res.data.refundTime || res.data.wxRefundSuccessTime, // 退款时间戳
+                                                  goodsList: orderItem.goodsList //商品列表
+                                                }
+                                              }))
+                                              navigateTo({
+                                                url: (routes.find((route) => route.name === 'orderDetail')?.path || '')
+                                              })
+                                            } else {
+                                              showToast({
+                                                title: '获取订单详情失败',
+                                                icon: 'none',
+                                              })
+                                            }
+                                          })
+                                        } else
+                                          // 只发生了商品级退款
+                                          if (orderItem.orderStatus === 5) {
+                                            // 部分退款，跳转退款记录页
+                                            return getGoodsRefundRecordAPI({
+                                              orderId: orderItem.orderId
+                                            }, getRefundList)
+                                          }
                                       }}
                                     >{orderItem.orderStatus === 4 ? '退款详情' : '退款记录'}</Button>
                                   </View>

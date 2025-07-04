@@ -14,6 +14,7 @@ import { getGoodsRefundRecordDetailsAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { error } from 'console'
 import goodList from '@/components/goodList'
+import { ICartItem } from '@/redux/types/order'
 
 export default function RefundList() {
     // 获取登录状态和用户信息
@@ -285,25 +286,42 @@ export default function RefundList() {
                                                         borderRadius: pxTransform(20),
                                                     }}
                                                     onClick={() => {
-                                                        // console.log(refundItem.goodsList);
+                                                        console.log(refundItem.goodsList);
                                                         
                                                         getGoodsRefundRecordDetailsAPI({
                                                             id: refundItem.id
                                                         }, (res: IResponseApi<any>) => {
+                                                            // console.log('getGoodsRefundRecordDetailsAPI res', res)
                                                             if (res.success) {
                                                                 dispatch(setCurrentOrderAction({
                                                                     type: 'set',
                                                                     data: {
                                                                         ...currentOrder,
                                                                         isUseCoupon: false,
-                                                                        goodsList: refundItem.goodsList
+                                                                        goodsList: refundItem.goodsList.map((item) => {
+                                                                            return {
+                                                                                ...item,
+                                                                                name: item.mealName,
+                                                                                image: item.mealImage,
+                                                                                count: item.userOrderQuantity,
+                                                                                price: item.standardPrice,
+                                                                            }
+                                                                        })
                                                                     }
                                                                 }))
                                                                 dispatch(setCurrentRefundAction({
                                                                     type: 'set',
                                                                     data: {
                                                                         ...res.data,
-                                                                        goodList: refundItem.goodsList
+                                                                        goodList: refundItem.goodsList.map((item) => {
+                                                                            return {
+                                                                                ...item,
+                                                                                name: item.mealName,
+                                                                                image: item.mealImage,
+                                                                                count: item.userOrderQuantity,
+                                                                                price: item.standardPrice,
+                                                                            }
+                                                                        })
                                                                     }
                                                                 }))
                                                                 navigateTo({

@@ -1151,59 +1151,78 @@ export default function Order() {
                                     </View>
                                   </View>
 
-                                  {/* 折叠内容 */}
-                                  <View
-                                    className={`collapse-content ${expandedItems[cartItem.id] ? 'expanded' : ''}`}
-                                    style={{ paddingLeft: pxTransform(8) }}
-                                  >
-                                    {
-                                      cartItem.cartDOS?.map((goodsItem, index) => (
-                                        <View
-                                          key={index}
-                                          className='item-detail'
-                                          style={{
-                                            paddingTop: pxTransform(4),
-                                            paddingBottom: pxTransform(4),
-                                          }}
-                                        >
-                                          <View
-                                            style={{
-                                              display: 'flex',
-                                              flexDirection: 'row',
-                                              alignItems: 'center',
-                                              justifyContent: 'space-between',
-                                            }}
-                                          >
+                                                                    {/* 折叠内容 */}
+                                  {expandedItems[cartItem.id] && (
+                                    <View 
+                                      style={{ 
+                                        paddingLeft: pxTransform(8),
+                                        marginTop: pxTransform(8),
+                                      }}
+                                    >
+                                      <ScrollView
+                                        scrollY
+                                        enableFlex
+                                        style={{
+                                          height: pxTransform(200),
+                                          width: '100%',
+                                          backgroundColor: '#f8f8f8',
+                                          borderRadius: pxTransform(8),
+                                          padding: pxTransform(8),
+                                        }}
+                                      >
+                                        {
+                                          cartItem.cartDOS?.map((goodsItem, index) => (
                                             <View
+                                              key={index}
                                               style={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                alignItems: 'center',
+                                                paddingTop: pxTransform(8),
+                                                paddingBottom: pxTransform(8),
+                                                borderBottom: index < cartItem.cartDOS!.length - 1 ? '1px solid #eee' : 'none',
                                               }}
                                             >
-                                              <Image
-                                                src={goodsItem.image}
-                                                width={pxTransform(windowWidth * 0.08)}
-                                                height={pxTransform(windowWidth * 0.08)}
-                                              />
-                                              <Text
+                                              <View
                                                 style={{
-                                                  marginLeft: pxTransform(windowWidth * 0.02),
-                                                  fontSize: pxTransform(windowWidth * 0.03),
+                                                  display: 'flex',
+                                                  flexDirection: 'row',
+                                                  alignItems: 'center',
+                                                  justifyContent: 'space-between',
                                                 }}
-                                              >{goodsItem.name}</Text>
+                                              >
+                                                <View
+                                                  style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                  }}
+                                                >
+                                                  <Image
+                                                    src={goodsItem.image}
+                                                    width={pxTransform(windowWidth * 0.08)}
+                                                    height={pxTransform(windowWidth * 0.08)}
+                                                    style={{ borderRadius: pxTransform(4) }}
+                                                  />
+                                                  <Text
+                                                    style={{
+                                                      marginLeft: pxTransform(windowWidth * 0.02),
+                                                      fontSize: pxTransform(windowWidth * 0.03),
+                                                      flex: 1,
+                                                    }}
+                                                  >{goodsItem.name}</Text>
+                                                </View>
+                                                <Text
+                                                  style={{
+                                                    color: '#939393',
+                                                    fontSize: pxTransform(windowWidth * 0.03),
+                                                    fontWeight: 'bold',
+                                                  }}
+                                                >x{goodsItem.count}</Text>
+                                              </View>
                                             </View>
-                                            <Text
-                                              style={{
-                                                color: '#939393',
-                                                fontSize: pxTransform(windowWidth * 0.03),
-                                              }}
-                                            >x{goodsItem.count}</Text>
-                                          </View>
-                                        </View>
-                                      ))
-                                    }
-                                  </View>
+                                          ))
+                                        }
+                                      </ScrollView>
+                                    </View>
+                                  )}
                                 </View>
                               }
                             </View>
