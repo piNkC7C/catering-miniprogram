@@ -3,6 +3,7 @@ import { IResponseApi } from "@/api/type"
 import { IOrderItem } from "@/redux/types/order"
 import { setOrderListAction } from "@/redux/modules/order"
 import { useAppDispatch, useAppSelector } from "./useAppStore"
+import goodList from "@/components/goodList"
 
 export function useOrder() {
     const {
@@ -20,7 +21,12 @@ export function useOrder() {
             if (res.success) {
                 dispatch(setOrderListAction({
                     type: 'set',
-                    data: res.data,
+                    data: res.data.map((item) => {
+                        return {
+                            ...item,
+                            goodsList: item.cartList
+                        }
+                    })
                 }))
             }
         })

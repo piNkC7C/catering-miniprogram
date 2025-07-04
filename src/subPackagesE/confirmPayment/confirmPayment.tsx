@@ -143,12 +143,13 @@ export default function ConfirmPayment() {
         getOrderDetailByPrePayAPI({
             id: payOrderInfo?.prepayId!,
         }, (res: IResponseApi<any>) => {
-            console.log('getOrderDetailByPrePayAPI res', res)
+            // console.log('getOrderDetailByPrePayAPI res', res)
             dispatch(setCurrentOrderAction({
                 type: 'set',
                 data: {
                     ...res.data,
-                    orderStatus: status
+                    orderStatus: status,
+                    goodsList: res.data.cartList
                 }
             }))
             getOrderList()

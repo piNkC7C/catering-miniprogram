@@ -201,7 +201,7 @@ export default function Payment() {
                                         className='list-item'
                                         style={{
                                             padding: `${pxTransform(windowWidth * 0.02)} 0`,
-                                            height: pxTransform(windowHeight * 0.06),
+                                            // height: pxTransform(windowHeight * 0.06),
                                         }}
                                     >
                                         <View
@@ -585,11 +585,14 @@ export default function Payment() {
                                 getOrderDetailByPrePayAPI({
                                     id: res.data.packageValue.substring(10, res.data.packageValue.length)
                                 }, (res: IResponseApi<any>) => {
-                                    console.log('getOrderDetailByPrePayAPI res', res)
+                                    // console.log('getOrderDetailByPrePayAPI res', res)
                                     if (res.success) {
                                         dispatch(setCurrentOrderAction({
                                             type: 'set',
-                                            data: res.data
+                                            data: {
+                                                ...res.data,
+                                                goodsList: res.data.cartList
+                                            }
                                         }))
                                         // 清空购物车
                                         clearSelectedCartAPI(

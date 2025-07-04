@@ -79,6 +79,7 @@ export interface IOrderItem {
   tableName: string // 桌号
   personNumber: number // 人数
   goodsList: ICartItem[] //商品列表
+  cartList: ICartItem[] //商品列表
   isUseCoupon: boolean // 是否用券
   couponList?: ICouponItem[] //券列表
   totalCount: number //总数
