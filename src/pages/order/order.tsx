@@ -78,7 +78,7 @@ export default function Order() {
           id: orderTabsList[index]?.classificationId,
           top: rect.top - res[0][0].top
         }))
-        console.log('分类位置信息:', sectionPositions.current)
+        // console.log('分类位置信息:', sectionPositions.current)
       }
     })
     // setFinish(false)
@@ -889,13 +889,13 @@ export default function Order() {
                   {
                     // scanType: ['qrCode'],
                     success: (res) => {
-                      console.log('扫桌码成功', res.path)
+                      // console.log('扫桌码成功', res.path)
                       // 确保路径以 / 开头，避免相对路径问题
                       let targetUrl = res.path
                       if (!targetUrl.startsWith('/')) {
                         targetUrl = '/' + targetUrl
                       }
-                      console.log('处理后的跳转地址', targetUrl)
+                      // console.log('处理后的跳转地址', targetUrl)
                       navigateTo(
                         {
                           url: targetUrl

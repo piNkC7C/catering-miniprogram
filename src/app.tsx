@@ -33,7 +33,7 @@ function App({ children }: PropsWithChildren<any>) {
                 key: OPEN_ID,
                 data: res.data.openid
             })
-            console.log('本地没有openid', res);
+            // console.log('本地没有openid', res);
             store.dispatch(userInfoAction({
                 type: 'set',
                 data: {
@@ -161,7 +161,7 @@ function App({ children }: PropsWithChildren<any>) {
                                 key: OPEN_ID,
                                 data: res.data.routineOpenid
                             })
-                            console.log('本地有openid', res);
+                            // console.log('本地有openid', res);
                             store.dispatch(userInfoAction({
                                 type: 'set',
                                 data: {

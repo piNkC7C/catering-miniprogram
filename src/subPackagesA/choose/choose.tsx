@@ -30,7 +30,7 @@ export default function Choose() {
     if (id) {
       getSetGoodDetailAPI({ id }, (res) => {
         if (res.success) {
-          console.log('res', res)
+          // console.log('res', res)
           setAllSelectedAddOneGood(res.data.mealSetOptionalGroupInfoList)
           setSelectedIncludeGood(res.data.mealSpecificationInfoList)
           setSetGoodDetail(res.data)

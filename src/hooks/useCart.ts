@@ -83,6 +83,8 @@ export function useCart() {
         mealQuantity: number,
         cartModifyReqVOList: any[],
     }) => {
+        console.log('data', data);
+
         const queryData = {
             "commodityId": data.commodityId,
             "count": data.count,
