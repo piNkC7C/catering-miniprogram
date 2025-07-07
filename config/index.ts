@@ -38,100 +38,100 @@ export default defineConfig(async (merge, { command, mode }) => {
     sourceRoot: 'src',
     outputRoot: 'dist',
     plugins: [
-      '@tarojs/plugin-http', 
-      '@tarojs/plugin-html'
+      '@tarojs/plugin-http',
+      '@tarojs/plugin-html',
     ],
-    defineConstants: {
-      LOCATION_APIKEY: JSON.stringify('PJ3BZ-BOPWZ-IPHXC-76G2M-OTHXS-FGF4B'),
+  defineConstants: {
+    LOCATION_APIKEY: JSON.stringify('PJ3BZ-BOPWZ-IPHXC-76G2M-OTHXS-FGF4B'),
     },
-    copy: {
-      patterns: [
-      ],
+  copy: {
+    patterns: [
+    ],
       options: {
-      }
-    },
-    framework: 'react',
+    }
+  },
+  framework: 'react',
     // 在 Taro 配置文件中关闭 prebundle 及 cache解决小程序项目运行时出现「找不到模板」的错误提示
     compiler: {
-      type: 'webpack5',
+    type: 'webpack5',
       prebundle: {
-        enable: false,
+      enable: false,
         exclude: ['@nutui/nutui-react-taro', '@nutui/icons-react-taro'],
       },
-    },
-    cache: {
-      enable: false // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache
-    },
-    mini: {
-      postcss: {
-        pxtransform: {
-          enable: true,
+  },
+  cache: {
+    enable: false // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache
+  },
+  mini: {
+    postcss: {
+      pxtransform: {
+        enable: true,
           config: {
-            // 包含 `nut-` 的类名选择器中的 px 单位不会被解析
-            selectorBlackList: ['nut-']
-          }
-        },
-        url: {
-          enable: true,
-          config: {
-            limit: 1024 // 设定转换尺寸上限
-          }
-        },
-        cssModules: {
-          enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
-          config: {
-            namingPattern: 'module', // 转换模式，取值为 global/module
-            generateScopedName: '[name]__[local]___[hash:base64:5]'
-          }
+          // 包含 `nut-` 的类名选择器中的 px 单位不会被解析
+          selectorBlackList: ['nut-']
         }
       },
-      webpackChain(chain) {
-        // 通用配置：TypeScript 路径映射
-        chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
+      url: {
+        enable: true,
+          config: {
+          limit: 1024 // 设定转换尺寸上限
+        }
+      },
+      cssModules: {
+        enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
+          config: {
+          namingPattern: 'module', // 转换模式，取值为 global/module
+            generateScopedName: '[name]__[local]___[hash:base64:5]'
+        }
       }
     },
-    h5: {
-      publicPath: '/',
+    webpackChain(chain) {
+      // 通用配置：TypeScript 路径映射
+      chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
+    }
+  },
+  h5: {
+    publicPath: '/',
       staticDirectory: 'static',
-      output: {
-        filename: 'js/[name].[hash:8].js',
+        output: {
+      filename: 'js/[name].[hash:8].js',
         chunkFilename: 'js/[name].[chunkhash:8].js'
-      },
-      miniCssExtractPluginOption: {
-        ignoreOrder: true,
+    },
+    miniCssExtractPluginOption: {
+      ignoreOrder: true,
         filename: 'css/[name].[hash].css',
-        chunkFilename: 'css/[name].[chunkhash].css'
+          chunkFilename: 'css/[name].[chunkhash].css'
+    },
+    postcss: {
+      autoprefixer: {
+        enable: true,
+          config: { }
       },
-      postcss: {
-        autoprefixer: {
-          enable: true,
-          config: {}
-        },
-        cssModules: {
-          enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
+      cssModules: {
+        enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
           config: {
-            namingPattern: 'module', // 转换模式，取值为 global/module
+          namingPattern: 'module', // 转换模式，取值为 global/module
             generateScopedName: '[name]__[local]___[hash:base64:5]'
-          }
         }
-      },
-      webpackChain(chain) {
-        chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
       }
     },
-    rn: {
-      appName: 'taroDemo',
+    webpackChain(chain) {
+      chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin)
+    }
+  },
+  rn: {
+    appName: 'taroDemo',
       postcss: {
-        cssModules: {
-          enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
+      cssModules: {
+        enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
         }
-      }
     }
   }
-  if (process.env.NODE_ENV === 'development') {
-    // 本地开发构建配置（不混淆压缩）
-    return merge({}, baseConfig, devConfig)
-  }
-  // 生产构建配置（默认开启压缩混淆等）
-  return merge({}, baseConfig, prodConfig)
+}
+  if (mode === 'development') {
+  // 本地开发构建配置（不混淆压缩）
+  return merge({}, baseConfig, devConfig)
+}
+// 生产构建配置（默认开启压缩混淆等）
+return merge({}, baseConfig, prodConfig)
 })

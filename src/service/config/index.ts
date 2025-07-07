@@ -20,8 +20,8 @@
 
 export const TIME_OUT = 10000
 // export const BASE_URL = 'https://console.imissniu.com/app-api'
-export const BASE_URL = process.env.NODE_ENV === 'production' ? process.env.XFN_API_URL + '/app-api' : process.env.TARO_APP_URL + '/app-api'
-export const ADMIN_BASE_URL = process.env.NODE_ENV === 'production' ? process.env.XFN_API_URL + '/admin-api' : process.env.TARO_APP_URL + '/admin-api'
+export const BASE_URL = process.env.TARO_APP_URL + '/app-api'
+export const ADMIN_BASE_URL = process.env.TARO_APP_URL + '/admin-api'
 
 // 获取地址列表
 export const getAddressListURL = '/member/user/address/list'
