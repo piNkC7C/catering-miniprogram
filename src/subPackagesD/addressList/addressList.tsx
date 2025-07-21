@@ -38,7 +38,9 @@ export default function AddressList() {
     }
 
     useDidShow(() => {
-        getAddressListAPI(getAddressList)
+        getAddressListAPI({
+            openId: userInfo?.openid || ''
+        }, getAddressList)
     })
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()

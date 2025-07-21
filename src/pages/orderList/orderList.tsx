@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, navigateTo, useDidShow, showToast, showLoading, hideLoading, showModal } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, useDidShow, showToast, showLoading, hideLoading, showModal, switchTab } from '@tarojs/taro'
 import './orderList.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { Tabs, Image, Button, pxTransform, Empty, Cell, Tag, Price, Divider, Popup, Space, Checkbox, Toast } from '@nutui/nutui-react-taro'
@@ -246,6 +246,11 @@ export default function OrderList() {
                         style={{
                           borderRadius: pxTransform(20),
                           width: pxTransform(windowWidth * 0.4),
+                        }}
+                        onClick={() => {
+                          switchTab({
+                            url: (routes.find((route) => route.name === 'order')?.path || '')
+                          })
                         }}
                       >去点单</Button>
                     </View>
@@ -570,18 +575,22 @@ export default function OrderList() {
                               {
                                 orderItem.orderStatus === 3 && (
                                   <View
-                                    className='order-status1'
+                                    className='order-status0'
                                   >
-                                    {/* <Button
+                                    <Button
                                       type="default"
                                       size="normal"
                                       style={{
                                         borderRadius: pxTransform(20),
                                       }}
                                       onClick={() => {
-                                        againOrder(orderItem.orderId, orderItem.shopId)
+                                        showToast({
+                                          title: '暂未开放',
+                                          icon: 'none',
+                                          duration: 1000,
+                                        })
                                       }}
-                                    >再来一单</Button> */}
+                                    >立即评价</Button>
                                     <Button
                                       type='primary'
                                       size="normal"

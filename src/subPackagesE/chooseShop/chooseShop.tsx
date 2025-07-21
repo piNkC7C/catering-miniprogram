@@ -3,7 +3,8 @@ import { View, Text, ScrollView, Map, MapProps } from '@tarojs/components'
 import { useLoad, useLaunch, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getLocation, useRouter, switchTab, chooseLocation, choosePoi } from '@tarojs/taro'
 import './chooseShop.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { pxTransform, Image, Button, Divider, Tabs, SearchBar, Popover, Cascader, CascaderOption, Loading, Input } from '@nutui/nutui-react-taro'
+import { pxTransform, Image, Button, Divider, Tabs, SearchBar, Popover, CascaderOption, Loading, Input } from '@nutui/nutui-react-taro'
+import CustomCascader from '@/components/CustomCascader'
 import { ArrowLeft, Search, ArrowDown, Location } from '@nutui/icons-react-taro'
 import { userNologin, locationLogo, routes } from '@/utils/constants'
 import ShopCard from '@/components/shopCard'
@@ -513,7 +514,7 @@ export default function ChooseShop() {
             </View>
             {
                 isValueInit && (
-                    <Cascader
+                    <CustomCascader
                         visible={selectAddCascaderVis}
                         defaultValue={value}
                         title="选择地址"

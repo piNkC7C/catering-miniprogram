@@ -1,4 +1,7 @@
 .address-card {
+    padding: 20rpx;
+    width: 100%;
+    box-sizing: border-box;
     background-color: #fff;
     display: flex;
     flex-direction: row;
@@ -15,16 +18,14 @@
 
         .address-card-left-top {
             width: 100%;
-            height: 60%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
+            height: max-content;
+            line-height: 1;
+            vertical-align: middle;
         }
 
         .address-card-left-bottom {
             width: 100%;
-            height: 40%;
+            height: max-content;
             color: #9C9C9C;
         }
     }

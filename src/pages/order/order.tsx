@@ -601,6 +601,13 @@ export default function Order() {
                                             borderRadius: pxTransform(viewHeight * 0.05),
                                           }}
                                           onClick={() => {
+                                            if (getCartGoodCount(goodsItem.id)! >= getGoodsQuantity(goodsItem)) {
+                                              showToast({
+                                                title: '库存不足',
+                                                icon: 'none',
+                                              })
+                                              return
+                                            }
                                             if (getCartGoodCount(goodsItem.id)! >= goodsItem.purchaseQuantityLimit) {
                                               showToast({
                                                 title: '已达到限购数量',

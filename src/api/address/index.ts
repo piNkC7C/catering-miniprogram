@@ -1,11 +1,13 @@
-import { taroGet, taroPost, taroPut } from '@/service'
-import { addAddressURL, getAddressListURL, editAddressURL, getAreaDataURL, getShopListURL, getShopDetailURL } from '@/service/config'
+import { taroDelete, taroGet, taroPost, taroPut } from '@/service'
+import { addAddressURL, getAddressListURL, editAddressURL, deleteAddressURL, getAreaDataURL, getShopListURL, getShopDetailURL } from '@/service/config'
 import type { IResponseApi } from '../type'
 import type { IAddressItem, IShopItem } from '@/redux/types/address'
 
-export const getAddressListAPI = (callback: (res: IResponseApi<IAddressItem[]>) => void) => {
+export const getAddressListAPI = (data: {
+    openId: string
+}, callback: (res: IResponseApi<IAddressItem[]>) => void) => {
     taroGet({
-        url: getAddressListURL,
+        url: getAddressListURL + '?openId=' + data.openId,
         success: (res) => {
             callback({
                 success: true,
@@ -64,6 +66,36 @@ export const editAddressAPI = (data: any, callback: (res: IResponseApi<any>) => 
     taroPut({
         url: editAddressURL,
         data,
+        success: (res) => {
+            callback({
+                success: true,
+                data: res.data
+            })
+        },
+        fail: (err) => {
+            if (err instanceof Promise) {
+                err.catch((errMsg) => {
+                    callback({
+                        success: false,
+                        data: errMsg
+                    })
+                })
+            } else {
+                callback({
+                    success: false,
+                    data: err
+                })
+            }
+        }
+    }).catch(() => {
+    })
+}
+
+export const deleteAddressAPI = (data: {
+    id: number
+}, callback: (res: IResponseApi<any>) => void) => {
+    taroDelete({
+        url: deleteAddressURL + '?id=' + data.id,
         success: (res) => {
             callback({
                 success: true,

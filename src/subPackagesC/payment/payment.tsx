@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getStorage, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, getStorage, navigateTo, showLoading, hideLoading, showToast } from '@tarojs/taro'
 import './payment.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { setCheckoutOrderCouponAction, setPayOrderInfoAction, setCurrentOrderAction, setCartListAction } from '@/redux/modules/order'
@@ -13,6 +13,7 @@ import CouponCard from '@/components/couponCard'
 import { clearSelectedCartAPI, payOrderAPI, getOrderDetailByPrePayAPI, getCartListAPI } from '@/api/order'
 import { IResponseApi } from '@/api/type'
 import { routes } from '@/utils/constants'
+import { show } from 'antd-mobile/es/components/dialog/show'
 
 export default function Payment() {
     // 获取登录状态和用户信息
@@ -76,6 +77,9 @@ export default function Payment() {
 
     // 文本域内容
     const [textAreaContent, setTextAreaContent] = useState('')
+
+    // 正在支付
+    const [paying, setPaying] = useState(false)
 
     const { statusBarHeight, windowHeight, windowWidth } = getSystemInfoSync()
     const finalStatusBarHeight = statusBarHeight || 0
@@ -501,7 +505,16 @@ export default function Payment() {
                     style={{
                         borderRadius: pxTransform(windowHeight * 0.03)
                     }}
+                    loading={paying}
                     onClick={() => {
+                        if (!paying) {
+                            setPaying(true)
+                            showLoading({
+                                title: '正在创建订单...',
+                            })
+                        } else {
+                            return
+                        }
                         // console.log('userInfo', userInfo)
 
                         // 创建待支付订单
@@ -639,15 +652,41 @@ export default function Payment() {
                                                                 type: 'set',
                                                                 data: res.data
                                                             }))
+                                                            // 关闭支付中
+                                                            setPaying(false)
                                                             // 跳转至确认支付页面
                                                             navigateTo({
                                                                 url: routes.find(route => route.name == 'confirmPayment')?.path!
                                                             })
                                                         }
                                                     })
+                                                } else {
+                                                    hideLoading()
+                                                    setPaying(false)
+                                                    showToast({
+                                                        title: (typeof res.data === 'string' ? res.data : res.data.msg) || '创建订单失败',
+                                                        icon: 'error',
+                                                        duration: 2000,
+                                                    })
                                                 }
                                             })
+                                    } else {
+                                        hideLoading()
+                                        setPaying(false)
+                                        showToast({
+                                            title: (typeof res.data === 'string' ? res.data : res.data.msg) || '创建订单失败',
+                                            icon: 'error',
+                                            duration: 2000,
+                                        })
                                     }
+                                })
+                            } else {
+                                hideLoading()
+                                setPaying(false)
+                                showToast({
+                                    title: (typeof res.data === 'string' ? res.data : res.data.msg) || '创建订单失败',
+                                    icon: 'error',
+                                    duration: 2000,
                                 })
                             }
                         })

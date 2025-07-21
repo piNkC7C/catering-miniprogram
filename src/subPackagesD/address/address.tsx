@@ -7,7 +7,7 @@ import { pxTransform, Button, Divider, Form, Input, Tag, Radio } from '@nutui/nu
 import { ArrowLeft, ArrowRight } from '@nutui/icons-react-taro'
 import QQMapWX from '@/libs/qqmap-wx-jssdk1.2/qqmap-wx-jssdk.js'
 import { qqmapsdkKey } from '@/utils/constants'
-import { addAddressAPI, editAddressAPI } from '@/api/address'
+import { addAddressAPI, editAddressAPI, deleteAddressAPI } from '@/api/address'
 
 export default function Address() {
     // 获取登录状态和用户信息
@@ -130,17 +130,19 @@ export default function Address() {
         if (addressId) {
             // 编辑地址
             editAddressAPI({
-                    id: addressId,
-                    userName,
-                    addressName,
-                    addressPhone: addressForm.getFieldValue('addressPhone'),
-                    addressTag: selectAddressTag,
-                    addressSex,
-                    addressDetail: addressForm.getFieldValue('addressDetail'),
-                    addressProvince,
-                    addressCity,
-                    addressArea,
-                    addressStreet,
+                id: addressId,
+                openId: userInfo?.openid,
+                userName,
+                addressName,
+                addressPhone: addressForm.getFieldValue('addressPhone'),
+                addressTag: selectAddressTag,
+                addressSex,
+                addressDetail: addressForm.getFieldValue('addressDetail'),
+                addressProvince,
+                addressCity,
+                addressArea,
+                addressStreet,
+                isDefault: 0,
             }, (res) => {
                 if (res.success) {
                     console.log('编辑地址成功:', res)
@@ -153,6 +155,7 @@ export default function Address() {
             // 新增地址
             addAddressAPI({
                 // userId: userInfo.userId,
+                openId: userInfo?.openid,
                 userName,
                 addressName,
                 addressPhone: addressForm.getFieldValue('addressPhone'),
@@ -163,6 +166,7 @@ export default function Address() {
                 addressCity,
                 addressArea,
                 addressStreet,
+                isDefault: 0,
             }, (res) => {
                 if (res.success) {
                     console.log('新增地址成功:', res)
@@ -176,7 +180,22 @@ export default function Address() {
     }
 
     const deleteAddress = () => {
-        navigateBack()
+        deleteAddressAPI({
+            id: Number(addressId),
+        }, (res) => {
+            if (res.success) {
+                showToast({
+                    title: '删除地址成功',
+                    icon: 'none',
+                })
+                navigateBack()
+            } else {
+                showToast({
+                    title: '删除地址失败',
+                    icon: 'none',
+                })
+            }
+        })
     }
 
     return (

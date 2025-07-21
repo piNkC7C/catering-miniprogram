@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, switchTab, useDidShow, navigateTo } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, getMenuButtonBoundingClientRect, navigateBack, useRouter, showModal, switchTab, useDidShow, navigateTo, showToast } from '@tarojs/taro'
 import './orderDetail.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
 import { pxTransform, Image, Button, Divider, Tabs, Steps, Step, Price } from '@nutui/nutui-react-taro'
@@ -290,6 +290,10 @@ export default function OrderDetail() {
                                 id: '3',
                                 label: '支付方式',
                                 value: currentOrder?.orderPayType == 1 ? '微信支付' : '支付宝支付'
+                            }, {
+                                id: '4',
+                                label: '订单备注',
+                                value: currentOrder?.remark || '无'
                             }]} />
                         </View>
                     )
@@ -413,6 +417,13 @@ export default function OrderDetail() {
                                         borderRadius: pxTransform(windowHeight * 0.05),
                                         color: '#D61518',
                                         borderColor: '#D61518',
+                                    }}
+                                    onClick={() => {
+                                        showToast({ 
+                                            title: '暂未开放',
+                                            icon: 'none',
+                                            duration: 1000,
+                                        })
                                     }}
                                 >
                                     立即评价

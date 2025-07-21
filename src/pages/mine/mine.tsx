@@ -81,7 +81,7 @@ export default function Mine() {
     {
       title: '反馈建议',
       icon: mineKeFu2,
-      path: routes.find((route) => route.name === 'suggestList')?.path || ''
+      // path: routes.find((route) => route.name === 'suggestList')?.path || ''
     },
   ]
 
@@ -294,6 +294,12 @@ export default function Mine() {
                     } else if (item.title === '联系客服') {
                       showToast({
                         title: '暂未配置',
+                        icon: 'none',
+                        duration: 1000,
+                      })
+                    } else if (item.title === '反馈建议') {
+                      showToast({
+                        title: '暂未开放',
                         icon: 'none',
                         duration: 1000,
                       })

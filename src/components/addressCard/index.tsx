@@ -36,9 +36,7 @@ function AddressCard({ addressItem }: IAddressCardProps) {
             style={{
                 marginBottom: pxTransform(windowWidth * 0.04),
                 borderRadius: pxTransform(windowWidth * 0.02),
-                padding: pxTransform(windowWidth * 0.02),
-                height: pxTransform(viewHeight * 0.05),
-                width: `calc(100% - ${pxTransform(windowWidth * 0.04)})`,
+                height: 'max-content',
             }}
         >
             <View
@@ -52,7 +50,9 @@ function AddressCard({ addressItem }: IAddressCardProps) {
                             <Tag
                                 type='primary'
                                 style={{
-                                    marginRight: pxTransform(windowWidth * 0.02),
+                                    marginRight: '10rpx',
+                                    width: '45rpx',
+                                    float: 'left',
                                 }}
                             >
                                 {addressItem.addressTag === '1' && '家'}
@@ -62,8 +62,7 @@ function AddressCard({ addressItem }: IAddressCardProps) {
                             </Tag>
                         )
                     }
-                    <View
-                    >{addressItem.addressName}&nbsp;{addressItem.addressDetail}</View>
+                    {addressItem.addressName}&nbsp;{addressItem.addressDetail}
                 </View>
                 <View
                     className='address-card-left-bottom'

@@ -98,6 +98,7 @@ export interface IOrderItem {
   orderPayType: number // 支付方式
   orderTime: number // 下单时间
   orderCloseTime: number // 订单关闭时间
+  remark: string // 订单备注
 }
 
 export interface IRefundItem {

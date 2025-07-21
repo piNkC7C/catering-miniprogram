@@ -352,7 +352,7 @@ export default function SelectTable() {
                                                 }
                                             })
                                         } else {
-                                            // getCartList()
+                                            getCartList(tableId, shopId, userInfo?.openid!)
                                             switchTab({
                                                 url: '/pages/order/order',
                                             })

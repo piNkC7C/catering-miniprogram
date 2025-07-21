@@ -54,11 +54,11 @@ export function useCart() {
     }
 
     // 获取购物车列表
-    const getCartList = () => {
+    const getCartList = (deskId?: number, shopId?: number, openId?: string) => {
         getCartListAPI({
-            "deskId": tableInfo?.tableId || 0,
-            "shopId": currentShop?.shopId!,
-            "openId": userInfo?.openid!,
+            "deskId": deskId || tableInfo?.tableId || 0,
+            "shopId": shopId || currentShop?.shopId!,
+            "openId": openId || userInfo?.openid!,
         }, (res: IResponseApi<any>) => {
             if (res.success) {
                 dispatch(setCartListAction({
