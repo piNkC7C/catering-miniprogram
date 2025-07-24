@@ -1078,7 +1078,8 @@ export default function Order() {
                 >清空</Text>
               </View>
             </View>
-            <View
+            <ScrollView
+              scrollY
               className='content'
               style={{
                 padding: pxTransform(windowWidth * 0.03),
@@ -1158,10 +1159,10 @@ export default function Order() {
                                     </View>
                                   </View>
 
-                                                                    {/* 折叠内容 */}
+                                  {/* 折叠内容 */}
                                   {expandedItems[cartItem.id] && (
-                                    <View 
-                                      style={{ 
+                                    <View
+                                      style={{
                                         paddingLeft: pxTransform(8),
                                         marginTop: pxTransform(8),
                                       }}
@@ -1353,7 +1354,7 @@ export default function Order() {
                 }}
               >
               </View>
-            </View>
+            </ScrollView>
           </View>
         </Popup>
       </View >
