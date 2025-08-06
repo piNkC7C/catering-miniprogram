@@ -26,6 +26,9 @@ export default function SelectTable() {
         },
         order: {
             cartList,
+        },
+        address: {
+            currentShop
         }
     } = useAppSelector((state) => state)
     const dispatch = useAppDispatch()
@@ -148,7 +151,7 @@ export default function SelectTable() {
                         style={{
                             marginTop: pxTransform(windowWidth * 0.02),
                         }}
-                    >欢迎光临某某某店</Text>
+                    >欢迎光临{currentShop?.shopName}</Text>
                     <Text
                         style={{
                             marginTop: pxTransform(windowWidth * 0.02),
@@ -345,6 +348,7 @@ export default function SelectTable() {
                                                         })
                                                     } else if (res.cancel) {
                                                         // console.log('清空单人购物车', userInfo?.openid);
+                                                        getCartList(tableId, shopId, userInfo?.openid!)
                                                         switchTab({
                                                             url: '/pages/order/order',
                                                         })

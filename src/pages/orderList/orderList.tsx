@@ -209,6 +209,7 @@ export default function OrderList() {
           onChange={(value) => {
             setTabvalue(value)
           }}
+          autoHeight
           style={{
             '--nutui-tabs-titles-background-color': '#fff',
             '--nutui-tabs-tabpane-background-color': '#f5f5f5',
@@ -218,6 +219,7 @@ export default function OrderList() {
           {
             tabsList.map((tabItem) => (
               <Tabs.TabPane
+                key={tabItem.value}
                 title={tabItem.title}
                 value={tabItem.value}
               >

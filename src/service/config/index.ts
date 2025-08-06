@@ -95,3 +95,5 @@ export const getOrderGoodsListURL = '/member/trade/cart/getCartByOrderId'
 export const uploadURL = '/infra/file/upload'
 // 获取订单是否可退款
 export const getIsOrderRefundURL = '/infra/order/getOrderRefund'
+// 测试美团签名
+export const testMeiTuanSignURL = '/member/trade/meituan/get-test-sign'

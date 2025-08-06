@@ -335,6 +335,7 @@ export default function Address() {
                             className='address-select'
                             onClick={() => {
                                 getLocation({
+                                    altitude: true,
                                     success: (res) => {
                                         chooseLocation({
                                             latitude: res.latitude,

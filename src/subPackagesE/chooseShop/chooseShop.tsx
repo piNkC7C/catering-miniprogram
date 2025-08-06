@@ -220,7 +220,7 @@ export default function ChooseShop() {
 
     useLoad(() => {
         getLocation({
-            type: 'wgs84',
+            altitude: true,
             success: (res) => {
                 if (!nowAddress) {
                     getAddressByLocation(res.latitude, res.longitude, true)

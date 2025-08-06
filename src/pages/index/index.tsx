@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Span } from '@tarojs/components'
-import { useLoad, getSystemInfoSync, navigateTo, switchTab, showToast } from '@tarojs/taro'
+import { useLoad, getSystemInfoSync, navigateTo, switchTab, showToast, navigateToMiniProgram } from '@tarojs/taro'
 import './index.scss'
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppStore'
-import { setLoginStatus, userInfoAction } from '@/redux/modules/login'
-import { Cell, Avatar, pxTransform, Button, Divider, Image, Grid, Popup, Checkbox, Space, Toast, Tag } from '@nutui/nutui-react-taro'
-import { ArrowRight, Close } from '@nutui/icons-react-taro'
+import { Cell, pxTransform, Button, Divider, Image,  } from '@nutui/nutui-react-taro'
+import { ArrowRight } from '@nutui/icons-react-taro'
 // 路由
 import { routes } from '@/utils/constants'
 import { userNologin, iconOrder, iconJifen, vipFrame, bgIndex } from '@/utils/constants'
 import LoginPopup from '@/components/LoginPopup'
 import VipCode from '@/components/vipCode'
+import { testMeiTuanSignAPI } from '@/api/coupon'
 
 export default function Index() {
   // 获取登录状态和用户信息
@@ -108,6 +108,22 @@ export default function Index() {
                       title: '暂未开放',
                       icon: 'none',
                       duration: 1000,
+                    })
+                    testMeiTuanSignAPI((res) => {
+                      console.log('测试美团签名', res);
+                      if (res.success) {
+                        navigateToMiniProgram({
+                          appId: 'wxde8ac0a21135c07d',  // 授权小程序的appId
+                          path: '/dynamic-page/index?scene=verify-bulk-comp|openplatform-verify-bulk',  // 授权页面路由
+                          envVersion: 'release',
+                          extraData: { ...res.data },
+                          success(naviRes) {
+                            console.log('navigateToMiniProgram success', naviRes);
+                          }
+                        }).catch((err) => {
+                          console.log('navigateToMiniProgram fail', err);
+                        })
+                      }
                     })
                     // navigateTo({
                     //   url: routes.find((route) => route.name === 'vip')?.path || '',

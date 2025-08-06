@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect } from 'react'
-import { useLaunch, requestPayment, checkSession, login, setStorage, getStorage, showLoading, hideLoading, useLoad, getLocation, navigateToMiniProgram } from '@tarojs/taro'
+import { login, setStorage, getStorage, showLoading, hideLoading } from '@tarojs/taro'
 import './app.scss'
 import { OPEN_ID, qqmapsdkKey } from './utils/constants'
 
@@ -22,25 +22,6 @@ import { IUserInfo } from './redux/types/login'
 // import { getGroupGoodsListAPI } from './api/order'
 
 function App({ children }: PropsWithChildren<any>) {
-
-    // useEffect(() => {
-    //     navigateToMiniProgram({
-    //         appId: 'wxde8ac0a21135c07d',  // 授权小程序的appId
-    //         path: '/dynamic-page/index?scene=verify-bulk-comp|openplatform-verify-bulk',  // 授权页面路由
-    //         envVersion: 'release',
-    //         extraData: {
-    //             developerId,
-    //             opBizCode,
-    //             sign,
-    //             businessId,
-    //             charset,
-    //             timestamp,
-    //             state,
-    //         },
-    //         success() {
-    //         }
-    //     })
-    // }, [])
 
     // useLaunch(() => {
     //     console.log('App launched.')

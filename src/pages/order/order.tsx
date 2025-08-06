@@ -92,7 +92,7 @@ export default function Order() {
     // 如果未选择门店
     if (!currentShop) {
       getLocation({
-        type: 'wgs84',
+        altitude: true,
         success: (res) => {
           getAddressByLocation(res.latitude, res.longitude, handleAutoSelectShop)
         },
@@ -592,7 +592,7 @@ export default function Order() {
                                           marginRight: pxTransform(windowWidth * 0.02),
                                         }}
                                         value={cartList.find((findItem) => {
-                                          return findItem.commodityId === goodsItem.id
+                                          return (findItem.commodityId === goodsItem.id && findItem.isSet === goodsItem.isSet)
                                         })?.count}>
                                         <Button
                                           type="primary"
@@ -601,14 +601,14 @@ export default function Order() {
                                             borderRadius: pxTransform(viewHeight * 0.05),
                                           }}
                                           onClick={() => {
-                                            if (getCartGoodCount(goodsItem.id)! >= getGoodsQuantity(goodsItem)) {
+                                            if (getCartGoodCount(goodsItem.id, goodsItem.isSet)! >= getGoodsQuantity(goodsItem)) {
                                               showToast({
                                                 title: '库存不足',
                                                 icon: 'none',
                                               })
                                               return
                                             }
-                                            if (getCartGoodCount(goodsItem.id)! >= goodsItem.purchaseQuantityLimit) {
+                                            if (getCartGoodCount(goodsItem.id, goodsItem.isSet)! >= goodsItem.purchaseQuantityLimit) {
                                               showToast({
                                                 title: '已达到限购数量',
                                                 icon: 'none',
@@ -705,7 +705,7 @@ export default function Order() {
                                             height: pxTransform(windowWidth * 0.05),
                                             borderRadius: pxTransform(windowWidth * 0.05),
                                           }}
-                                          disabled={getCartGoodCount(goodsItem.id)! >= getGoodsQuantity(goodsItem) || getCartGoodCount(goodsItem.id)! >= goodsItem.purchaseQuantityLimit}
+                                          disabled={getCartGoodCount(goodsItem.id, goodsItem.isSet)! >= getGoodsQuantity(goodsItem) || getCartGoodCount(goodsItem.id, goodsItem.isSet)! >= goodsItem.purchaseQuantityLimit}
                                           icon={<Add color='#fff' size={windowWidth * 0.036} />}
                                           onClick={() => {
                                             const count = cartList.filter(cartItem => cartItem.commodityId == goodsItem.id).length == 0 ? goodsItem.minimumPurchaseQuantity : 1
@@ -1311,10 +1311,10 @@ export default function Order() {
                               style={{
                                 width: pxTransform(windowWidth * 0.0848),
                                 height: pxTransform(viewHeight * 0.036),
-                                color: getCartGoodCount(cartItem.commodityId)! >= getGoodsQuantity(cartItem as any) || getCartGoodCount(cartItem.commodityId)! >= cartItem.purchaseQuantityLimit ? '#999' : '#D61518',
+                                color: getCartGoodCount(cartItem.commodityId, cartItem.isSet)! >= getGoodsQuantity(cartItem as any) || getCartGoodCount(cartItem.commodityId, cartItem.isSet)! >= cartItem.purchaseQuantityLimit ? '#999' : '#D61518',
                               }}
                               onClick={() => {
-                                if (getCartGoodCount(cartItem.commodityId)! >= getGoodsQuantity(cartItem as any) || getCartGoodCount(cartItem.commodityId)! >= cartItem.purchaseQuantityLimit) {
+                                if (getCartGoodCount(cartItem.commodityId, cartItem.isSet)! >= getGoodsQuantity(cartItem as any) || getCartGoodCount(cartItem.commodityId, cartItem.isSet)! >= cartItem.purchaseQuantityLimit) {
                                   showToast({
                                     title: '可选商品数量已达上限',
                                     icon: 'none',

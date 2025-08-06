@@ -47,9 +47,9 @@ export function useCart() {
     }
 
     // 获取购物车中的某个商品的购买数量
-    const getCartGoodCount = (commodityId: number) => {
+    const getCartGoodCount = (commodityId: number, isSet: boolean) => {
         return cartList.filter((findItem) => {
-            return findItem.commodityId === commodityId
+            return findItem.commodityId === commodityId && findItem.isSet === isSet
         })?.reduce((acc, item) => acc + item.count, 0)
     }
 
